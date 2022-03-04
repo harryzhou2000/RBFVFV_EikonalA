@@ -1,5 +1,5 @@
-#ifndef _RECONSTRUCTIONRBFA_H
-#define _RECONSTRUCTIONRBFA_H
+#ifndef _RECONSTRUCTIONRBFB_H
+#define _RECONSTRUCTIONRBFB_H
 //#include "TypeDefine.h"
 //#include "Point.h"
 
@@ -13,11 +13,11 @@
 namespace ScalarCfv
 {
 	template <unsigned int O>
-	class reconstructionRBFA1 : public reconstruction<O>
+	class reconstructionRBFB1 : public reconstruction<O>
 	{
 	public:
-		reconstructionRBFA1(){};
-		~reconstructionRBFA1(){};
+		reconstructionRBFB1(){};
+		~reconstructionRBFB1(){};
 
 		const static unsigned int NDOFS = (O + 2) * (O + 1) / 2 + 1;
 		// const static unsigned int NDIFFS = (O + 2) * (O + 1) / 2;
@@ -60,14 +60,14 @@ namespace ScalarCfv
 			GaussIntegralFaceO1Grid<fO> *gaussIntegralFace,
 			std::ostream &out) override;
 
-		bool initReconstructionMatrixAndVector(
-			parameter *parameter,
-			cellFieldDataVector *cellFieldData,
-			cellGaussDataVector *cellGaussData,
-			faceFieldDataVector *faceFieldData,
-			faceGaussDataVector *faceGaussData,
-			GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
-			GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
+		// bool initReconstructionMatrixAndVector(
+		// 	parameter *parameter,
+		// 	cellFieldDataVector *cellFieldData,
+		// 	cellGaussDataVector *cellGaussData,
+		// 	faceFieldDataVector *faceFieldData,
+		// 	faceGaussDataVector *faceGaussData,
+		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
+		// 	GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
 
 		bool excuteReconstruction(
 			parameter *parameter,
@@ -78,14 +78,14 @@ namespace ScalarCfv
 			GaussIntegralCellO1Grid<vO> *gaussIntegralCell,
 			GaussIntegralFaceO1Grid<fO> *gaussIntegralFace) override;
 
-		bool excuteReconstruction(
-			parameter *parameter,
-			cellFieldDataVector *cellFieldData,
-			cellGaussDataVector *cellGaussData,
-			faceFieldDataVector *faceFieldData,
-			faceGaussDataVector *faceGaussData,
-			GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
-			GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
+		// bool excuteReconstruction(
+		// 	parameter *parameter,
+		// 	cellFieldDataVector *cellFieldData,
+		// 	cellGaussDataVector *cellGaussData,
+		// 	faceFieldDataVector *faceFieldData,
+		// 	faceGaussDataVector *faceGaussData,
+		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
+		// 	GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
 
 		// CR
 		bool initReconstructionMatrixAndVectorCR(
@@ -97,14 +97,14 @@ namespace ScalarCfv
 			GaussIntegralCellO1Grid<vO> *gaussIntegralCell,
 			GaussIntegralFaceO1Grid<fO> *gaussIntegralFace) override;
 
-		bool initReconstructionMatrixAndVectorCR(
-			parameter *parameter,
-			cellFieldDataVector *cellFieldData,
-			cellGaussDataVector *cellGaussData,
-			faceFieldDataVector *faceFieldData,
-			faceGaussDataVector *faceGaussData,
-			GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
-			GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
+		// bool initReconstructionMatrixAndVectorCR(
+		// 	parameter *parameter,
+		// 	cellFieldDataVector *cellFieldData,
+		// 	cellGaussDataVector *cellGaussData,
+		// 	faceFieldDataVector *faceFieldData,
+		// 	faceGaussDataVector *faceGaussData,
+		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
+		// 	GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
 
 		bool excuteReconstructionCR(
 			parameter *parameter,
@@ -115,14 +115,14 @@ namespace ScalarCfv
 			GaussIntegralCellO1Grid<vO> *gaussIntegralCell,
 			GaussIntegralFaceO1Grid<fO> *gaussIntegralFace) override;
 
-		bool excuteReconstructionCR(
-			parameter *parameter,
-			cellFieldDataVector *cellFieldData,
-			cellGaussDataVector *cellGaussData,
-			faceFieldDataVector *faceFieldData,
-			faceGaussDataVector *faceGaussData,
-			GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
-			GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
+		// bool excuteReconstructionCR(
+		// 	parameter *parameter,
+		// 	cellFieldDataVector *cellFieldData,
+		// 	cellGaussDataVector *cellGaussData,
+		// 	faceFieldDataVector *faceFieldData,
+		// 	faceGaussDataVector *faceGaussData,
+		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
+		// 	GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
 
 		unsigned ReturnNDOFS() override { return NDOFS; };
 		unsigned ReturnNDIFFS() override { return NDIFFS; };
@@ -130,7 +130,7 @@ namespace ScalarCfv
 
 	//----------------------------------------------------------------------------------
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::initBaseMomentAndRelaxFactor(
+	bool reconstructionRBFB1<O>::initBaseMomentAndRelaxFactor(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -151,7 +151,6 @@ namespace ScalarCfv
 				(*iterCellFieldData).relaxFactor = 1.0;
 				(*iterCellFieldData).relaxFactorCR = 1.0;
 			}
-			// auto a = *iterCellFieldData;
 
 			// base momment
 			tensor1D<real, NDOFS> *phi = new tensor1D<real, NDOFS>[static_cast<int>((*iterCellFieldData).PG)];
@@ -164,19 +163,15 @@ namespace ScalarCfv
 			//------------------------------------------
 
 			// get the function values at Gaussian points
-
-			// #ifdef TRIAL
-			// 			for (auto &i : iterCellFieldData->gaussPairVector_)
-			// 				std::cout << i.JacobiCof << i.normalVector << '\n';
-			// #endif
 			for (int ii = 0; ii < static_cast<int>((*iterCellFieldData).PG); ++ii)
 			{
 				tensor1D<real, NDOFS> phiG;
-				CfvMath::getMomentRBFA1(
-					(*iterCellFieldData).gaussPairVector_[ii].p,
+				CfvMath::getMomentRBFB1(
+					(*iterCellFieldData).parametricValue[ii].first,
 					(*iterCellFieldData).baryCenter,
 					(*iterCellFieldData).lengthReference,
-					phiG);
+					phiG,
+					*iterCellFieldData);
 				for (int jj = 1; jj < NDOFS; ++jj)
 				{							//ע�������ָ�귶Χ����20200315
 					phi[ii][jj] = phiG[jj]; // phi: first->Gauss points; second->base function
@@ -210,8 +205,9 @@ namespace ScalarCfv
 				//	<< (*iterCellFieldData).baseMoment[1] << "\t"
 				//	<< (*iterCellFieldData).baseMoment[2] << std::endl;
 				// exit(1);
-				(*iterCellFieldData).baseMoment[1] = 0.0;
-				(*iterCellFieldData).baseMoment[2] = 0.0;
+				// (*iterCellFieldData).baseMoment[1] = 0.0;
+				// (*iterCellFieldData).baseMoment[2] = 0.0;
+				// WARNING: DO NOT APPLY IN PARAMETRIC SCHEME
 			}
 		}
 		std::cout << " ..base moment and relax factor have been initialized." << std::endl;
@@ -219,7 +215,7 @@ namespace ScalarCfv
 	}
 
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::initBaseMomentAndRelaxFactor(
+	bool reconstructionRBFB1<O>::initBaseMomentAndRelaxFactor(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -268,11 +264,12 @@ namespace ScalarCfv
 				//	std::cout << phi[ii][4] << "\t" << phi[ii][5] << "\t" << phi[ii][6] << std::endl;
 				//	std::cout << phi[ii][7] << "\t" << phi[ii][8] << "\t" << phi[ii][9] << std::endl;
 
-				CfvMath::getMomentRBFA1(
-					(*iterCellFieldData).gaussPairVector_[ii].p,
+				CfvMath::getMomentRBFB1(
+					(*iterCellFieldData).parametricValue[ii].first,
 					(*iterCellFieldData).baryCenter,
 					(*iterCellFieldData).lengthReference,
-					phiG);
+					phiG,
+					(*iterCellFieldData));
 				for (int jj = 1; jj < NDOFS; ++jj)
 				{							//ע�������ָ�귶Χ����20200315
 					phi[ii][jj] = phiG[jj]; // phi: first->Gauss points; second->base function
@@ -314,8 +311,9 @@ namespace ScalarCfv
 				//	<< (*iterCellFieldData).baseMoment[1] << "\t"
 				//	<< (*iterCellFieldData).baseMoment[2] << std::endl;
 				// exit(1);
-				(*iterCellFieldData).baseMoment[1] = 0.0;
-				(*iterCellFieldData).baseMoment[2] = 0.0;
+				// (*iterCellFieldData).baseMoment[1] = 0.0;
+				// (*iterCellFieldData).baseMoment[2] = 0.0;
+				// WARNING: DO NOT APPLY IN PARAMETRIC SCHEME
 			}
 		}
 		std::cout << " ..base moment and relax factor have been initialized." << std::endl;
@@ -325,7 +323,7 @@ namespace ScalarCfv
 	//----------------------------------------------------------------------------------
 
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::initFaceWeight(
+	bool reconstructionRBFB1<O>::initFaceWeight(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		faceFieldDataVector *faceFieldData)
@@ -472,7 +470,7 @@ namespace ScalarCfv
 
 	// Upgrade V1
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::initReconstructionMatrixAndVector(
+	bool reconstructionRBFB1<O>::initReconstructionMatrixAndVector(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -495,24 +493,17 @@ namespace ScalarCfv
 			std::cout << "\n Some Cell: \n";
 			for (auto &i : iterCellFieldData->parametricValue)
 				std::cout << i.first << '\n';
-			for (int i = 1; i <= 4; i++ )
-				std::cout << iterCellFieldData->cellNode[i].first << iterCellFieldData->cellNode[i].second << '\n';
-			for (auto &i : iterCellFieldData->gaussPairVector_)
-				std::cout << i.JacobiCof << i.normalVector << i.p << '\n';
-
 #endif
 			for (int ff = 1; ff < (*iterCellFieldData).cellFaceNumber + 1; ++ff)
 			{ //ע��ѭ�����ޣ���20200314
 #ifdef TRIAL
 				std::cout << "SomeFace: \n";
-				std::cout << (*faceFieldData)[iterCellFieldData->cellFaceIndex[ff]-1].faceNode[1].second;
-				std::cout << (*faceFieldData)[iterCellFieldData->cellFaceIndex[ff]-1].faceNode[2].second << '\n';
-				std::cout << (*faceFieldData)[iterCellFieldData->cellFaceIndex[ff] - 1].sideOff << '\n';
 #endif
 				int kf = (*iterCellFieldData).cellFaceIndex[ff];
 				iterFaceFieldData_ = faceFieldData->begin() + kf - 1;
 				int cl = (*iterFaceFieldData_).faceCellIndex[1];
 				int cr = (*iterFaceFieldData_).faceCellIndex[2];
+
 				// alternate cell��ֻ���ڲ���Ԫ���ܻ���Ҫ
 				if (cr == (*iterCellFieldData).index)
 				{
@@ -521,9 +512,6 @@ namespace ScalarCfv
 					cl = ck;
 					// std::cout << "		alternate left and right cell." << std::endl;
 				}
-				// 			#ifdef TRIAL
-				// std::cout<< (*cellFieldData)[cr-1].
-				// 			#endif
 
 				//�����
 				iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -531,6 +519,12 @@ namespace ScalarCfv
 				tensor1D<real, NDOFS> bi;
 				if (cr > 0)
 				{
+					int ffr = 1;
+					for (; ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1; ffr++)
+						if ((*cellFieldData)[cr - 1].cellFaceIndex[ffr] == kf)
+							break;
+					assert(ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1);
+
 					// find the neibhour cell index
 					int cc;
 					for (cc = 1; cc < (*iterCellFieldData).cellCellNumber + 1; ++cc)
@@ -586,18 +580,23 @@ namespace ScalarCfv
 						point scaleI = (*iterCellFieldData_).lengthReference;
 #ifdef TRIAL
 						std::cout << (*iterFaceFieldData_).parametricValue[gg].first << std::endl;
-
 #endif
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
-							p,
+						point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
+						point pparamr = CfvMath::GetFaceParam((*cellFieldData)[cr - 1].cellType_, ffr, iterFaceFieldData_->parametricValue[gg].first, true);
+#ifdef TRIAL
+						std::cout << "LR" << CfvMath::getPoint(pparaml, (*cellFieldData)[cl - 1]) << CfvMath::getPoint(pparamr, (*cellFieldData)[cr - 1]) << std::endl;
+#endif
+						CfvMath::getDiffBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							matrixDiffBaseI);
+							matrixDiffBaseI,
+							*iterCellFieldData_);
 						// diff base matrix j
 						tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseJ;
 						// base moment j
@@ -609,12 +608,13 @@ namespace ScalarCfv
 						{
 							momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
-							p + (*iterFaceFieldData_).sideOff, // 20200318����
+						CfvMath::getDiffBaseValueRBFB1(
+							pparamr, // 20200318����
 							baryCenterJ,
 							scaleJ,
 							momentJ,
-							matrixDiffBaseJ);
+							matrixDiffBaseJ,
+							*iterCellFieldData_);
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -748,6 +748,10 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+
+						point pparaml;
+						pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
+
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -755,12 +759,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
-							p,
+						CfvMath::getDiffBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							matrixDiffBaseI);
+							matrixDiffBaseI,
+							*iterCellFieldData_);
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -826,6 +831,8 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml;
+						pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -833,12 +840,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
-							p,
+						CfvMath::getDiffBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							matrixDiffBaseI);
+							matrixDiffBaseI,
+							*iterCellFieldData_);
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -904,6 +912,8 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml;
+						pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -911,12 +921,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
-							p,
+						CfvMath::getDiffBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							matrixDiffBaseI);
+							matrixDiffBaseI,
+							*iterCellFieldData_);
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -1033,7 +1044,7 @@ namespace ScalarCfv
 
 	// Upgrade V1
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::getBoundaryValueCheck(
+	bool reconstructionRBFB1<O>::getBoundaryValueCheck(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -1078,6 +1089,8 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml;
+						pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -1086,12 +1099,13 @@ namespace ScalarCfv
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
 						tensor1D<real, NDOFS> baseValueI;
-						CfvMath::getBaseValueRBFA1(
-							p,
+						CfvMath::getBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							baseValueI);
+							baseValueI,
+							*iterCellFieldData_);
 
 						real pointRecValue = (*iterCellFieldData).scalarVariableTn[0];
 						for (unsigned kk = 1; kk < NDOFS; ++kk)
@@ -1123,8 +1137,9 @@ namespace ScalarCfv
 	}
 
 	// Upgrade V1
+	/*
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::initReconstructionMatrixAndVector(
+	bool reconstructionRBFB1<O>::initReconstructionMatrixAndVector__NotReady(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -1219,7 +1234,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
+						CfvMath::getDiffBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -1236,7 +1251,7 @@ namespace ScalarCfv
 						{
 							momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
+						CfvMath::getDiffBaseValueRBFB1(
 							p + (*iterFaceFieldData_).sideOff, // 20200318����
 							baryCenterJ,
 							scaleJ,
@@ -1382,7 +1397,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
+						CfvMath::getDiffBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -1460,7 +1475,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
+						CfvMath::getDiffBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -1538,7 +1553,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getDiffBaseValueRBFA1(
+						CfvMath::getDiffBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -1657,11 +1672,12 @@ namespace ScalarCfv
 		std::cout << " ..reconstruction matrix and vector has been initialized." << std::endl;
 		return true;
 	}
+	*/
 
 	//----------------------------------------------------------------------------------
 	// Upgrade V1
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::excuteReconstruction(
+	bool reconstructionRBFB1<O>::excuteReconstruction(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -1734,6 +1750,8 @@ namespace ScalarCfv
 							// base moment i
 							tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 							point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+							point pparaml;
+							pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ii, iterFaceFieldData_->parametricValue[gg].first);
 
 							point baryCenterI = (*iterCellFieldData_).baryCenter;
 							point scaleI = (*iterCellFieldData_).lengthReference;
@@ -1741,12 +1759,13 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getDiffBaseValueRBFA1(
-								p,
+							CfvMath::getDiffBaseValueRBFB1(
+								pparaml,
 								baryCenterI,
 								scaleI,
 								momentI,
-								matrixDiffBaseI);
+								matrixDiffBaseI,
+								*iterCellFieldData_);
 							real uI = (*iterCellFieldData_).scalarVariableTn[0];
 							real uBV = 0.0;
 							// get the function values at Gauss points
@@ -1791,6 +1810,8 @@ namespace ScalarCfv
 							// base i
 							tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 							point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+							point pparaml;
+							pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ii, iterFaceFieldData_->parametricValue[gg].first);
 
 							point baryCenterI = (*iterCellFieldData_).baryCenter;
 							point scaleI = (*iterCellFieldData_).lengthReference;
@@ -1798,12 +1819,14 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getDiffBaseValueRBFA1(
-								p,
+							CfvMath::getDiffBaseValueRBFB1(
+								pparaml,
 								baryCenterI,
 								scaleI,
 								momentI,
-								matrixDiffBaseI);
+								matrixDiffBaseI,
+								*iterCellFieldData_);
+
 							real uI = (*iterCellFieldData_).scalarVariableTn[0];
 							real uBV = uI;
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
@@ -1856,6 +1879,8 @@ namespace ScalarCfv
 							// base i
 							tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 							point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+							point pparaml;
+							pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ii, iterFaceFieldData_->parametricValue[gg].first);
 
 							point baryCenterI = (*iterCellFieldData_).baryCenter;
 							point scaleI = (*iterCellFieldData_).lengthReference;
@@ -1863,12 +1888,13 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getDiffBaseValueRBFA1(
-								p,
+							CfvMath::getDiffBaseValueRBFB1(
+								pparaml,
 								baryCenterI,
 								scaleI,
 								momentI,
-								matrixDiffBaseI);
+								matrixDiffBaseI,
+								*iterCellFieldData_);
 							real uI = (*iterCellFieldData_).scalarVariableTn[0];
 							real uBV = uI;
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
@@ -1997,8 +2023,9 @@ namespace ScalarCfv
 	}
 
 	// Upgrade V1
+	/*
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::excuteReconstruction(
+	bool reconstructionRBFB1<O>::excuteReconstruction_NotReady(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -2086,7 +2113,7 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getBaseValueRBFA1(
+							CfvMath::getBaseValueRBFB1(
 								p,
 								baryCenterI,
 								scaleI,
@@ -2117,7 +2144,7 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getBaseValueRBFA1(
+							CfvMath::getBaseValueRBFB1(
 								p,
 								baryCenterI,
 								scaleI,
@@ -2153,7 +2180,7 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getDiffBaseValueRBFA1(
+							CfvMath::getDiffBaseValueRBFB1(
 								p,
 								baryCenterI,
 								scaleI,
@@ -2285,10 +2312,11 @@ namespace ScalarCfv
 		//		std::cout << " ..reconstruction has been completed." << std::endl;
 		return true;
 	}
+	*/
 
 	//----------------------------------------------------------------------------------
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::initReconstructionMatrixAndVectorCR(
+	bool reconstructionRBFB1<O>::initReconstructionMatrixAndVectorCR(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -2353,6 +2381,9 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml;
+						pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
+
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -2360,12 +2391,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
-							p,
+						CfvMath::getBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							vectorBaseI);
+							vectorBaseI,
+							*iterCellFieldData_);
 						// matrix
 						for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 						{
@@ -2421,6 +2453,8 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml;
+						pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -2428,12 +2462,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
-							p,
+						CfvMath::getBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							vectorBaseI);
+							vectorBaseI,
+							*iterCellFieldData_);
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -2494,6 +2529,8 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml;
+						pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -2501,12 +2538,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
-							p,
+						CfvMath::getBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							vectorBaseI);
+							vectorBaseI,
+							*iterCellFieldData_);
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -2567,6 +2605,8 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml;
+						pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -2574,12 +2614,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
-							p,
+						CfvMath::getBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							vectorBaseI);
+							vectorBaseI,
+							*iterCellFieldData_);
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -2662,8 +2703,9 @@ namespace ScalarCfv
 		return true;
 	}
 
+	/*
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::initReconstructionMatrixAndVectorCR(
+	bool reconstructionRBFB1<O>::initReconstructionMatrixAndVectorCR_NotReady(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -2735,7 +2777,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
+						CfvMath::getBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -2803,7 +2845,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
+						CfvMath::getBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -2876,7 +2918,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
+						CfvMath::getBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -2949,7 +2991,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
+						CfvMath::getBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -3036,11 +3078,12 @@ namespace ScalarCfv
 		//		std::cout << " ..CR reconstruction matrix and vector has been initialized." << std::endl;
 		return true;
 	}
+	*/
 
 	//----------------------------------------------------------------------------------
 	// Update V1
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::excuteReconstructionCR(
+	bool reconstructionRBFB1<O>::excuteReconstructionCR(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -3065,7 +3108,8 @@ namespace ScalarCfv
 					int cr = (*iterCellFieldData).cellCellIndex[cc];
 					int kf;
 					//ȷ����
-					for (int ff = 1; ff < (*iterCellFieldData).cellFaceNumber + 1; ++ff)
+					int ff, ffr;
+					for (ff = 1; ff < (*iterCellFieldData).cellFaceNumber + 1; ++ff)
 					{
 						kf = (*iterCellFieldData).cellFaceIndex[ff];
 						iterFaceFieldData_ = faceFieldData->begin() + kf - 1;
@@ -3076,10 +3120,19 @@ namespace ScalarCfv
 							break;
 						}
 					}
+					for (ffr = 1; ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1; ffr++)
+						if ((*cellFieldData)[cr - 1].cellFaceIndex[ffr] == kf)
+							break;
+					assert(ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1);
+
 					iterFaceFieldData_ = faceFieldData->begin() + kf - 1;
 					point p1 = (*iterFaceFieldData_).faceNode[1].second;
 					point p2 = (*iterFaceFieldData_).faceNode[2].second;
 					point pMid = 0.5 * (p1 + p2);
+					point pparaml, pparamr;
+					pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, point(0.5, 0));
+					pparamr = CfvMath::GetFaceParam((*cellFieldData)[cr - 1].cellType_, ffr, point(0.5, 0), true);
+
 					point outDirection = pMid - (*iterCellFieldData).baryCenter;
 					point normalVector = getInnerProduct(outDirection, (*iterFaceFieldData_).normalVector) * (*iterFaceFieldData_).normalVector;
 					point uNV = (1.0 / (normalVector.length() + parameter->EPS)) * normalVector; // cell L -> cell R
@@ -3096,12 +3149,13 @@ namespace ScalarCfv
 					{
 						momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
-					CfvMath::getDiffBaseValueRBFA1(
-						pMid,
+					CfvMath::getDiffBaseValueRBFB1(
+						pparaml,
 						baryCenterI,
 						scaleI,
 						momentI,
-						matrixDiffBaseI);
+						matrixDiffBaseI,
+						*iterCellFieldData_);
 					real dxL = 0.0;
 					real dyL = 0.0;
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -3121,12 +3175,13 @@ namespace ScalarCfv
 					{
 						momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
-					CfvMath::getDiffBaseValueRBFA1(
-						pMid + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
+					CfvMath::getDiffBaseValueRBFB1(
+						pparamr, //���ڱ߽�����
 						baryCenterJ,
 						scaleJ,
 						momentJ,
-						matrixDiffBaseJ);
+						matrixDiffBaseJ,
+						*iterCellFieldData_);
 					real dxR = 0.0;
 					real dyR = 0.0;
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -3149,6 +3204,9 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
+						point pparamr = CfvMath::GetFaceParam((*cellFieldData)[cr - 1].cellType_, ffr, iterFaceFieldData_->parametricValue[gg].first, true);
+
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -3156,12 +3214,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
-							p,
+						CfvMath::getBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							vectorBaseI);
+							vectorBaseI,
+							*iterCellFieldData_);
 						fIL[gg] = (*iterCellFieldData_).scalarVariableTn[0];
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 						{
@@ -3179,12 +3238,13 @@ namespace ScalarCfv
 						{
 							momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
-							p + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
+						CfvMath::getBaseValueRBFB1(
+							pparamr, //���ڱ߽�����
 							baryCenterJ,
 							scaleJ,
 							momentJ,
-							vectorBaseJ);
+							vectorBaseJ,
+							*iterCellFieldData_);
 						fIR[gg] = (*iterCellFieldData_).scalarVariableTn[0];
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 						{
@@ -3261,6 +3321,7 @@ namespace ScalarCfv
 							// base moment i
 							tensor1D<real, NDOFS> momentI;
 							point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+							point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 							iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 							point baryCenterI = (*iterCellFieldData_).baryCenter;
 							point scaleI = (*iterCellFieldData_).lengthReference;
@@ -3268,12 +3329,13 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getBaseValueRBFA1(
-								p,
+							CfvMath::getBaseValueRBFB1(
+								pparaml,
 								baryCenterI,
 								scaleI,
 								momentI,
-								vectorBaseI);
+								vectorBaseI,
+								*iterCellFieldData_);
 
 							fIL[gg] = 0.0;
 							for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -3292,6 +3354,7 @@ namespace ScalarCfv
 							// base moment i
 							tensor1D<real, NDOFS> momentI;
 							point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+							point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 							iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 							point baryCenterI = (*iterCellFieldData_).baryCenter;
 							point scaleI = (*iterCellFieldData_).lengthReference;
@@ -3299,12 +3362,13 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getBaseValueRBFA1(
-								p,
+							CfvMath::getBaseValueRBFB1(
+								pparaml,
 								baryCenterI,
 								scaleI,
 								momentI,
-								vectorBaseI);
+								vectorBaseI,
+								*iterCellFieldData_);
 
 							fIL[gg] = (*iterCellFieldData_).scalarVariableTn[0];
 							for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -3323,6 +3387,7 @@ namespace ScalarCfv
 							// base moment i
 							tensor1D<real, NDOFS> momentI;
 							point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+							point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
 							iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 							point baryCenterI = (*iterCellFieldData_).baryCenter;
 							point scaleI = (*iterCellFieldData_).lengthReference;
@@ -3330,12 +3395,13 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getBaseValueRBFA1(
-								p,
+							CfvMath::getBaseValueRBFB1(
+								pparaml,
 								baryCenterI,
 								scaleI,
 								momentI,
-								vectorBaseI);
+								vectorBaseI,
+								*iterCellFieldData_);
 							fIL[gg] = (*iterCellFieldData_).scalarVariableTn[0];
 							for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 							{
@@ -3396,8 +3462,10 @@ namespace ScalarCfv
 					int cl = (*iterCellFieldData).cellCellIndex[0];
 					int cr = (*iterCellFieldData).cellCellIndex[cc];
 					int kf;
+
 					//ȷ����
-					for (int ff = 1; ff < (*iterCellFieldData).cellFaceNumber + 1; ++ff)
+					int ffr, ff;
+					for (ff = 1; ff < (*iterCellFieldData).cellFaceNumber + 1; ++ff)
 					{
 						kf = (*iterCellFieldData).cellFaceIndex[ff];
 						iterFaceFieldData_ = faceFieldData->begin() + kf - 1;
@@ -3408,10 +3476,17 @@ namespace ScalarCfv
 							break;
 						}
 					}
+					for (ffr = 1; ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1; ffr++)
+						if ((*cellFieldData)[cr - 1].cellFaceIndex[ffr] == kf)
+							break;
+					assert(ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1);
+
 					iterFaceFieldData_ = faceFieldData->begin() + kf - 1;
 					point p1 = (*iterFaceFieldData_).faceNode[1].second;
 					point p2 = (*iterFaceFieldData_).faceNode[2].second;
 					point pMid = 0.5 * (p1 + p2);
+					point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, point(0.5, 0));
+					point pparamr = CfvMath::GetFaceParam((*cellFieldData)[cr - 1].cellType_, ffr, point(0.5, 0), true);
 					point outDirection = pMid - (*iterCellFieldData).baryCenter;
 					point normalVector = getInnerProduct(outDirection, (*iterFaceFieldData_).normalVector) * (*iterFaceFieldData_).normalVector;
 					point uNV = (1.0 / (normalVector.length() + parameter->EPS)) * normalVector; // cell L -> cell R
@@ -3428,12 +3503,13 @@ namespace ScalarCfv
 					{
 						momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
-					CfvMath::getDiffBaseValueRBFA1(
-						pMid,
+					CfvMath::getDiffBaseValueRBFB1(
+						pparaml,
 						baryCenterI,
 						scaleI,
 						momentI,
-						matrixDiffBaseI);
+						matrixDiffBaseI,
+						*iterCellFieldData_);
 					real dxL = 0.0;
 					real dyL = 0.0;
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -3453,12 +3529,13 @@ namespace ScalarCfv
 					{
 						momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
-					CfvMath::getDiffBaseValueRBFA1(
-						pMid + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
+					CfvMath::getDiffBaseValueRBFB1(
+						pparamr, //���ڱ߽�����
 						baryCenterJ,
 						scaleJ,
 						momentJ,
-						matrixDiffBaseJ);
+						matrixDiffBaseJ,
+						*iterCellFieldData_);
 					real dxR = 0.0;
 					real dyR = 0.0;
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -3481,6 +3558,8 @@ namespace ScalarCfv
 						// base moment i
 						tensor1D<real, NDOFS> momentI;
 						point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
+						point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, iterFaceFieldData_->parametricValue[gg].first);
+						point pparamr = CfvMath::GetFaceParam((*cellFieldData)[cr - 1].cellType_, ffr, iterFaceFieldData_->parametricValue[gg].first, true);
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						point baryCenterI = (*iterCellFieldData_).baryCenter;
 						point scaleI = (*iterCellFieldData_).lengthReference;
@@ -3488,12 +3567,13 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
-							p,
+						CfvMath::getBaseValueRBFB1(
+							pparaml,
 							baryCenterI,
 							scaleI,
 							momentI,
-							vectorBaseI);
+							vectorBaseI,
+							*iterCellFieldData_);
 
 						fIL[gg] = (*iterCellFieldData_).scalarVariableTn[0];
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -3512,12 +3592,13 @@ namespace ScalarCfv
 						{
 							momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
-							p + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
+						CfvMath::getBaseValueRBFB1(
+							pparamr, //���ڱ߽�����
 							baryCenterJ,
 							scaleJ,
 							momentJ,
-							vectorBaseJ);
+							vectorBaseJ,
+							*iterCellFieldData_);
 						fIR[gg] = (*iterCellFieldData_).scalarVariableTn[0];
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 						{
@@ -3584,8 +3665,9 @@ namespace ScalarCfv
 		return true;
 	}
 
+	/*
 	template <unsigned int O>
-	bool reconstructionRBFA1<O>::excuteReconstructionCR(
+	bool reconstructionRBFB1<O>::excuteReconstructionCR_NotReady(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -3641,7 +3723,7 @@ namespace ScalarCfv
 					{
 						momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
-					CfvMath::getDiffBaseValueRBFA1(
+					CfvMath::getDiffBaseValueRBFB1(
 						pMid,
 						baryCenterI,
 						scaleI,
@@ -3666,7 +3748,7 @@ namespace ScalarCfv
 					{
 						momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
-					CfvMath::getDiffBaseValueRBFA1(
+					CfvMath::getDiffBaseValueRBFB1(
 						pMid + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
 						baryCenterJ,
 						scaleJ,
@@ -3701,7 +3783,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
+						CfvMath::getBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -3724,7 +3806,7 @@ namespace ScalarCfv
 						{
 							momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
+						CfvMath::getBaseValueRBFB1(
 							p + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
 							baryCenterJ,
 							scaleJ,
@@ -3813,7 +3895,7 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getBaseValueRBFA1(
+							CfvMath::getBaseValueRBFB1(
 								p,
 								baryCenterI,
 								scaleI,
@@ -3844,7 +3926,7 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getBaseValueRBFA1(
+							CfvMath::getBaseValueRBFB1(
 								p,
 								baryCenterI,
 								scaleI,
@@ -3875,7 +3957,7 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
-							CfvMath::getBaseValueRBFA1(
+							CfvMath::getBaseValueRBFB1(
 								p,
 								baryCenterI,
 								scaleI,
@@ -3973,7 +4055,7 @@ namespace ScalarCfv
 					{
 						momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
-					CfvMath::getDiffBaseValueRBFA1(
+					CfvMath::getDiffBaseValueRBFB1(
 						pMid,
 						baryCenterI,
 						scaleI,
@@ -3998,7 +4080,7 @@ namespace ScalarCfv
 					{
 						momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
-					CfvMath::getDiffBaseValueRBFA1(
+					CfvMath::getDiffBaseValueRBFB1(
 						pMid + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
 						baryCenterJ,
 						scaleJ,
@@ -4033,7 +4115,7 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
+						CfvMath::getBaseValueRBFB1(
 							p,
 							baryCenterI,
 							scaleI,
@@ -4057,7 +4139,7 @@ namespace ScalarCfv
 						{
 							momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFA1(
+						CfvMath::getBaseValueRBFB1(
 							p + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
 							baryCenterJ,
 							scaleJ,
@@ -4128,5 +4210,7 @@ namespace ScalarCfv
 		//		std::cout << " ..CR reconstruction has been completed." << std::endl;
 		return true;
 	}
+	*/
+
 }
 #endif

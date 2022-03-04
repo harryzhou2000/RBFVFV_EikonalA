@@ -51,7 +51,7 @@ namespace ScalarCfv
 		virtual bool setFaceTopology();
 		virtual int checkFace(const int n1, const int n2);
 		virtual bool setCellTopology();
-		//virtual bool setNodeFaceTopology();//ÐèÒªµÈsetFaceTopologyÖ´ÐÐÍêºó²ÅÄÜÖ´ÐÐ
+		//virtual bool setNodeFaceTopology();//ï¿½ï¿½Òªï¿½ï¿½setFaceTopologyÖ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½
 		virtual bool setBoundaryTopology();
 		virtual bool setFaceProperty();
 		virtual bool saveGrid(const std::string & filename);
@@ -83,6 +83,8 @@ namespace ScalarCfv
 			GaussIntegralFaceO2Grid<fO>* gaussFaceIntegral_);
 
 		virtual bool adjustNV();
+
+		bool adjustNodeFaceOrder();
 	};
 
 }

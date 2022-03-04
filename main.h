@@ -8,6 +8,7 @@
 #include "Grid.h"
 #include "Reconstruction.h"
 #include "ReconstructionRBFA.h"
+#include "ReconstructionRBFB.h"
 
 #include "Evolution.h"
 #include "FieldSolver.h"

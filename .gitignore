@@ -1,2 +1,6 @@
 Cases/*
+Cases
 .vscode
+Eigen
+*.o
+*.exe

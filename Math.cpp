@@ -4,6 +4,8 @@
 
 #include "Point.h"
 
+
+
 namespace ScalarCfv
 {
 	std::ostream &operator<<(std::ostream &out, const point2D &p)
@@ -97,6 +99,44 @@ namespace CfvMath
 		A[2] = delta.y;
 		A[3] = RBF::RBF0(deltaRBF, crbf, RBF::F0);
 
+		return true;
+	}
+
+	bool getMomentRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 3> &A,
+		ScalarCfv::cellFieldData &cell) // adding 1
+	{
+		// Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+		// Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+		// 									 {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+		// Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+		// 								 {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+		// Eigen::Vector2d pp = XiNj * Nj;
+		// ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+		// A[1] = delta.x / scale.x;
+		// A[2] = delta.y / scale.y;
+
+		A[1] = p.x;
+		A[2] = p.y;
+#ifdef TRIAL
+		// std::cout << "Moment in " << p.x << p.y << std::endl;
+#endif
+		return true;
+	}
+
+	bool getMomentRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 4> &A,
+		ScalarCfv::cellFieldData &cell) // adding 1
+	{
+		A[1] = p.x;
+		A[2] = p.y;
+		A[3] = RBF::RBF0(p, crbf, RBF::F0);
 		return true;
 	}
 
@@ -722,6 +762,118 @@ namespace CfvMath
 
 		return true;
 	}
+	bool getDiffBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 3> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 3, 3> &A,
+		ScalarCfv::cellFieldData &cell) // adding 0
+	{
+
+		//(1-x)(1-y) y(1-x) x*y x*(1-y)
+		Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+		Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+											 {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+		Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+										 {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+		// Eigen::Vector2d pp = XiNj * Nj;
+		// ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+		// A[1][0] = delta.x / scale.x - moment[1];
+		// A[2][0] = delta.y / scale.y - moment[2];
+
+		// A[1][1] = 1 / scale.x;
+		// A[1][2] = 0 / scale.x;
+		// A[2][1] = 0 / scale.y;
+		// A[2][2] = 1 / scale.y;
+
+		A[1][0] = p.x - moment[1];
+		A[2][0] = p.y - moment[2];
+
+		assert(cell.cellType_ == ScalarCfv::Quadrilateral);
+
+		Eigen::Matrix2d Jacobi = dNjdetai * XiNj.transpose(); // = dxj/detai
+		Eigen::Matrix2d iJacobi = Jacobi.inverse();			  // = detaj/dxi // iJabcobi * dphideetaj = dphidxj
+
+		// diff 1:
+		Eigen::Vector2d dphidetaj, dphidxj;
+		dphidetaj << 1, 0;
+		dphidxj = iJacobi.transpose() * dphidetaj;
+		A[1][1] = dphidxj[0];
+		A[1][2] = dphidxj[1];
+
+		dphidetaj << 0, 1;
+		dphidxj = iJacobi.transpose() * dphidetaj;
+		A[2][1] = dphidxj[0];
+		A[2][2] = dphidxj[1];
+
+		return true;
+	}
+
+	bool getDiffBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 4> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 4, 6> &A,
+		ScalarCfv::cellFieldData &cell) // adding 1
+	{
+		A[1][0] = p.x - moment[1];
+		A[2][0] = p.y - moment[2];
+		A[3][0] = RBF::RBF0(p, crbf, RBF::F0) - moment[3];
+
+		assert(cell.cellType_ == ScalarCfv::Quadrilateral);
+
+		//(1-x)(1-y) y(1-x) x*y x*(1-y)
+		Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+											 {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+		Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+										 {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+
+		Eigen::Matrix2d Jacobi = dNjdetai * XiNj.transpose(); // = dxj/detai
+		Eigen::Matrix2d iJacobi = Jacobi.inverse();			  // = detaj/dxi // iJabcobi * dphideetaj = dphidxj
+
+		// diff 1:
+		Eigen::Vector2d dphidetaj, dphidxj;
+		dphidetaj << 1, 0;
+		dphidxj = iJacobi * dphidetaj;
+		A[1][1] = dphidxj[0];
+		A[1][2] = dphidxj[1];
+
+		dphidetaj << 0, 1;
+		dphidxj = iJacobi * dphidetaj;
+		A[2][1] = dphidxj[0];
+		A[2][2] = dphidxj[1];
+
+		dphidetaj << RBF::RBF1x(p, crbf, RBF::F0, RBF::F1), RBF::RBF1y(p, crbf, RBF::F0, RBF::F1);
+		dphidxj = iJacobi * dphidetaj;
+		A[3][1] = dphidxj[0];
+		A[3][2] = dphidxj[1];
+
+		// diff 2:
+		A[1][3] = A[1][4] = A[1][5] = 0;
+		A[2][3] = A[2][4] = A[2][5] = 0;
+		Eigen::Matrix2d dphidetaidetaj, dphidxidxj;
+		ScalarCfv::real rbfxx, rbfxy, rbfyy;
+		rbfxx = RBF::RBF2xx(p, crbf, RBF::F0, RBF::F1, RBF::F2);
+		rbfxy = RBF::RBF2xy(p, crbf, RBF::F0, RBF::F1, RBF::F2);
+		rbfyy = RBF::RBF2yy(p, crbf, RBF::F0, RBF::F1, RBF::F2);
+		dphidetaidetaj << rbfxx, rbfxy, rbfxy, rbfyy;
+		dphidxidxj = iJacobi * dphidetaidetaj * iJacobi.transpose();
+		A[3][3] = dphidxidxj(0, 0);
+		A[3][4] = dphidxidxj(0, 1);
+		A[3][5] = dphidxidxj(1, 1);
+
+#ifdef DEBUG_RBFB
+		std::cout << "XiNj\n"
+				  << XiNj << std::endl;
+		std::cout << "Jacobi\n"
+				  << Jacobi << std::endl;
+		std::cout << Jacobi.determinant() << std::endl;
+#endif
+
+		return true;
+	}
 
 #ifndef USE_RBF
 	// rO=2
@@ -1185,6 +1337,46 @@ namespace CfvMath
 		A[1] = delta.x - moment[1];
 		A[2] = delta.y - moment[2];
 		A[3] = RBF::RBF0(deltaRBF, crbf, RBF::F0) - moment[3];
+		return true;
+	}
+
+	bool getBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 3> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 3> &A,
+		ScalarCfv::cellFieldData &cell) // adding 1
+	{
+		// Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+		// Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+		// 									 {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+		// Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+		// 								 {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+		// Eigen::Vector2d pp = XiNj * Nj;
+		// ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+		// A[1] = delta.x / scale.x - moment[1];
+		// A[2] = delta.y / scale.y - moment[2];
+
+		A[1] = p.x - moment[1];
+		A[2] = p.y - moment[2];
+		return true;
+	}
+
+	
+
+	bool getBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 4> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 4> &A,
+		ScalarCfv::cellFieldData &cell) // adding 1
+	{
+		A[1] = p.x - moment[1];
+		A[2] = p.y - moment[2];
+		A[3] = RBF::RBF0(p, crbf, RBF::F0) - moment[3];
+
 		return true;
 	}
 

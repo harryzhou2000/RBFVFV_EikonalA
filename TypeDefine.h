@@ -1,9 +1,11 @@
 #ifndef _TYPE_DEFINE_H
 #define _TYPE_DEFINE_H
 #include <vector>
+#include <assert.h>
 
-#define USE_RBFA1
-// #define TRIAL
+// #define USE_RBFA1
+#define TRIAL
+// #define DEBUG_RBFB
 // #define USE_RBF
 
 #define rO 1 //reconstruction polynomal order {1,2,3}

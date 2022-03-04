@@ -1,6 +1,6 @@
 #include "main.h"
 
-//„1¤7„1¤7„1¤70ê51’1„1¤71„1¤7„1¤7„1¤7„1¤70¯9„1¤7„1¤7„1¤7„1¤7„1¤7„1¤70¼2„1¤7Gauss„1¤7„1¤7„1¤70÷0„1¤70è0„1¤7„1¤702.20„1¤7„1¤7„1¤7„1¤7
+//ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½0ï¿½5ï¿½1ï¿½1ï¿½1ï¿½71ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½0ï¿½9ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½0ï¿½2ï¿½1ï¿½7Gaussï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½0ï¿½0ï¿½1ï¿½7ï¿½0ï¿½0ï¿½1ï¿½7ï¿½1ï¿½702.20ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7ï¿½1ï¿½7
 
 int main(int argc, char **argv)
 {
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 	ScalarCfv::cellFieldDataVector cellFieldData;
 	ScalarCfv::faceFieldDataVector faceFieldData;
 #ifdef USE_RBFA1
-	ScalarCfv::reconstructionRBFA1<rO> reconstruction;
+	ScalarCfv::reconstructionRBFB1<rO> reconstruction;
 #else
 	ScalarCfv::reconstruction<rO> reconstruction;
 #endif
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 		&evolution,
 		&reconstruction);
 
-	//ScalarCfv::problemCIRCLE fieldSolver(
+	// ScalarCfv::problemCIRCLE fieldSolver(
 	//	&parameter,
 	//	&cellFieldData,
 	//	&faceFieldData,
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 	//	&evolution,
 	//	&reconstruction);
 
-	//ScalarCfv::problemAT fieldSolver(
+	// ScalarCfv::problemAT fieldSolver(
 	//	&parameter,
 	//	&cellFieldData,
 	//	&faceFieldData,
@@ -77,6 +77,8 @@ int main(int argc, char **argv)
 	grid.setCellTopology();
 	grid.saveGrid(ScalarCfv::fileOut_Mesh);
 	grid.adjustNV();
+	grid.adjustNodeFaceOrder();
+	// grid.adjustNodeFaceOrder();
 
 	gaussIntegralCell.allocateArray(&parameter, &cell, &cellGaussData);
 	gaussIntegralCell.initializeArray(&cell, &cellGaussData);
@@ -89,16 +91,17 @@ int main(int argc, char **argv)
 	//	grid.debugTest(&faceGaussData);
 
 	//#define TEST
+	
 
 #ifdef TEST
 
 	fieldSolver.allocateArray();
 	fieldSolver.initializeArray();
 
-	//face info
+	// face info
 
-	//ScalarCfv::faceFieldDataVector::iterator iterFaceFieldData;
-	//for (iterFaceFieldData = faceFieldData.begin(); iterFaceFieldData != faceFieldData.end(); ++iterFaceFieldData){
+	// ScalarCfv::faceFieldDataVector::iterator iterFaceFieldData;
+	// for (iterFaceFieldData = faceFieldData.begin(); iterFaceFieldData != faceFieldData.end(); ++iterFaceFieldData){
 	//	std::cout << "------------------------" << std::endl;
 	//	std::cout << "node: " << (*iterFaceFieldData).faceNode[1].first << "\t" << (*iterFaceFieldData).faceNode[2].first << std::endl;
 	//	std::cout.precision(12);
@@ -113,9 +116,9 @@ int main(int argc, char **argv)
 	//	for (int ii = 0; ii < (*iterFaceFieldData).fPG; ++ii){
 	//		std::cout << "\t" << (*iterFaceFieldData).gaussPairVector_[ii].normalVector.x << "\t" << (*iterFaceFieldData).gaussPairVector_[ii].normalVector.y << std::endl;
 	//	}
-	//}
+	// }
 
-	//cell info
+	// cell info
 
 	ScalarCfv::cellFieldDataVector::iterator iterCellFieldData;
 	for (iterCellFieldData = cellFieldData.begin(); iterCellFieldData != cellFieldData.end(); ++iterCellFieldData)
@@ -146,7 +149,7 @@ int main(int argc, char **argv)
 		ScalarCfv::fileOut_Sln,
 		ScalarCfv::fileOut_Residual);
 
-	//fieldSolver.timeMarchingExplicitSSPRK(
+	// fieldSolver.timeMarchingExplicitSSPRK(
 	//	&node,
 	//	&gaussIntegralCell,
 	//	&gaussIntegralFace,
@@ -159,9 +162,9 @@ int main(int argc, char **argv)
 
 #endif
 
-	//fieldSolver.timeMarchingExplicit_DEBUG(
+	// fieldSolver.timeMarchingExplicit_DEBUG(
 	//	&node,
-	//  &gaussIntegralCell,
+	//   &gaussIntegralCell,
 	//	&gaussIntegralFace,
 	//	ScalarCfv::fileIn_BackUp,
 	//	ScalarCfv::fileOut_BackUp,
