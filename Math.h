@@ -79,6 +79,13 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A);
 
+	bool getMomentRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 6> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
 	// rO=3
 	bool getMoment(
 		ScalarCfv::point p,
@@ -142,6 +149,14 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
 		ScalarCfv::tensor2D<ScalarCfv::real, 7, 10> &A);
+	bool getDiffBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 6> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 6, 6> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
 	// rO=3
 	bool getDiffBaseValue(
 		ScalarCfv::point p,
@@ -190,6 +205,13 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A);
+	bool getBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 6> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 6> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
 	// rO=3
 	bool getBaseValue(
 		ScalarCfv::point p,
@@ -257,5 +279,163 @@ namespace CfvMath
 		Eigen::Vector2d pp = XiNj * Nj;
 		return ScalarCfv::point(pp(0), pp(1));
 	}
+
+	// Cik += Aij Bjk
+	template <class TA, class TB, class TC>
+	void VVMatMat(TA &A, TB &B, TC &C,
+				  int istart, int iend, int jstart, int jend, int kstart, int kend, bool clear = true)
+	{
+		if (clear)
+			for (int i = istart; i < iend; i++)
+				for (int k = kstart; k < kend; k++)
+					C[i][k] = 0.0;
+		for (int i = istart; i < iend; i++)
+			for (int j = jstart; j < jend; j++)
+				for (int k = kstart; k < kend; k++)
+					C[i][k] += A[i][j] * B[j][k];
+	}
+
+	// ci += Aij * bj
+	template <class TA, class TB, class TC>
+	void VVMatVec(TA &A, TB &b, TC &c,
+				  int istart, int iend, int jstart, int jend, bool clear = true)
+	{
+		if (clear)
+			for (int i = istart; i < iend; i++)
+				c[i] = 0.0;
+		for (int i = istart; i < iend; i++)
+			for (int j = jstart; j < jend; j++)
+				c[i] += A[i][j] * b[j];
+	}
+
+	// ci += Aij * bj * alpha
+	template <class TA, class TB, class TC>
+	void VVMatVec(TA &A, TB &b, TC &c, ScalarCfv::real alpha,
+				  int istart, int iend, int jstart, int jend, bool clear = true)
+	{
+		if (clear)
+			for (int i = istart; i < iend; i++)
+				c[i] = 0.0;
+		for (int i = istart; i < iend; i++)
+		{
+			ScalarCfv::real inc = 0;
+			for (int j = jstart; j < jend; j++)
+				inc += A[i][j] * b[j];
+			c[i] += inc * alpha;
+		}
+	}
+
+	// B = A
+	template <class TA, class TB>
+	void VVMatCopy(TA &A, TB &B, int istart, int iend, int jstart, int jend)
+	{
+		for (int i = istart; i < iend; i++)
+			for (int j = jstart; j < jend; j++)
+				B[i][j] = A[i][j];
+	}
+
+	// B = A
+	template <class TA, class TB>
+	void VVVecCopy(TA &A, TB &B, int istart, int iend)
+	{
+		for (int i = istart; i < iend; i++)
+			B[i] = A[i];
+	}
+
+	// B = alpha * A
+	template <class TA, class TB>
+	void VVVecCopy(TA &A, TB &B, ScalarCfv::real alpha, int istart, int iend)
+	{
+		for (int i = istart; i < iend; i++)
+			B[i] = A[i] * alpha;
+	}
+
+	// B += alpha * A
+	template <class TA, class TB>
+	void VVVecAdd(TA &A, TB &B, ScalarCfv::real alpha, int istart, int iend)
+	{
+		for (int i = istart; i < iend; i++)
+			B[i] += A[i] * alpha;
+	}
+
+	// Cik = sum_j -- Aij Wj Bkj
+	template <class TA, class TB, class TC, class TW>
+	void VVMatConjProd(TA &A, TB &B, TC &C, TW &W,
+					   int istart, int iend, int jstart, int jend, int kstart, int kend, bool clear = true)
+	{
+		if (clear)
+			for (int i = istart; i < iend; i++)
+				for (int k = kstart; k < kend; k++)
+					C[i][k] = 0.0;
+		for (int i = istart; i < iend; i++)
+			for (int j = jstart; j < jend; j++)
+				for (int k = kstart; k < kend; k++)
+					C[i][k] += A[i][j] * B[k][j] * W[j];
+	}
+
+	// Cik = sum_j -- Aij WjWj Bkj with tensored diffs
+	template <class TA, class TB, class TC, class TW>
+	void VVMatConjProd2DDiffCombine(TA &A, TB &B, TC &C, TW &W,
+									int istart, int iend, int jstart, int jend, int kstart, int kend, bool clear = true)
+	{
+		if (clear)
+			for (int i = istart; i < iend; i++)
+				for (int k = kstart; k < kend; k++)
+					C[i][k] = 0.0;
+		if (jstart == 0 && jend == 6)
+			for (int i = istart; i < iend; i++)
+				for (int k = kstart; k < kend; k++)
+				{
+					C[i][k] += A[i][0] * B[k][0] * W[0] * W[0];
+					ScalarCfv::real csumA = 0.0;
+					ScalarCfv::real csumB = 0.0;
+					ScalarCfv::real csumD = 0.0;
+					ScalarCfv::real csumW = 0.0;
+					for (int j = 1; j < 3; j++)
+					{
+						csumA += A[i][j] * (W[j]);
+						csumB += B[k][j] * (W[j]);
+						csumD += A[i][j] * B[k][j];
+						csumW += W[j] * W[j];
+					}
+					// C[i][k] += 0.5 * (csumA * csumB + csumD * csumW);
+					C[i][k] += csumA * csumB;
+					csumA = csumB = csumD = csumW = 0;
+					for (int j = 3; j < 6; j++)
+					{
+						csumA += A[i][j] * (W[j]);
+						csumB += B[k][j] * (W[j]);
+						csumD += A[i][j] * B[k][j];
+						csumW += W[j] * W[j];
+					}
+					C[i][k] += csumA * csumB;
+					// C[i][k] += 0.5 * (csumA * csumB + csumD * csumW);
+					// C[i][k] = 0.67 * C[i][k] + 0.33 * (A[i][3] + A[i][5]) * (B[k][3] + B[k][5]) * (W[3] + W[5]) * (W[3] + W[5]);
+				}
+		else if (jstart == 0 && jend == 3)
+			for (int i = istart; i < iend; i++)
+				for (int k = kstart; k < kend; k++)
+				{
+					C[i][k] += A[i][0] * B[k][0] * W[0] * W[0];
+					ScalarCfv::real csumA = 0.0;
+					ScalarCfv::real csumB = 0.0;
+					ScalarCfv::real csumD = 0.0;
+					ScalarCfv::real csumW = 0.0;
+					for (int j = 1; j < 3; j++)
+					{
+						csumA += A[i][j] * (W[j]);
+						csumB += B[k][j] * (W[j]);
+						csumD += A[i][j] * B[k][j];
+						csumW += W[j] * W[j];
+					}
+					C[i][k] += 0.5 * (csumA * csumB + csumD * csumW); // OK for RBFB1+0 rO=1
+																	  // C[i][k] += 0.5 * (csumA * csumB); // OK for RBFB1+0 rO=1
+				}
+		else
+		{
+			assert(false);
+		}
+	}
+
 }
 #endif

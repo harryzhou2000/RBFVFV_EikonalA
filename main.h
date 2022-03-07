@@ -11,6 +11,9 @@
 #include "ReconstructionRBFB.h"
 
 #include "Evolution.h"
+#include "EvolutionRBFB.h"
+
+
 #include "FieldSolver.h"
 #include "problemCircle.h"
 #include "problemAT.h"

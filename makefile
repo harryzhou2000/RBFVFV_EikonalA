@@ -3,7 +3,7 @@
 LIB=-lmkl_sequential -lmkl_core -lmkl_intel_lp64
 
 # OPT=-g
-OPT=-O3 -g
+OPT= -O3 -g
 
 OBJ=FieldSolver.o Grid.o Math.o Parameter.o
 
@@ -20,4 +20,4 @@ test1.exe: test1.cpp
 
 .PHONY: clean
 clean:
-	rm -rf *.o *.exe
+	rm -f *.o *.exe

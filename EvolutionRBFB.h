@@ -1,5 +1,5 @@
-#ifndef _EVOLUTION_H
-#define _EVOLUTION_H
+#ifndef _EVOLUTIONRBFB_H
+#define _EVOLUTIONRBFB_H
 //#include "TypeDefine.h"
 //#include "Point.h"
 //#include "Parameter.h"
@@ -8,15 +8,16 @@
 #include "Variable.h"
 #include "Parameter.h"
 #include <math.h>
+#include "Evolution.h"
 
 namespace ScalarCfv
 {
 	template <unsigned int O>
-	class evolution
+	class evolutionRBFB1 : public evolution<O>
 	{
 	public:
-		evolution(){};
-		~evolution(){};
+		evolutionRBFB1(){};
+		~evolutionRBFB1(){};
 
 		const static unsigned int NDOFS = (O + 2) * (O + 1) / 2;
 		const static unsigned int NDIFFS = (O + 2) * (O + 1) / 2;
@@ -37,11 +38,11 @@ namespace ScalarCfv
 			cellFieldDataVector *cellFieldData,
 			faceFieldDataVector *faceFieldData,
 			GaussIntegralCellO1Grid<vO> *gaussIntegralCell); //
-		virtual bool getSourceTerm(
-			parameter *parameter,
-			cellFieldDataVector *cellFieldData,
-			faceFieldDataVector *faceFieldData,
-			GaussIntegralCellO2Grid<vO> *gaussIntegralCell); //
+		// virtual bool getSourceTerm(
+		// 	parameter *parameter,
+		// 	cellFieldDataVector *cellFieldData,
+		// 	faceFieldDataVector *faceFieldData,
+		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell); //
 
 		virtual bool getArtificialViscosityTerm(
 			parameter *parameter,
@@ -89,7 +90,7 @@ namespace ScalarCfv
 
 	//------------------------------------------------------------------------------------------
 	template <unsigned int O>
-	bool evolution<O>::getTimeStep(
+	bool evolutionRBFB1<O>::getTimeStep(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		faceFieldDataVector *faceFieldData)
@@ -104,6 +105,10 @@ namespace ScalarCfv
 		{
 			(*iterCellFieldData).lambdaCell = 0.0;
 		}
+#ifdef TRIAL
+		std::cout << "EVOB1\n";
+#endif
+
 		for (iterFaceFieldData = faceFieldData->begin(); iterFaceFieldData != faceFieldData->end(); ++iterFaceFieldData)
 		{
 			// use low order
@@ -112,10 +117,17 @@ namespace ScalarCfv
 			point p1 = (*iterFaceFieldData).faceNode[1].second;
 			point p2 = (*iterFaceFieldData).faceNode[2].second;
 			point pMid = 0.5 * (p1 + p2);
+
+			int ff;
+			for (ff = 1; ff < (*cellFieldData)[cl - 1].cellFaceNumber + 1; ff++)
+				if ((*cellFieldData)[cl - 1].cellFaceIndex[ff] == iterFaceFieldData->index)
+					break;
+			assert(ff < (*cellFieldData)[cl - 1].cellFaceNumber + 1);
+
 			point normalVector = (*iterFaceFieldData).normalVector;
 			point uNV = (1.0 / normalVector.length()) * normalVector;
 			// diff base matrix i
-			tensor2D<real, NDOFS, NDOFS> matrixDiffBaseI;
+			tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 			// base moment i
 			tensor1D<real, NDOFS> momentI;
 			iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -125,12 +137,17 @@ namespace ScalarCfv
 			{
 				momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 			}
-			CfvMath::getDiffBaseValue(
-				pMid,
+
+			point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, point(0.5, 0));
+
+			CfvMath::getDiffBaseValueRBFB1(
+				pparaml,
 				baryCenterI,
 				scaleI,
 				momentI,
-				matrixDiffBaseI);
+				matrixDiffBaseI,
+				*iterCellFieldData_);
+
 			real dxL = 0.0;
 			real dyL = 0.0;
 			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -143,8 +160,15 @@ namespace ScalarCfv
 			uL.y = dyL;
 			if (cr > 0)
 			{
+				int ffr;
+				for (ffr = 1; ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1; ffr++)
+					if ((*cellFieldData)[cr - 1].cellFaceIndex[ffr] == iterFaceFieldData->index)
+						break;
+				assert(ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1);
+				point pparamr = CfvMath::GetFaceParam((*cellFieldData)[cr - 1].cellType_, ffr, point(0.5, 0), true);
+
 				// diff base matrix j
-				tensor2D<real, NDOFS, NDOFS> matrixDiffBaseJ;
+				tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseJ;
 				// base moment j
 				tensor1D<real, NDOFS> momentJ;
 				iterCellFieldData_ = cellFieldData->begin() + cr - 1;
@@ -154,12 +178,19 @@ namespace ScalarCfv
 				{
 					momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 				}
-				CfvMath::getDiffBaseValue(
-					pMid + (*iterFaceFieldData).sideOff, //���ڱ߽�����
+				// CfvMath::getDiffBaseValue(
+				// 	pMid + (*iterFaceFieldData).sideOff, //���ڱ߽�����
+				// 	baryCenterJ,
+				// 	scaleJ,
+				// 	momentJ,
+				// 	matrixDiffBaseJ);
+				CfvMath::getDiffBaseValueRBFB1(
+					pparamr, //���ڱ߽�����
 					baryCenterJ,
 					scaleJ,
 					momentJ,
-					matrixDiffBaseJ);
+					matrixDiffBaseJ,
+					*iterCellFieldData_);
 				real dxR = 0.0;
 				real dyR = 0.0;
 				for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -219,7 +250,7 @@ namespace ScalarCfv
 	//------------------------------------------------------------------------------------------
 
 	template <unsigned int O>
-	bool evolution<O>::excuteFilter(
+	bool evolutionRBFB1<O>::excuteFilter(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData)
 	{
@@ -264,7 +295,7 @@ namespace ScalarCfv
 	//------------------------------------------------------------------------------------------
 
 	template <unsigned int O>
-	bool evolution<O>::excuteWBAPLimiter4th(
+	bool evolutionRBFB1<O>::excuteWBAPLimiter4th(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData)
 	{
@@ -376,7 +407,7 @@ namespace ScalarCfv
 	}
 
 	template <unsigned int O>
-	bool evolution<O>::excuteWBAPLimiter4thCR(
+	bool evolutionRBFB1<O>::excuteWBAPLimiter4thCR(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData)
 	{
@@ -490,7 +521,7 @@ namespace ScalarCfv
 	//------------------------------------------------------------------------------------------
 
 	template <unsigned int O>
-	bool evolution<O>::getSourceTerm(
+	bool evolutionRBFB1<O>::getSourceTerm(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		faceFieldDataVector *faceFieldData,
@@ -509,7 +540,7 @@ namespace ScalarCfv
 			for (int gg = 0; gg < static_cast<int>((*iterCellFieldData).PG); ++gg)
 			{
 				// diff base matrix i
-				tensor2D<real, NDOFS, NDOFS> matrixDiffBaseI;
+				tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 				// base moment i
 				tensor1D<real, NDOFS> momentI;
 				point p = (*iterCellFieldData).gaussPairVector_[gg].p;
@@ -519,12 +550,13 @@ namespace ScalarCfv
 				{
 					momentI[kk] = (*iterCellFieldData).baseMoment[kk];
 				}
-				CfvMath::getDiffBaseValue(
-					p,
+				CfvMath::getDiffBaseValueRBFB1(
+					(*iterCellFieldData).parametricValue[gg].first,
 					baryCenterI,
 					scaleI,
 					momentI,
-					matrixDiffBaseI);
+					matrixDiffBaseI,
+					*iterCellFieldData);
 				real phi = (*iterCellFieldData).scalarVariableTn[0];
 				real tempX, tempY;
 				point dPhi, dPhiTilde;
@@ -598,8 +630,9 @@ namespace ScalarCfv
 		return true;
 	}
 
+	/*
 	template <unsigned int O>
-	bool evolution<O>::getSourceTerm(
+	bool evolutionRBFB1<O>::getSourceTerm_NotReady(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		faceFieldDataVector *faceFieldData,
@@ -699,11 +732,11 @@ namespace ScalarCfv
 		//		std::cout << " ..source term has been computed." << std::endl;
 		return true;
 	}
-
+	*/
 	//------------------------------------------------------------------------------------------
 
 	template <unsigned int O>
-	bool evolution<O>::excuteInnerLoopExplicitSSPRKStep3(
+	bool evolutionRBFB1<O>::excuteInnerLoopExplicitSSPRKStep3(
 		const int iStep,
 		cellFieldDataVector *cellFieldData)
 	{
@@ -731,7 +764,7 @@ namespace ScalarCfv
 	}
 
 	template <unsigned int O>
-	bool evolution<O>::excuteInnerLoopExplicitSSPRKStep4(
+	bool evolutionRBFB1<O>::excuteInnerLoopExplicitSSPRKStep4(
 		const int iStep,
 		cellFieldDataVector *cellFieldData)
 	{
@@ -774,7 +807,7 @@ namespace ScalarCfv
 	//------------------------------------------------------------------------------------------
 
 	template <unsigned int O>
-	bool evolution<O>::updateArtificalViscosity(
+	bool evolutionRBFB1<O>::updateArtificalViscosity(
 		const int iStep,
 		const real refValue,
 		cellFieldDataVector *cellFieldData)
@@ -790,7 +823,7 @@ namespace ScalarCfv
 			else
 			{
 				// diff base matrix i
-				tensor2D<real, NDOFS, NDOFS> matrixDiffBaseI;
+				tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 				// base moment i
 				tensor1D<real, NDOFS> momentI;
 				point p = (*iterCellFieldData).baryCenter;
@@ -800,12 +833,15 @@ namespace ScalarCfv
 				{
 					momentI[kk] = (*iterCellFieldData).baseMoment[kk];
 				}
-				CfvMath::getDiffBaseValue(
-					p,
+				assert(iterCellFieldData->cellType_ == Quadrilateral);
+				CfvMath::getDiffBaseValueRBFB1(
+					point(0.5, 0.5),
 					baryCenterI,
 					scaleI,
 					momentI,
-					matrixDiffBaseI);
+					matrixDiffBaseI,
+					*iterCellFieldData);
+
 				// real phi = (*iterCellFieldData).scalarVariableTn[0];
 				point dPhi;
 				dPhi.setZero();
@@ -839,7 +875,7 @@ namespace ScalarCfv
 	}
 
 	template <unsigned int O>
-	bool evolution<O>::getArtificialViscosityTerm(
+	bool evolutionRBFB1<O>::getArtificialViscosityTerm(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		faceFieldDataVector *faceFieldData,
@@ -858,6 +894,11 @@ namespace ScalarCfv
 		{
 			int cl = (*iterFaceFieldData).faceCellIndex[1];
 			int cr = (*iterFaceFieldData).faceCellIndex[2];
+			int ff;
+			for (ff = 1; ff < (*cellFieldData)[cl - 1].cellFaceNumber + 1; ff++)
+				if ((*cellFieldData)[cl - 1].cellFaceIndex[ff] == iterFaceFieldData->index)
+					break;
+			assert(ff < (*cellFieldData)[cl - 1].cellFaceNumber + 1);
 
 			point *uNV = new point[static_cast<int>((*iterFaceFieldData).fPG)];
 			real *fluxF = new real[static_cast<int>((*iterFaceFieldData).fPG)];
@@ -877,20 +918,23 @@ namespace ScalarCfv
 				// base moment i
 				tensor1D<real, NDOFS> momentI;
 				// base i
-				tensor2D<real, NDOFS, NDOFS> matrixDiffBaseI;
+				tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 				point baryCenterI = (*iterCell_).baryCenter;
 				point scaleI = (*iterCell_).lengthReference;
 				for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 				{
 					momentI[kk] = (*iterCell_).baseMoment[kk];
 				}
-				point p = (*iterFaceFieldData).gaussPairVector_[gg].p;
-				CfvMath::getDiffBaseValue(
-					p,
+				// point p = ;
+				point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, (*iterFaceFieldData).parametricValue[gg].first);
+				CfvMath::getDiffBaseValueRBFB1(
+					pparaml,
 					baryCenterI,
 					scaleI,
 					momentI,
-					matrixDiffBaseI);
+					matrixDiffBaseI,
+					*iterCell_);
+
 				qL = (*iterCell_).scalarVariableTn[0];
 				for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 				{
@@ -907,33 +951,41 @@ namespace ScalarCfv
 				SI = (*iterCell_).smoothIndicator;
 				if (cr > 0)
 				{
+					int ffr;
+					for (ffr = 1; ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1; ffr++)
+						if ((*cellFieldData)[cr - 1].cellFaceIndex[ffr] == iterFaceFieldData->index)
+							break;
+					assert(ffr < (*cellFieldData)[cr - 1].cellFaceNumber + 1);
 					// cell R
 					iterCell_ = cellFieldData->begin() + cr - 1;
 					// base moment j
 					tensor1D<real, NDOFS> momentJ;
 					// base j
-					tensor2D<real, NDOFS, NDOFS> matrixDiffBaseJ;
+					tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseJ;
 					point baryCenterJ = (*iterCell_).baryCenter;
 					point scaleJ = (*iterCell_).lengthReference;
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 					{
 						momentJ[kk] = (*iterCell_).baseMoment[kk];
 					}
-					p = (*iterFaceFieldData).gaussPairVector_[gg].p;
-					CfvMath::getDiffBaseValue(
-						p + (*iterFaceFieldData).sideOff, //���ڱ߽�����
+					// p = ;
+					point pparamr = CfvMath::GetFaceParam((*cellFieldData)[cr - 1].cellType_, ffr, (*iterFaceFieldData).parametricValue[gg].first, true);
+					CfvMath::getDiffBaseValueRBFB1(
+						pparamr, //���ڱ߽�����
 						baryCenterJ,
 						scaleJ,
 						momentJ,
-						matrixDiffBaseJ);
+						matrixDiffBaseJ,
+						*iterCell_);
 					qR = (*iterCell_).scalarVariableTn[0];
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 					{
 						qR += matrixDiffBaseJ[kk][0] * (*iterCell_).scalarVariableTn[kk];
 						dqR.x += matrixDiffBaseJ[kk][1] * (*iterCell_).scalarVariableTn[kk];
 						dqR.y += matrixDiffBaseJ[kk][2] * (*iterCell_).scalarVariableTn[kk];
-						d = (baryCenterJ - baryCenterI).length();
+
 					}
+					d = (baryCenterJ - baryCenterI).length();
 					omegaR = (*iterCell_).volume;
 					dq = 0.5 * (dqL + dqR);
 					qnR = getInnerProduct(dqR, uNV[gg]);
@@ -1024,7 +1076,7 @@ namespace ScalarCfv
 	}
 
 	template <unsigned int O>
-	bool evolution<O>::applyBoundaryLimiter( // time marching order 4
+	bool evolutionRBFB1<O>::applyBoundaryLimiter( // time marching order 4
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData)
 	{

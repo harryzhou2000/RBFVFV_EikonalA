@@ -81,6 +81,12 @@ namespace ScalarCfv
 			fileIn >> (*iterNode).nodePhysical.x;
 			fileIn >> (*iterNode).nodePhysical.y;
 			(*iterNode).nodePhysical = (1.0 / parameter_->unit) * (*iterNode).nodePhysical;
+			auto x = (*iterNode).nodePhysical.x, y = (*iterNode).nodePhysical.y;
+
+			// DEBUG: rotate the grid 
+			real t = std::acos(-1) / 4.0;
+			(*iterNode).nodePhysical.x = std::cos(t) * x + std::sin(t) * y;
+			(*iterNode).nodePhysical.y = -std::sin(t) * x + std::cos(t) * y;
 			++ii;
 		}
 		std::cout << "	node coordinate has been read." << std::endl;

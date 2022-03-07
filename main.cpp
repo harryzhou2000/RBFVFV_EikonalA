@@ -25,12 +25,17 @@ int main(int argc, char **argv)
 
 	ScalarCfv::cellFieldDataVector cellFieldData;
 	ScalarCfv::faceFieldDataVector faceFieldData;
-#ifdef USE_RBFA1
+#if defined USE_RBFA1
+	ScalarCfv::reconstructionRBFA1<rO> reconstruction;
+	ScalarCfv::evolutionRBFA1<rO> evolution;
+#elif defined USE_RBFB1
 	ScalarCfv::reconstructionRBFB1<rO> reconstruction;
+	ScalarCfv::evolutionRBFB1<rO> evolution;
 #else
 	ScalarCfv::reconstruction<rO> reconstruction;
-#endif
 	ScalarCfv::evolution<rO> evolution;
+#endif
+	
 
 	ScalarCfv::fieldsolver fieldSolver(
 		&parameter,

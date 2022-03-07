@@ -1194,10 +1194,18 @@ namespace ScalarCfv
 			exit(1);
 		}
 		std::cout << "	exporting sln in Tecplot format, to file : " << fileName << "..." << std::endl;
+
+#ifndef USE_RBFB1_N
 		fileOut << "VARIABLES = \"x\", \"y\", \"sln\", \"smooth\", \"dx\", \"dy\"\n";
 		fileOut << "ZONE N =" << parameter_->nodeNumber << ","
 				<< "E=" << parameter_->cellNumber << ","
 				<< "VARLOCATION=([1-2]=NODAL,[3-6]=CELLCENTERED)" << std::endl;
+#else
+		fileOut << "VARIABLES = \"x\", \"y\", \"sln\", \"smooth\", \"dx\", \"dy\"\n";
+		fileOut << "ZONE N =" << parameter_->nodeNumber << ","
+				<< "E=" << parameter_->cellNumber << ","
+				<< "VARLOCATION=([1-3]=NODAL,[4-6]=CELLCENTERED)" << std::endl;
+#endif
 		fileOut << ", "
 				<< "DATAPACKING=BLOCK, ZONETYPE=FEQUADRILATERAL" << std::endl;
 		fileOut << std::setprecision(15);
@@ -1218,6 +1226,9 @@ namespace ScalarCfv
 		}
 		fileOut << std::endl;
 		cellFieldDataVector::iterator iterCell;
+
+		std::vector<real> nodeSln( node->size(), 0.0);
+		std::vector<real> nodeCount(node->size(), 0.0);
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			// base moment i
@@ -1231,23 +1242,100 @@ namespace ScalarCfv
 			{
 				momentI[kk] = (*iterCell).baseMoment[kk];
 			}
+
+#ifndef USE_RBFB1_N
 			CfvMath::getDiffBaseValue(
 				p,
 				baryCenterI,
 				scaleI,
 				momentI,
 				matrixDiffBaseI);
+#else
+			assert(iterCell->cellType_ == Quadrilateral);
+			CfvMath::getDiffBaseValueRBFB1(
+				point(0.5, 0.5),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+
+			CfvMath::getDiffBaseValueRBFB1(
+				point(0, 0),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+			nodeCount[iterCell->cellNode[1].first - 1] += 1;
+			nodeSln[iterCell->cellNode[1].first - 1] += (*iterCell).scalarVariableTn[0];
+			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+			{
+				nodeSln[iterCell->cellNode[1].first - 1] += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
+			}
+
+			CfvMath::getDiffBaseValueRBFB1(
+				point(0, 1),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+			nodeCount[iterCell->cellNode[2].first - 1] += 1;
+			nodeSln[iterCell->cellNode[2].first - 1] += (*iterCell).scalarVariableTn[0];
+			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+			{
+				nodeSln[iterCell->cellNode[2].first - 1] += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
+			}
+
+			CfvMath::getDiffBaseValueRBFB1(
+				point(1, 0),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+			nodeCount[iterCell->cellNode[3].first - 1] += 1;
+			nodeSln[iterCell->cellNode[3].first - 1] += (*iterCell).scalarVariableTn[0];
+			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+			{
+				nodeSln[iterCell->cellNode[3].first - 1] += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
+			}
+
+			CfvMath::getDiffBaseValueRBFB1(
+				point(1, 1),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+			nodeCount[iterCell->cellNode[4].first - 1] += 1;
+			nodeSln[iterCell->cellNode[4].first - 1] += (*iterCell).scalarVariableTn[0];
+			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+			{
+				nodeSln[iterCell->cellNode[4].first - 1] += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
+			}
+#endif
 
 			real f = (*iterCell).scalarVariableTn[0];
 			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 			{
 				f += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
 			}
-
+#ifndef USE_RBFB1_N
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
 				fileOut << std::endl;
+#endif
 		}
+#ifdef USE_RBFB1_N
+		for (int i = 0; i < nodeSln.size(); i++)
+		{
+			fileOut << nodeSln[i] / nodeCount[i] << "\t";
+			if (((*iterCell).index % lineControl) == 0)
+				fileOut << std::endl;
+		}
+#endif
 		fileOut << std::endl;
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
@@ -1263,12 +1351,23 @@ namespace ScalarCfv
 			{
 				momentI[kk] = (*iterCell).baseMoment[kk];
 			}
+#ifndef USE_RBFB1_N
 			CfvMath::getDiffBaseValue(
 				p,
 				baryCenterI,
 				scaleI,
 				momentI,
 				matrixDiffBaseI);
+#else
+			assert(iterCell->cellType_ == Quadrilateral);
+			CfvMath::getDiffBaseValueRBFB1(
+				point(0.5, 0.5),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+#endif
 
 			point dPhi;
 			dPhi.setZero();
@@ -1303,12 +1402,23 @@ namespace ScalarCfv
 			{
 				momentI[kk] = (*iterCell).baseMoment[kk];
 			}
+#ifndef USE_RBFB1_N
 			CfvMath::getDiffBaseValue(
 				p,
 				baryCenterI,
 				scaleI,
 				momentI,
 				matrixDiffBaseI);
+#else
+			assert(iterCell->cellType_ == Quadrilateral);
+			CfvMath::getDiffBaseValueRBFB1(
+				point(0.5, 0.5),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+#endif
 
 			real dfdx = 0.0;
 			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
@@ -1335,12 +1445,24 @@ namespace ScalarCfv
 			{
 				momentI[kk] = (*iterCell).baseMoment[kk];
 			}
+#ifndef USE_RBFB1_N
 			CfvMath::getDiffBaseValue(
 				p,
 				baryCenterI,
 				scaleI,
 				momentI,
 				matrixDiffBaseI);
+#else
+			assert(iterCell->cellType_ == Quadrilateral);
+			CfvMath::getDiffBaseValueRBFB1(
+				point(0.5, 0.5),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+
+#endif
 
 			real dfdy = 0.0;
 			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)

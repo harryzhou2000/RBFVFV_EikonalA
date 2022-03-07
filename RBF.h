@@ -48,6 +48,13 @@ namespace RBF
         return 1.0 / (c2 * std::pow(rr2 / c2 + 1, 1.5));
     }
 
+    ScalarCfv::real MQ3(ScalarCfv::real rr, ScalarCfv::real c)
+    {
+        auto rr2 = rr * rr;
+        auto c2 = c * c;
+        return -3.0 * rr / (c2*c2 * std::pow(rr2 / c2 + 1, 2.5));
+    }
+
     ScalarCfv::real PHSpline3P0(ScalarCfv::real rr, ScalarCfv::real c)
     {
         auto rdc = rr / c;
@@ -78,7 +85,7 @@ namespace RBF
         if (rdc <= eps)
             return 0.0;
         return (rdc) / (c * c * c) * (26 + 24 * std::log(rdc));
-    }
+    }   
 
     // auto F0 = Gaussian0;
     // auto F1 = Gaussian1;

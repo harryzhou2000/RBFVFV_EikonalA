@@ -41,7 +41,11 @@ namespace ScalarCfv
 		faceGaussDataVector *faceGaussData_;
 		evolution<rO> *evolution_;
 		reconstruction<rO> *reconstruction_;
+		// const static unsigned int NDOFS = (rO + 2) * (rO + 1) / 2 + 1;
+		// const static unsigned int NDIFFS = (rO + 2 + 1) * (rO + 1 + 1) / 2;
+
 		const static unsigned int NDOFS = (rO + 2) * (rO + 1) / 2;
+		const static unsigned int NDIFFS = (rO + 2) * (rO + 1) / 2;
 
 	public:
 		virtual bool allocateArray();

@@ -4,11 +4,14 @@
 #include <assert.h>
 
 // #define USE_RBFA1
-#define TRIAL
+#define USE_RBFB1
+
+
+// #define TRIAL
 // #define DEBUG_RBFB
 // #define USE_RBF
 
-#define rO 1 //reconstruction polynomal order {1,2,3}
+#define rO 2 //reconstruction polynomal order {1,2,3}
 #define fO 5 //face integral order {1,3,5}
 #define vO 3 //volume integral order {1,2,3}
 #define mO 1 //mesh order {1,2}
@@ -19,7 +22,8 @@
 #define orientFlagG -1
 #define orientFlagF 1
 //-----------------------
-#define IF_RESTRICT_RADIUS
+// #define IF_RESTRICT_RADIUS
+
 namespace ScalarCfv
 {
 	enum boundaryType{

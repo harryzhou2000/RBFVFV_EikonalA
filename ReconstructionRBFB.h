@@ -19,9 +19,11 @@ namespace ScalarCfv
 		reconstructionRBFB1(){};
 		~reconstructionRBFB1(){};
 
-		const static unsigned int NDOFS = (O + 2) * (O + 1) / 2 + 1;
-		// const static unsigned int NDIFFS = (O + 2) * (O + 1) / 2;
-		const static unsigned int NDIFFS = (O + 1 + 2) * (O + 1 + 1) / 2;
+		// const static unsigned int NDOFS = (O + 2) * (O + 1) / 2 + 1;
+		// const static unsigned int NDIFFS = (O + 1 + 2) * (O + 1 + 1) / 2;
+
+		const static unsigned int NDOFS = (O + 2) * (O + 1) / 2;
+		const static unsigned int NDIFFS = (O + 2) * (O + 1) / 2;
 
 	public:
 		bool initBaseMomentAndRelaxFactor(
@@ -30,11 +32,11 @@ namespace ScalarCfv
 			cellGaussDataVector *cellGaussData,
 			GaussIntegralCellO1Grid<vO> *gaussIntegralCell) override;
 
-		bool initBaseMomentAndRelaxFactor(
-			parameter *parameter,
-			cellFieldDataVector *cellFieldData,
-			cellGaussDataVector *cellGaussData,
-			GaussIntegralCellO2Grid<vO> *gaussIntegralCell) override;
+		// bool initBaseMomentAndRelaxFactor(
+		// 	parameter *parameter,
+		// 	cellFieldDataVector *cellFieldData,
+		// 	cellGaussDataVector *cellGaussData,
+		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell) override;
 
 		bool initFaceWeight(
 			parameter *parameter,
@@ -214,112 +216,113 @@ namespace ScalarCfv
 		return true;
 	}
 
-	template <unsigned int O>
-	bool reconstructionRBFB1<O>::initBaseMomentAndRelaxFactor(
-		parameter *parameter,
-		cellFieldDataVector *cellFieldData,
-		cellGaussDataVector *cellGaussData,
-		GaussIntegralCellO2Grid<vO> *gaussIntegralCell)
-	{
-		std::cout << "initializing base moment and relax factor..." << std::endl;
-
-		// std::cout << "===================================" << std::endl;
-
-		cellFieldDataVector::iterator iterCellFieldData;
-		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+	/*
+		template <unsigned int O>
+		bool reconstructionRBFB1<O>::initBaseMomentAndRelaxFactor(
+			parameter *parameter,
+			cellFieldDataVector *cellFieldData,
+			cellGaussDataVector *cellGaussData,
+			GaussIntegralCellO2Grid<vO> *gaussIntegralCell)
 		{
-			// relax factor
-			if ((*iterCellFieldData).boundaryCellType_ == InnerCell)
+			std::cout << "initializing base moment and relax factor..." << std::endl;
+
+			// std::cout << "===================================" << std::endl;
+
+			cellFieldDataVector::iterator iterCellFieldData;
+			for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
 			{
-				(*iterCellFieldData).relaxFactor = 1.0;
-				(*iterCellFieldData).relaxFactorCR = 1.0;
-			}
-			else
-			{
-				(*iterCellFieldData).relaxFactor = 1.0;
-				(*iterCellFieldData).relaxFactorCR = 1.0;
-			}
-
-			// base momment
-			tensor1D<real, NDOFS> *phi = new tensor1D<real, NDOFS>[static_cast<int>((*iterCellFieldData).PG)];
-			//------------------------------------------
-			//|phi_1(GP1) phi_2(GP1) phi_3(GP1) ...
-			//------------------------------------------
-			//|phi_1(GP2) phi_2(GP2) phi_3(GP2) ...
-			//------------------------------------------
-			//|phi_1(GP3) phi_2(GP3) phi_3(GP3) ...
-			//------------------------------------------
-
-			// get the function values at Gaussian points
-			for (int ii = 0; ii < static_cast<int>((*iterCellFieldData).PG); ++ii)
-			{
-				tensor1D<real, NDOFS> phiG;
-
-				//	std::cout << "------------------------" << std::endl;
-				//	std::cout << "PG: " << ii << std::endl;
-				//	std::cout << (*iterCellFieldData).gaussPairVector_[1].p.x << "\t" << (*iterCellFieldData).gaussPairVector_[1].p.y
-				//		<< "\t" << (*iterCellFieldData).gaussPairVector_[9].p.x << "\t" << (*iterCellFieldData).gaussPairVector_[9].p.y << std::endl;
-				//	std::cout << (*iterCellFieldData).baryCenter.x << "\t" << (*iterCellFieldData).baryCenter.y << std::endl;
-				//	std::cout << (*iterCellFieldData).lengthReference.x << "\t" << (*iterCellFieldData).lengthReference.y << std::endl;
-				//	std::cout << phi[ii][4] << "\t" << phi[ii][5] << "\t" << phi[ii][6] << std::endl;
-				//	std::cout << phi[ii][7] << "\t" << phi[ii][8] << "\t" << phi[ii][9] << std::endl;
-
-				CfvMath::getMomentRBFB1(
-					(*iterCellFieldData).parametricValue[ii].first,
-					(*iterCellFieldData).baryCenter,
-					(*iterCellFieldData).lengthReference,
-					phiG,
-					(*iterCellFieldData));
-				for (int jj = 1; jj < NDOFS; ++jj)
-				{							//ע�������ָ�귶Χ����20200315
-					phi[ii][jj] = phiG[jj]; // phi: first->Gauss points; second->base function
-				}
-
-				//	std::cout << "------------------------" << std::endl;
-				//	std::cout << "PG: " << ii << std::endl;
-				//	std::cout << phi[ii][1] << "\t" << phi[ii][1] << "\t" << phi[ii][3] << std::endl;
-				//	std::cout << phi[ii][4] << "\t" << phi[ii][5] << "\t" << phi[ii][6] << std::endl;
-				//	std::cout << phi[ii][7] << "\t" << phi[ii][8] << "\t" << phi[ii][9] << std::endl;
-			}
-
-			// system("pause");
-
-			// get gauss integral
-			for (int ii = 1; ii < NDOFS; ++ii)
-			{
-				real *f = new real[static_cast<int>((*iterCellFieldData).PG)];
-				// tensor1D<real, static_cast<int>((*iterCellFieldData).PG)> f;
-				for (int jj = 0; jj < static_cast<int>((*iterCellFieldData).PG); ++jj)
+				// relax factor
+				if ((*iterCellFieldData).boundaryCellType_ == InnerCell)
 				{
-					f[jj] = phi[jj][ii];
+					(*iterCellFieldData).relaxFactor = 1.0;
+					(*iterCellFieldData).relaxFactorCR = 1.0;
 				}
-				gaussIntegralCell->getIntegral(
-					f,
-					(*iterCellFieldData).index,
-					cellGaussData,
-					(*iterCellFieldData).baseMoment[ii]);
-				(*iterCellFieldData).baseMoment[ii] /= (*iterCellFieldData).volume;
-				delete[] f;
-				f = NULL;
-			}
-			delete[] phi;
-			phi = NULL;
-			if ((std::fabs((*iterCellFieldData).baseMoment[1]) + std::fabs((*iterCellFieldData).baseMoment[2])) > parameter->EPS)
-			{
-				// std::cout << "	error: first order x- and y-moment should be small." << std::endl;
-				// std::cout << (*iterCellFieldData).index << "\t"
-				//	<< (*iterCellFieldData).baseMoment[1] << "\t"
-				//	<< (*iterCellFieldData).baseMoment[2] << std::endl;
-				// exit(1);
-				// (*iterCellFieldData).baseMoment[1] = 0.0;
-				// (*iterCellFieldData).baseMoment[2] = 0.0;
-				// WARNING: DO NOT APPLY IN PARAMETRIC SCHEME
-			}
-		}
-		std::cout << " ..base moment and relax factor have been initialized." << std::endl;
-		return true;
-	}
+				else
+				{
+					(*iterCellFieldData).relaxFactor = 0.5;
+					(*iterCellFieldData).relaxFactorCR = 0.5;
+				}
 
+				// base momment
+				tensor1D<real, NDOFS> *phi = new tensor1D<real, NDOFS>[static_cast<int>((*iterCellFieldData).PG)];
+				//------------------------------------------
+				//|phi_1(GP1) phi_2(GP1) phi_3(GP1) ...
+				//------------------------------------------
+				//|phi_1(GP2) phi_2(GP2) phi_3(GP2) ...
+				//------------------------------------------
+				//|phi_1(GP3) phi_2(GP3) phi_3(GP3) ...
+				//------------------------------------------
+
+				// get the function values at Gaussian points
+				for (int ii = 0; ii < static_cast<int>((*iterCellFieldData).PG); ++ii)
+				{
+					tensor1D<real, NDOFS> phiG;
+
+					//	std::cout << "------------------------" << std::endl;
+					//	std::cout << "PG: " << ii << std::endl;
+					//	std::cout << (*iterCellFieldData).gaussPairVector_[1].p.x << "\t" << (*iterCellFieldData).gaussPairVector_[1].p.y
+					//		<< "\t" << (*iterCellFieldData).gaussPairVector_[9].p.x << "\t" << (*iterCellFieldData).gaussPairVector_[9].p.y << std::endl;
+					//	std::cout << (*iterCellFieldData).baryCenter.x << "\t" << (*iterCellFieldData).baryCenter.y << std::endl;
+					//	std::cout << (*iterCellFieldData).lengthReference.x << "\t" << (*iterCellFieldData).lengthReference.y << std::endl;
+					//	std::cout << phi[ii][4] << "\t" << phi[ii][5] << "\t" << phi[ii][6] << std::endl;
+					//	std::cout << phi[ii][7] << "\t" << phi[ii][8] << "\t" << phi[ii][9] << std::endl;
+
+					CfvMath::getMomentRBFB1(
+						(*iterCellFieldData).parametricValue[ii].first,
+						(*iterCellFieldData).baryCenter,
+						(*iterCellFieldData).lengthReference,
+						phiG,
+						(*iterCellFieldData));
+					for (int jj = 1; jj < NDOFS; ++jj)
+					{							//ע�������ָ�귶Χ����20200315
+						phi[ii][jj] = phiG[jj]; // phi: first->Gauss points; second->base function
+					}
+
+					//	std::cout << "------------------------" << std::endl;
+					//	std::cout << "PG: " << ii << std::endl;
+					//	std::cout << phi[ii][1] << "\t" << phi[ii][1] << "\t" << phi[ii][3] << std::endl;
+					//	std::cout << phi[ii][4] << "\t" << phi[ii][5] << "\t" << phi[ii][6] << std::endl;
+					//	std::cout << phi[ii][7] << "\t" << phi[ii][8] << "\t" << phi[ii][9] << std::endl;
+				}
+
+				// system("pause");
+
+				// get gauss integral
+				for (int ii = 1; ii < NDOFS; ++ii)
+				{
+					real *f = new real[static_cast<int>((*iterCellFieldData).PG)];
+					// tensor1D<real, static_cast<int>((*iterCellFieldData).PG)> f;
+					for (int jj = 0; jj < static_cast<int>((*iterCellFieldData).PG); ++jj)
+					{
+						f[jj] = phi[jj][ii];
+					}
+					gaussIntegralCell->getIntegral(
+						f,
+						(*iterCellFieldData).index,
+						cellGaussData,
+						(*iterCellFieldData).baseMoment[ii]);
+					(*iterCellFieldData).baseMoment[ii] /= (*iterCellFieldData).volume;
+					delete[] f;
+					f = NULL;
+				}
+				delete[] phi;
+				phi = NULL;
+				if ((std::fabs((*iterCellFieldData).baseMoment[1]) + std::fabs((*iterCellFieldData).baseMoment[2])) > parameter->EPS)
+				{
+					// std::cout << "	error: first order x- and y-moment should be small." << std::endl;
+					// std::cout << (*iterCellFieldData).index << "\t"
+					//	<< (*iterCellFieldData).baseMoment[1] << "\t"
+					//	<< (*iterCellFieldData).baseMoment[2] << std::endl;
+					// exit(1);
+					// (*iterCellFieldData).baseMoment[1] = 0.0;
+					// (*iterCellFieldData).baseMoment[2] = 0.0;
+					// WARNING: DO NOT APPLY IN PARAMETRIC SCHEME
+				}
+			}
+			std::cout << " ..base moment and relax factor have been initialized." << std::endl;
+			return true;
+		}
+	*/
 	//----------------------------------------------------------------------------------
 
 	template <unsigned int O>
@@ -362,6 +365,9 @@ namespace ScalarCfv
 				delta.x = std::fabs((baryCenterL - baryCenterR + (*iterFaceFieldData).sideOff).x);
 				delta.y = std::fabs((baryCenterL - baryCenterR + (*iterFaceFieldData).sideOff).y);
 
+				// for parametric
+				delta = -1.0 * (baryCenterL - baryCenterR + (*iterFaceFieldData).sideOff);
+
 				refLR = 0.5 * (omegaL + omegaR) / (*iterFaceFieldData).area;
 				Omega = 0.5 * (omegaL + omegaR);
 				for (int ii = 0; ii < static_cast<int>((*iterFaceFieldData).NDOFS); ++ii)
@@ -393,6 +399,9 @@ namespace ScalarCfv
 				delta.x = std::fabs((baryCenterL - midPoint).x);
 				delta.y = std::fabs((baryCenterL - midPoint).y);
 
+				// for parametric
+				delta = midPoint - baryCenterL;
+
 				w[0] = 1.0;
 				refLR = omegaL / (*iterFaceFieldData).area;
 			}
@@ -408,6 +417,9 @@ namespace ScalarCfv
 				Omega = omegaL;
 				delta.x = std::fabs((baryCenterL - midPoint).x);
 				delta.y = std::fabs((baryCenterL - midPoint).y);
+
+				// for parametric
+				delta = midPoint - baryCenterL;
 
 				w[0] = 1.0;
 				refLR = omegaL / (*iterFaceFieldData).area;
@@ -431,6 +443,9 @@ namespace ScalarCfv
 				delta.x = 2.0 * std::fabs((normalProjection * unitNormalVector).x);
 				delta.y = 2.0 * std::fabs((normalProjection * unitNormalVector).y);
 
+				// for parametric
+				delta = 2 * (midPoint - baryCenterL);
+
 				w[0] = 1.0;
 				w[1] = 1.0;
 				w[2] = 1.0;
@@ -449,6 +464,11 @@ namespace ScalarCfv
 			real dy = delta.y;
 			real alpha = 1.0;
 
+			w[0] *= 2.0;
+			w[1] *= 2.0;
+			w[2] *= 2.0;
+
+
 			for (int ii = 0; ii < static_cast<int>((*iterFaceFieldData).NDOFS); ++ii)
 			{ // 0: for b_vec
 				int m = CfvMath::mMapping[ii];
@@ -458,6 +478,9 @@ namespace ScalarCfv
 
 				(*iterFaceFieldData).faceWeightVF[ii] =
 					w[ii] * (*iterFaceFieldData).weightVF * std::pow(dx, 2 * m) * std::pow(dy, 2 * n) * std::pow(Cm, 2) / std::pow(Pmn, 2);
+				// for parametric
+				(*iterFaceFieldData).faceWeightVF[ii] =
+					w[ii] * (*iterFaceFieldData).weightVF * std::pow(dx, 1 * m) * std::pow(dy, 1 * n) * std::pow(Cm, 1) / std::pow(Pmn, 1);
 			}
 		}
 		std::cout << " ..face weight has been initialized." << std::endl;
@@ -590,6 +613,7 @@ namespace ScalarCfv
 #ifdef TRIAL
 						std::cout << "LR" << CfvMath::getPoint(pparaml, (*cellFieldData)[cl - 1]) << CfvMath::getPoint(pparamr, (*cellFieldData)[cr - 1]) << std::endl;
 #endif
+						assert(CfvMath::getPoint(pparaml, (*cellFieldData)[cl - 1]).x == CfvMath::getPoint(pparamr, (*cellFieldData)[cr - 1]).x);
 						CfvMath::getDiffBaseValueRBFB1(
 							pparaml,
 							baryCenterI,
@@ -619,24 +643,16 @@ namespace ScalarCfv
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						// matrix
-						for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-						{
-							for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-							{
-								fII[gg][ll][rr] = 0.0;
-								fIJ[gg][ll][rr] = 0.0;
-								// mapping col can be 0, but row cannot be 0
-								for (int kk = 0; kk < static_cast<int>(NDIFFS); ++kk)
-								{
-									fII[gg][ll][rr] += (*iterFaceFieldData_).faceWeightVF[kk] * matrixDiffBaseI[ll][kk] * matrixDiffBaseI[rr][kk];
-									fIJ[gg][ll][rr] += (*iterFaceFieldData_).faceWeightVF[kk] * matrixDiffBaseI[ll][kk] * matrixDiffBaseJ[rr][kk];
-								}
-							}
-						}
+						CfvMath::VVMatConjProd2DDiffCombine(matrixDiffBaseI, matrixDiffBaseI, fII[gg], iterFaceFieldData_->faceWeightVF,
+															1, NDOFS, 0, NDIFFS, 1, NDOFS);
+						CfvMath::VVMatConjProd2DDiffCombine(matrixDiffBaseI, matrixDiffBaseJ, fIJ[gg], iterFaceFieldData_->faceWeightVF,
+															1, NDOFS, 0, NDIFFS, 1, NDOFS);
 						// vector
 						for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 						{
-							fI[gg][ll] = (*iterFaceFieldData_).faceWeightVF[0] * matrixDiffBaseI[ll][0];
+							// fI[gg][ll] = (*iterFaceFieldData_).faceWeightVF[0] * matrixDiffBaseI[ll][0];
+							//  parametric
+							fI[gg][ll] = std::pow((*iterFaceFieldData_).faceWeightVF[0], 2) * matrixDiffBaseI[ll][0];
 						}
 					}
 					// get the face Gauss point for coefficient matrix. integral along the interface between cell i and cell j
@@ -722,14 +738,8 @@ namespace ScalarCfv
 					}
 					// assign the matrix and vector with respect to each face
 					iterCellFieldData_ = cellFieldData->begin() + cl - 1;
-					for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-					{
-						for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-						{
-							(*iterCellFieldData_).matrixBij[cc][ll][rr] = Bij[ll][rr];
-						}
-						(*iterCellFieldData_).vectorbij[cc][ll] = bi[ll];
-					}
+					CfvMath::VVVecCopy(bi, iterCellFieldData_->vectorbij[cc], 1, NDOFS);
+					CfvMath::VVMatCopy(Bij, iterCellFieldData_->matrixBij[cc], 1, NDOFS, 1, NDOFS);
 					delete[] fII;
 					delete[] fIJ;
 					delete[] fI;
@@ -770,18 +780,8 @@ namespace ScalarCfv
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						// matrix
-						for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-						{
-							for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-							{
-								fII[gg][ll][rr] = 0.0;
-								// mapping
-								for (int kk = 0; kk < static_cast<int>(NDIFFS); ++kk)
-								{
-									fII[gg][ll][rr] += (*iterFaceFieldData_).faceWeightVF[kk] * matrixDiffBaseI[ll][kk] * matrixDiffBaseI[rr][kk];
-								}
-							}
-						}
+						CfvMath::VVMatConjProd2DDiffCombine(matrixDiffBaseI, matrixDiffBaseI, fII[gg], iterFaceFieldData_->faceWeightVF,
+															1, NDOFS, 0, NDIFFS, 1, NDOFS);
 					}
 					// get the face Gauss point for coefficient matrix. integral along the interface between cell i and cell j
 					iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -851,18 +851,8 @@ namespace ScalarCfv
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						// matrix
-						for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-						{
-							for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-							{
-								fII[gg][ll][rr] = 0.0;
-								// mapping
-								for (int kk = 0; kk < static_cast<int>(NDIFFS); ++kk)
-								{
-									fII[gg][ll][rr] += (*iterFaceFieldData_).faceWeightVF[kk] * matrixDiffBaseI[ll][kk] * matrixDiffBaseI[rr][kk];
-								}
-							}
-						}
+						CfvMath::VVMatConjProd2DDiffCombine(matrixDiffBaseI, matrixDiffBaseI, fII[gg], iterFaceFieldData_->faceWeightVF,
+															1, NDOFS, 0, NDIFFS, 1, NDOFS);
 					}
 					// get the face Gauss point for coefficient matrix. integral along the interface between cell i and cell j
 					iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -932,18 +922,8 @@ namespace ScalarCfv
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 						// matrix
-						for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-						{
-							for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-							{
-								fII[gg][ll][rr] = 0.0;
-								// mapping
-								for (int kk = 0; kk < static_cast<int>(NDIFFS); ++kk)
-								{
-									fII[gg][ll][rr] += (*iterFaceFieldData_).faceWeightVF[kk] * matrixDiffBaseI[ll][kk] * matrixDiffBaseI[rr][kk];
-								}
-							}
-						}
+						CfvMath::VVMatConjProd2DDiffCombine(matrixDiffBaseI, matrixDiffBaseI, fII[gg], iterFaceFieldData_->faceWeightVF,
+															1, NDOFS, 0, NDIFFS, 1, NDOFS);
 					}
 					// get the face Gauss point for coefficient matrix. integral along the interface between cell i and cell j
 					iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -993,49 +973,20 @@ namespace ScalarCfv
 			}
 			// iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 			// assign Aii
-			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-			{
-				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-				{
-					(*iterCellFieldData).matrixAii[ll][rr] = Aii[ll][rr];
-				}
-			}
+			CfvMath::VVMatCopy(Aii, iterCellFieldData->matrixAii, 1, NDOFS, 1, NDOFS);
 			tensor2D<real, NDOFS, NDOFS> inverseAii;
 			CfvMath::getMatrixGeneralInverse(Aii, inverseAii);
 			// assign inverse Aii
-			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-			{
-				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-				{
-					(*iterCellFieldData).matrixAiiInverse[ll][rr] = inverseAii[ll][rr];
-				}
-			}
+			CfvMath::VVMatCopy(inverseAii, iterCellFieldData->matrixAiiInverse, 1, NDOFS, 1, NDOFS);
 			// assign inverseAii*Bij & inverseAii*bi, for convenient calculation
 			for (int cc = 1; cc < (*iterCellFieldData).cellCellNumber + 1; ++cc)
 			{ // cellFaceNumber -> cellCellNumber
 				// assign inverseAii*Bij
-				for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-				{
-					for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-					{
-						(*iterCellFieldData).matrixAiiInverseBij[cc][ll][rr] = 0.0;
-						for (int pp = 1; pp < static_cast<int>(NDOFS); ++pp)
-						{
-							(*iterCellFieldData).matrixAiiInverseBij[cc][ll][rr] +=
-								inverseAii[ll][pp] * (*iterCellFieldData).matrixBij[cc][pp][rr];
-						}
-					}
-				}
 				// assign inverseAii*bi
-				for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-				{
-					(*iterCellFieldData).vectorAiiInversebij[cc][ll] = 0.0;
-					for (int pp = 1; pp < static_cast<int>(NDOFS); ++pp)
-					{
-						(*iterCellFieldData).vectorAiiInversebij[cc][ll] +=
-							inverseAii[ll][pp] * (*iterCellFieldData).vectorbij[cc][pp];
-					}
-				}
+				CfvMath::VVMatMat(inverseAii, iterCellFieldData->matrixBij[cc], iterCellFieldData->matrixAiiInverseBij[cc],
+								  1, NDOFS, 1, NDOFS, 1, NDOFS);
+				CfvMath::VVMatVec(inverseAii, iterCellFieldData->vectorbij[cc], iterCellFieldData->vectorAiiInversebij[cc],
+								  1, NDOFS, 1, NDOFS);
 			}
 		}
 		std::cout << " ..reconstruction matrix and vector has been initialized." << std::endl;
@@ -1706,27 +1657,17 @@ namespace ScalarCfv
 				{
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
-					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj)
-					{
-						real sumLocal = 0.0;
-						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
-						{
-							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii][jj][kk] * (*iterCellFieldData_).scalarVariableTn[kk];
-						}
-						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal; //+ means sum of neighbour cells
-					}
+					CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverseBij[ii], iterCellFieldData_->scalarVariableTn, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
+									  1, NDOFS, 1, NDOFS, false);
 				}
 				// deal with bi
 				for (int ii = 1; ii < (*iterCellFieldData).cellCellNumber + 1; ++ii)
 				{
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
-					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj)
-					{
-						real sumLocal = (*iterCellFieldData).vectorAiiInversebij[ii][jj] *
-										((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
-						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal; //+ means sum of neighbour cells
-					}
+					CfvMath::VVVecAdd(iterCellFieldData->vectorAiiInversebij[ii], iterCellFieldData->scalarVariableTn,
+									  iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]),
+									  1, NDOFS);
 				}
 			}
 			else
@@ -1771,7 +1712,8 @@ namespace ScalarCfv
 							// get the function values at Gauss points
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 							{
-								fI[gg][ll] = (*iterFaceFieldData_).faceWeightVF[0] * matrixDiffBaseI[ll][0] * (uBV - uI);
+								// parametric
+								fI[gg][ll] = std::pow((*iterFaceFieldData_).faceWeightVF[0], 2) * matrixDiffBaseI[ll][0] * (uBV - uI);
 							}
 
 							//	//--20200513
@@ -1836,7 +1778,8 @@ namespace ScalarCfv
 							// get the function values at Gauss points
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 							{
-								fI[gg][ll] = (*iterFaceFieldData_).faceWeightVF[0] * matrixDiffBaseI[ll][0] * (uBV - uI);
+								// parametric
+								fI[gg][ll] = std::pow((*iterFaceFieldData_).faceWeightVF[0], 2) * matrixDiffBaseI[ll][0] * (uBV - uI);
 							}
 
 							////--20200513
@@ -1859,11 +1802,13 @@ namespace ScalarCfv
 							duBVdy = duBVdy;
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 							{
-								fI[gg][ll] += (*iterFaceFieldData_).faceWeightVF[1] * matrixDiffBaseI[ll][1] * duBVdx;
+								// parametric
+								fI[gg][ll] += std::pow((*iterFaceFieldData_).faceWeightVF[1], 2) * matrixDiffBaseI[ll][1] * duBVdx;
 							}
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 							{
-								fI[gg][ll] += (*iterFaceFieldData_).faceWeightVF[2] * matrixDiffBaseI[ll][2] * duBVdy;
+								// parametric
+								fI[gg][ll] += std::pow((*iterFaceFieldData_).faceWeightVF[2], 2) * matrixDiffBaseI[ll][2] * duBVdy;
 							}
 
 							//
@@ -1904,7 +1849,8 @@ namespace ScalarCfv
 							// get the function values at Gauss points
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 							{
-								fI[gg][ll] = (*iterFaceFieldData_).faceWeightVF[0] * matrixDiffBaseI[ll][0] * (uBV - uI);
+								// parametric
+								fI[gg][ll] = std::pow((*iterFaceFieldData_).faceWeightVF[0], 2) * matrixDiffBaseI[ll][0] * (uBV - uI);
 							}
 							// 1st order derivative correction
 							real duBVdx = 0.0;
@@ -1923,11 +1869,13 @@ namespace ScalarCfv
 							duBVdy = duBVdy - 2.0 * duBVdn * uNV.y;
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 							{
-								fI[gg][ll] += (*iterFaceFieldData_).faceWeightVF[1] * matrixDiffBaseI[ll][1] * duBVdx;
+								// parametric
+								fI[gg][ll] += std::pow((*iterFaceFieldData_).faceWeightVF[1], 2) * matrixDiffBaseI[ll][1] * duBVdx;
 							}
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 							{
-								fI[gg][ll] += (*iterFaceFieldData_).faceWeightVF[2] * matrixDiffBaseI[ll][2] * duBVdy;
+								// parametric
+								fI[gg][ll] += std::pow((*iterFaceFieldData_).faceWeightVF[2], 2) * matrixDiffBaseI[ll][2] * duBVdy;
 							}
 						}
 					}
@@ -1984,38 +1932,22 @@ namespace ScalarCfv
 				{
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
-					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj)
-					{
-						real sumLocal = 0.0;
-						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
-						{
-							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii][jj][kk] * (*iterCellFieldData_).scalarVariableTn[kk];
-						}
-						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
-					}
+
+					CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverseBij[ii], iterCellFieldData_->scalarVariableTn, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
+									  1, NDOFS, 1, NDOFS, false);
 				}
 				// deal with bi
 				for (int ii = 1; ii < (*iterCellFieldData).cellCellNumber + 1; ++ii)
 				{
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
-					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj)
-					{
-						real sumLocal = (*iterCellFieldData).vectorAiiInversebij[ii][jj] *
-										((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
-						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
-					}
+					CfvMath::VVVecAdd(iterCellFieldData->vectorAiiInversebij[ii], iterCellFieldData->scalarVariableTn,
+									  iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]),
+									  1, NDOFS);
 				}
 				// deal with boundary correction
-				for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj)
-				{
-					real sumLocal = 0.0;
-					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
-					{
-						sumLocal += (*iterCellFieldData).matrixAiiInverse[jj][kk] * vectorBoundaryCorrection[kk];
-					}
-					(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
-				}
+				CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverse, vectorBoundaryCorrection, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
+								  1, NDOFS, 1, NDOFS, false);
 			}
 		}
 		//		std::cout << " ..reconstruction has been completed." << std::endl;
@@ -2391,6 +2323,12 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
+						// CfvMath::getBaseValue(
+						// 	p,
+						// 	baryCenterI,
+						// 	scaleI,
+						// 	momentI,
+						// 	vectorBaseI);
 						CfvMath::getBaseValueRBFB1(
 							pparaml,
 							baryCenterI,
@@ -2403,7 +2341,8 @@ namespace ScalarCfv
 						{
 							for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
 							{
-								fII[gg][ll][rr] = (*iterFaceFieldData_).faceWeightVF[0] * vectorBaseI[ll] * vectorBaseI[rr];
+								//parametric
+								fII[gg][ll][rr] = std::pow((*iterFaceFieldData_).faceWeightVF[0],2) * vectorBaseI[ll] * vectorBaseI[rr];
 							}
 						}
 					}
@@ -2462,6 +2401,12 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
+						// CfvMath::getBaseValue(
+						// 	p,
+						// 	baryCenterI,
+						// 	scaleI,
+						// 	momentI,
+						// 	vectorBaseI);
 						CfvMath::getBaseValueRBFB1(
 							pparaml,
 							baryCenterI,
@@ -2477,7 +2422,8 @@ namespace ScalarCfv
 						{
 							for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
 							{
-								fII[gg][ll][rr] = (*iterFaceFieldData_).faceWeightVF[0] * vectorBaseI[ll] * vectorBaseI[rr];
+								// parametric
+								fII[gg][ll][rr] = std::pow((*iterFaceFieldData_).faceWeightVF[0],2) * vectorBaseI[ll] * vectorBaseI[rr];
 							}
 						}
 					}
@@ -2538,13 +2484,19 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
-						CfvMath::getBaseValueRBFB1(
-							pparaml,
+						CfvMath::getBaseValue(
+							p,
 							baryCenterI,
 							scaleI,
 							momentI,
-							vectorBaseI,
-							*iterCellFieldData_);
+							vectorBaseI);
+						// CfvMath::getBaseValue(
+						// 	pparaml,
+						// 	baryCenterI,
+						// 	scaleI,
+						// 	momentI,
+						// 	vectorBaseI,
+						// 	*iterCellFieldData_);
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
 						iterCellFieldData_ = cellFieldData->begin() + cl - 1;
@@ -2553,7 +2505,8 @@ namespace ScalarCfv
 						{
 							for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
 							{
-								fII[gg][ll][rr] = (*iterFaceFieldData_).faceWeightVF[0] * vectorBaseI[ll] * vectorBaseI[rr];
+								// parametric
+								fII[gg][ll][rr] = std::pow((*iterFaceFieldData_).faceWeightVF[0],2) * vectorBaseI[ll] * vectorBaseI[rr];
 							}
 						}
 					}
@@ -2614,6 +2567,12 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
+						// CfvMath::getBaseValueRBFB1(
+						// 	p,
+						// 	baryCenterI,
+						// 	scaleI,
+						// 	momentI,
+						// 	vectorBaseI);
 						CfvMath::getBaseValueRBFB1(
 							pparaml,
 							baryCenterI,
@@ -2629,7 +2588,8 @@ namespace ScalarCfv
 						{
 							for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
 							{
-								fII[gg][ll][rr] = (*iterFaceFieldData_).faceWeightVF[0] * vectorBaseI[ll] * vectorBaseI[rr];
+								// parametric
+								fII[gg][ll][rr] = std::pow((*iterFaceFieldData_).faceWeightVF[0],2) * vectorBaseI[ll] * vectorBaseI[rr];
 							}
 						}
 					}
@@ -2681,23 +2641,12 @@ namespace ScalarCfv
 			}
 			// iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 			// assign Aii
-			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-			{
-				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-				{
-					(*iterCellFieldData).matrixAiiCR[ll][rr] = Aii[ll][rr];
-				}
-			}
-			tensor2D<real, NDOFS, NDOFS> inverseAii;
+			CfvMath::VVMatCopy(Aii, iterCellFieldData->matrixAiiCR, 1, NDOFS, 1, NDOFS);
+			tensor2D<real, NDOFS, NDOFS>
+				inverseAii;
 			CfvMath::getMatrixGeneralInverse(Aii, inverseAii);
 			// assign inverse Aii
-			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
-			{
-				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr)
-				{
-					(*iterCellFieldData).matrixAiiInverseCR[ll][rr] = inverseAii[ll][rr];
-				}
-			}
+			CfvMath::VVMatCopy(inverseAii, iterCellFieldData->matrixAiiInverseCR, 1, NDOFS, 1, NDOFS);
 		}
 		//		std::cout << " ..CR reconstruction matrix and vector has been initialized." << std::endl;
 		return true;
@@ -3149,6 +3098,12 @@ namespace ScalarCfv
 					{
 						momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
+					// CfvMath::getDiffBaseValue(
+					// 	pMid,
+					// 	baryCenterI,
+					// 	scaleI,
+					// 	momentI,
+					// 	matrixDiffBaseI);
 					CfvMath::getDiffBaseValueRBFB1(
 						pparaml,
 						baryCenterI,
@@ -3175,6 +3130,12 @@ namespace ScalarCfv
 					{
 						momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
+					// CfvMath::getDiffBaseValue(
+					// 	pMid + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
+					// 	baryCenterJ,
+					// 	scaleJ,
+					// 	momentJ,
+					// 	matrixDiffBaseJ);
 					CfvMath::getDiffBaseValueRBFB1(
 						pparamr, //���ڱ߽�����
 						baryCenterJ,
@@ -3214,6 +3175,12 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
+						// CfvMath::getBaseValue(
+						// 	p,
+						// 	baryCenterI,
+						// 	scaleI,
+						// 	momentI,
+						// 	vectorBaseI);
 						CfvMath::getBaseValueRBFB1(
 							pparaml,
 							baryCenterI,
@@ -3238,6 +3205,12 @@ namespace ScalarCfv
 						{
 							momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
+						// CfvMath::getBaseValue(
+						// p + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
+						// baryCenterJ,
+						// scaleJ,
+						// momentJ,
+						// vectorBaseJ);
 						CfvMath::getBaseValueRBFB1(
 							pparamr, //���ڱ߽�����
 							baryCenterJ,
@@ -3263,7 +3236,7 @@ namespace ScalarCfv
 						real result;
 						for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData_).fPG); ++gg)
 						{
-							f[gg] = (0.5 * (1.0 + signLR) * fIL[gg] + 0.5 * (1.0 - signLR) * fIR[gg] - valueL) * fIBase[gg][ll] * (*iterFaceFieldData_).faceWeightVF[0];
+							f[gg] = (0.5 * (1.0 + signLR) * fIL[gg] + 0.5 * (1.0 - signLR) * fIR[gg] - valueL) * fIBase[gg][ll] * std::pow((*iterFaceFieldData_).faceWeightVF[0],2);
 							// integrated function value
 							weight[gg] = (*iterFaceFieldData_).parametricValue[gg].second;
 							cofJacobi[gg] = (*iterFaceFieldData_).gaussPairVector_[gg].JacobiCof;
@@ -3329,6 +3302,12 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
+							// CfvMath::getBaseValueRBFA1(
+							// 	p,
+							// 	baryCenterI,
+							// 	scaleI,
+							// 	momentI,
+							// 	vectorBaseI);
 							CfvMath::getBaseValueRBFB1(
 								pparaml,
 								baryCenterI,
@@ -3362,6 +3341,12 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
+							// CfvMath::getBaseValue(
+							// 	p,
+							// 	baryCenterI,
+							// 	scaleI,
+							// 	momentI,
+							// 	vectorBaseI);
 							CfvMath::getBaseValueRBFB1(
 								pparaml,
 								baryCenterI,
@@ -3395,6 +3380,12 @@ namespace ScalarCfv
 							{
 								momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 							}
+							// CfvMath::getBaseValue(
+							// 	p,
+							// 	baryCenterI,
+							// 	scaleI,
+							// 	momentI,
+							// 	vectorBaseI);
 							CfvMath::getBaseValueRBFB1(
 								pparaml,
 								baryCenterI,
@@ -3430,7 +3421,7 @@ namespace ScalarCfv
 						real result;
 						for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData_).fPG); ++gg)
 						{
-							f[gg] = (fIL[gg] - valueL) * fIBase[gg][ll] * (*iterFaceFieldData_).faceWeightVF[0];
+							f[gg] = (fIL[gg] - valueL) * fIBase[gg][ll] * std::pow((*iterFaceFieldData_).faceWeightVF[0],2);
 							// integrated function value
 							weight[gg] = (*iterFaceFieldData_).parametricValue[gg].second;
 							cofJacobi[gg] = (*iterFaceFieldData_).gaussPairVector_[gg].JacobiCof;
@@ -3503,6 +3494,12 @@ namespace ScalarCfv
 					{
 						momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
+					// CfvMath::getDiffBaseValue(
+					// 	pMid,
+					// 	baryCenterI,
+					// 	scaleI,
+					// 	momentI,
+					// 	matrixDiffBaseI);
 					CfvMath::getDiffBaseValueRBFB1(
 						pparaml,
 						baryCenterI,
@@ -3529,6 +3526,12 @@ namespace ScalarCfv
 					{
 						momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 					}
+					// CfvMath::getDiffBaseValue(
+					// 	pMid + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
+					// 	baryCenterJ,
+					// 	scaleJ,
+					// 	momentJ,
+					// 	matrixDiffBaseJ);
 					CfvMath::getDiffBaseValueRBFB1(
 						pparamr, //���ڱ߽�����
 						baryCenterJ,
@@ -3567,6 +3570,12 @@ namespace ScalarCfv
 						{
 							momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
+						// CfvMath::getBaseValueR(
+						// 	p,
+						// 	baryCenterI,
+						// 	scaleI,
+						// 	momentI,
+						// 	vectorBaseI);
 						CfvMath::getBaseValueRBFB1(
 							pparaml,
 							baryCenterI,
@@ -3592,6 +3601,12 @@ namespace ScalarCfv
 						{
 							momentJ[kk] = (*iterCellFieldData_).baseMoment[kk];
 						}
+						// CfvMath::getBaseValue(
+						// 	p + (*iterFaceFieldData_).sideOff, //���ڱ߽�����
+						// 	baryCenterJ,
+						// 	scaleJ,
+						// 	momentJ,
+						// 	vectorBaseJ);
 						CfvMath::getBaseValueRBFB1(
 							pparamr, //���ڱ߽�����
 							baryCenterJ,
@@ -3617,7 +3632,7 @@ namespace ScalarCfv
 						real result;
 						for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData_).fPG); ++gg)
 						{
-							f[gg] = (0.5 * (1.0 + signLR) * fIL[gg] + 0.5 * (1.0 - signLR) * fIR[gg] - valueL) * fIBase[gg][ll] * (*iterFaceFieldData_).faceWeightVF[0];
+							f[gg] = (0.5 * (1.0 + signLR) * fIL[gg] + 0.5 * (1.0 - signLR) * fIR[gg] - valueL) * fIBase[gg][ll] * std::pow((*iterFaceFieldData_).faceWeightVF[0],2);
 							// integrated function value
 							weight[gg] = (*iterFaceFieldData_).parametricValue[gg].second;
 							cofJacobi[gg] = (*iterFaceFieldData_).gaussPairVector_[gg].JacobiCof;
