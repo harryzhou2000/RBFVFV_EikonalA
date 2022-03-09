@@ -28,6 +28,14 @@ namespace RBF
         return (4 * rr2 * f0) / (c2 * c2) - (2 * f0) / c2;
     }
 
+    ScalarCfv::real Gaussian3(ScalarCfv::real rr, ScalarCfv::real c)
+    {
+        auto rr2 = rr * rr;
+        auto c2 = c * c;
+        auto f0 = exp(-rr2 / c2);
+        return (12 * rr * f0) / (c2 * c2) - (8 * rr * rr2 * f0) / (c2 * c2 * c2);
+    }
+
     ScalarCfv::real MQ0(ScalarCfv::real rr, ScalarCfv::real c)
     {
         auto rdc = rr / c;
@@ -52,7 +60,7 @@ namespace RBF
     {
         auto rr2 = rr * rr;
         auto c2 = c * c;
-        return -3.0 * rr / (c2*c2 * std::pow(rr2 / c2 + 1, 2.5));
+        return -3.0 * rr / (c2 * c2 * std::pow(rr2 / c2 + 1, 2.5));
     }
 
     ScalarCfv::real PHSpline3P0(ScalarCfv::real rr, ScalarCfv::real c)
@@ -85,18 +93,20 @@ namespace RBF
         if (rdc <= eps)
             return 0.0;
         return (rdc) / (c * c * c) * (26 + 24 * std::log(rdc));
-    }   
+    }
 
     // auto F0 = Gaussian0;
     // auto F1 = Gaussian1;
     // auto F2 = Gaussian2;
-    // auto F0 = MQ0;
-    // auto F1 = MQ1;
-    // auto F2 = MQ2;
-    auto F0 = PHSpline3P0;
-    auto F1 = PHSpline3P1;
-    auto F2 = PHSpline3P2;
-    auto F3 = PHSpline3P3;
+    // auto F3 = Gaussian3;
+    auto F0 = MQ0;
+    auto F1 = MQ1;
+    auto F2 = MQ2;
+    auto F3 = MQ3;
+    // auto F0 = PHSpline3P0;
+    // auto F1 = PHSpline3P1;
+    // auto F2 = PHSpline3P2;
+    // auto F3 = PHSpline3P3;
 
     typedef std::function<ScalarCfv::real(ScalarCfv::real, ScalarCfv::real)> functionRBF;
 
@@ -167,7 +177,6 @@ namespace RBF
         auto r2 = rr * rr;
         auto r4 = r2 * r2;
 
-
         if (rr < eps)
             return fRBF3(rr, c);
         return fRBF3(rr, c) * rirjrk / r3 + fRBF2(rr, c) * 3 * (r.x / r2 - rirjrk / r4) +
@@ -186,7 +195,6 @@ namespace RBF
         auto r2 = rr * rr;
         auto r4 = r2 * r2;
 
-
         if (rr < eps)
             return fRBF3(rr, c);
         return fRBF3(rr, c) * rirjrk / r3 + fRBF2(rr, c) * 3 * (r.y / r2 - rirjrk / r4) +
@@ -204,7 +212,6 @@ namespace RBF
         auto r3 = rr * rr * rr;
         auto r2 = rr * rr;
         auto r4 = r2 * r2;
-
 
         if (rr < eps)
             return 0.0;

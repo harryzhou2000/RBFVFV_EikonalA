@@ -84,9 +84,9 @@ namespace ScalarCfv
 			auto x = (*iterNode).nodePhysical.x, y = (*iterNode).nodePhysical.y;
 
 			// DEBUG: rotate the grid 
-			real t = std::acos(-1) / 4.0;
-			(*iterNode).nodePhysical.x = std::cos(t) * x + std::sin(t) * y;
-			(*iterNode).nodePhysical.y = -std::sin(t) * x + std::cos(t) * y;
+			real theta = 1.0 * std::acos(-1) / 4.0;
+			(*iterNode).nodePhysical.x = std::cos(theta) * x + std::sin(theta) * y;
+			(*iterNode).nodePhysical.y = -std::sin(theta) * x + std::cos(theta) * y;
 			++ii;
 		}
 		std::cout << "	node coordinate has been read." << std::endl;
@@ -1476,14 +1476,14 @@ namespace ScalarCfv
 		{
 			fileOut << (*iterNode).nodePhysical.x << "\t";
 			if (((*iterNode).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
 		fileOut << std::endl;
 		for (iterNode = node_->begin(); iterNode != node_->end(); ++iterNode)
 		{
 			fileOut << (*iterNode).nodePhysical.y << "\t";
 			if (((*iterNode).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
 		fileOut << std::endl;
 		cellVector::iterator iterCell;
@@ -1491,21 +1491,21 @@ namespace ScalarCfv
 		{
 			fileOut << (*iterCell).volume << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
 		fileOut << std::endl;
 		for (iterCell = cell_->begin(); iterCell != cell_->end(); ++iterCell)
 		{
 			fileOut << (*iterCell).baryCenter.x << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
 		fileOut << std::endl;
 		for (iterCell = cell_->begin(); iterCell != cell_->end(); ++iterCell)
 		{
 			fileOut << (*iterCell).baryCenter.y << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
 		fileOut << std::endl;
 

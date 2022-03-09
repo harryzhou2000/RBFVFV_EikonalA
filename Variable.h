@@ -8,20 +8,20 @@
 
 namespace ScalarCfv
 {
-	//template <unsigned int O>
-	//class variable
+	// template <unsigned int O>
+	// class variable
 	//{
-	//public:
+	// public:
 	//	variable() {};
 	//	~variable() {};
 	//	const static unsigned int NDOFS = (O + 2)*(O + 1) / 2 - 1;
-	//private:
+	// private:
 	//	real gama;
 	//	real Cp;
 	//	real Cv;
 	//	real relaxFactor;
 	//	real artificialViscousParameter;
-	//public:
+	// public:
 	//	std::vector<real> dT;
 	//	std::vector<real> smoothIndicator;
 	//	std::vector<real> artificialViscous;
@@ -35,13 +35,14 @@ namespace ScalarCfv
 	//	std::vector<tensor2D<real, NDOFS, NDOFS>> reconstructionMatrixPlusCR;
 	//	std::vector<tensor2D<real, NDOFS, NDOFS>> reconstructionMatrixCR;
 	//	//boundary ??
-	//};
+	// };
 
-	class cellFieldData : public cellGaussData{
+	class cellFieldData : public cellGaussData
+	{
 	public:
 		cellFieldData() : cellGaussData(){};
-		~cellFieldData() {};
-		//const static unsigned int NDOFS = (O + 2)*(O + 1) / 2; //°üº¬¾ùÖµÁË
+		~cellFieldData(){};
+		// const static unsigned int NDOFS = (O + 2)*(O + 1) / 2; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½
 
 	public:
 		unsigned int NDOFS;
@@ -60,65 +61,68 @@ namespace ScalarCfv
 		real smoothIndicator;
 		real artificialViscous;
 
-		//20200324
+		// 20200324
 		real lambdaCell;
 		real timeMarchingRHSTn;
 
-		//20200404
+		// 20200404
 		real phiFilter;
 
-		//for multistep method,
+		// for multistep method,
 		//[1] <-> the results from Tm
 		//[2] <-> the results from Tm + (1)
 		//[3] <-> the results from Tm + (2)
 		std::vector<real> timeMarchingRHSRK;
 
-
 		std::vector<real> baseMoment;
 
-		std::vector<real> scalarVariableTn; //current time step , inlcude the multistep time marching methods, Tn means the newest values
-		std::vector<real> scalarVariableTm; //previous time step 
+		std::vector<real> scalarVariableTn; // current time step , inlcude the multistep time marching methods, Tn means the newest values
+		std::vector<real> scalarVariableTm; // previous time step
 		std::vector<real> scalarVariableTnLimited;
 		std::vector<real> scalarVariableTnCR;
 		std::vector<real> scalarVariableTnCRLimited;
 		std::vector<real> deltaScalarVariableTn;
 		std::vector<real> deltaScalarVariableTm;
 
-
-		std::vector<std::vector<real> > vectorbij;
-		std::vector<std::vector<real> > vectorAiiInversebij;
-		std::vector<std::vector<real> > matrixAiiInverse;
-		std::vector<std::vector<real> > matrixAii;
-		std::vector<std::vector<std::vector<real> > > matrixBij;
-		std::vector<std::vector<std::vector<real> > > matrixAiiInverseBij;
-		std::vector<std::vector<real> > matrixAiiInverseCR;
-		std::vector<std::vector<real> > matrixAiiCR;
-		std::vector<std::vector<std::vector<real> > > matrixBijCR;//CRËÆºõ²»ÐèÒª
-		//std::vector<std::vector<real> > matrixAiInverseInverseCR;
-		//std::vector<std::vector<real> > matrixAiCR;
+		std::vector<std::vector<real>> vectorbij;
+		std::vector<std::vector<real>> vectorAiiInversebij;
+		std::vector<std::vector<real>> matrixAiiInverse;
+		std::vector<std::vector<real>> matrixAii;
+		std::vector<std::vector<std::vector<real>>> matrixBij;
+		std::vector<std::vector<std::vector<real>>> matrixAiiInverseBij;
+		std::vector<std::vector<real>> matrixAiiInverseCR;
+		std::vector<std::vector<real>> matrixAiiCR;
+		std::vector<std::vector<std::vector<real>>> matrixBijCR; // CRï¿½Æºï¿½ï¿½ï¿½ï¿½ï¿½Òª
+		// std::vector<std::vector<real> > matrixAiInverseInverseCR;
+		// std::vector<std::vector<real> > matrixAiCR;
 
 		std::vector<std::pair<point, real>> parametricValue;
+
+		std::vector<std::vector<std::vector<real>>> diffBaseValueData; // ad gauss points
+		std::vector<std::vector<real>> diffBaseValueDataBary;
 	};
 
 	typedef std::vector<cellFieldData> cellFieldDataVector;
 
-
-	class faceFieldData : public faceGaussData{
+	class faceFieldData : public faceGaussData
+	{
 	public:
-		faceFieldData() :faceGaussData(){};
-		~faceFieldData() {};
-		//unsigned int NDOFS = (O + 2)*(O + 1) / 2; //°üº¬¾ùÖµÁË
+		faceFieldData() : faceGaussData(){};
+		~faceFieldData(){};
+		// unsigned int NDOFS = (O + 2)*(O + 1) / 2; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½
 
 	public:
 		unsigned int NDOFS;
 		unsigned int fPG;
-		//tensor1D<NDOFS> flux;//??
-		//tensor1D<NDOFS> scalarVariableTm; //previous time step
+		// tensor1D<NDOFS> flux;//??
+		// tensor1D<NDOFS> scalarVariableTm; //previous time step
 		real weightVF;
 		std::vector<real> faceWeightVF;
-		//std::vector<real> flux;
+		// std::vector<real> flux;
 		real lambdaFace;
 
+		std::vector<std::vector<std::vector<std::vector<real>>>> diffBaseValueData;// at gaussian points
+		std::vector<std::vector<std::vector<real>>> diffBaseValueDataMid; 
 	};
 	typedef std::vector<faceFieldData> faceFieldDataVector;
 }

@@ -14,7 +14,7 @@
 
 namespace CfvMath
 {
-
+	const ScalarCfv::real crbf = 0.5;
 	// getMatrixGeneralInverse just operates with the right down (N-1,N-1) part of A
 	bool getMatrixGeneralInverse(
 		ScalarCfv::tensor2D<ScalarCfv::real, 3, 3> &A,
@@ -65,6 +65,13 @@ namespace CfvMath
 		ScalarCfv::point scale,		 // dummy
 		ScalarCfv::tensor1D<ScalarCfv::real, 4> &A,
 		ScalarCfv::cellFieldData &cell); // adding 1
+
+	bool getMomentRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A,
+		ScalarCfv::cellFieldData &cell); // adding 4
 
 	// rO=2
 	bool getMoment(
@@ -130,6 +137,21 @@ namespace CfvMath
 		ScalarCfv::tensor2D<ScalarCfv::real, 4, 6> &A,
 		ScalarCfv::cellFieldData &cell); // adding 1
 
+	bool getDiffBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 7, 6> &A,
+		ScalarCfv::cellFieldData &cell); // adding 4
+	bool getDiffBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 7, 3> &A,
+		ScalarCfv::cellFieldData &cell); // adding 4
+
 	// rO=2
 	bool getDiffBaseValue(
 		ScalarCfv::point p,
@@ -192,6 +214,14 @@ namespace CfvMath
 		ScalarCfv::tensor1D<ScalarCfv::real, 4> &moment,
 		ScalarCfv::tensor1D<ScalarCfv::real, 4> &A,
 		ScalarCfv::cellFieldData &cell); // adding 1
+	bool getBaseValueRBFB1(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
 	// rO=2
 	bool getBaseValue(
 		ScalarCfv::point p,
@@ -373,6 +403,7 @@ namespace CfvMath
 					C[i][k] += A[i][j] * B[k][j] * W[j];
 	}
 
+#ifndef RBFB1_GlobalPoly
 	// Cik = sum_j -- Aij WjWj Bkj with tensored diffs
 	template <class TA, class TB, class TC, class TW>
 	void VVMatConjProd2DDiffCombine(TA &A, TB &B, TC &C, TW &W,
@@ -398,8 +429,8 @@ namespace CfvMath
 						csumD += A[i][j] * B[k][j];
 						csumW += W[j] * W[j];
 					}
-					// C[i][k] += 0.5 * (csumA * csumB + csumD * csumW);
-					C[i][k] += csumA * csumB;
+					C[i][k] += 0.5 * (csumA * csumB + csumD * csumW);
+					// C[i][k] += csumA * csumB;
 					csumA = csumB = csumD = csumW = 0;
 					for (int j = 3; j < 6; j++)
 					{
@@ -408,6 +439,8 @@ namespace CfvMath
 						csumD += A[i][j] * B[k][j];
 						csumW += W[j] * W[j];
 					}
+					csumW -= W[4] * W[4] * 0.5;
+					csumD += A[i][4] * B[k][4];
 					C[i][k] += csumA * csumB;
 					// C[i][k] += 0.5 * (csumA * csumB + csumD * csumW);
 					// C[i][k] = 0.67 * C[i][k] + 0.33 * (A[i][3] + A[i][5]) * (B[k][3] + B[k][5]) * (W[3] + W[5]) * (W[3] + W[5]);
@@ -436,6 +469,21 @@ namespace CfvMath
 			assert(false);
 		}
 	}
+#else
+	template <class TA, class TB, class TC, class TW>
+	void VVMatConjProd2DDiffCombine(TA &A, TB &B, TC &C, TW &W,
+									int istart, int iend, int jstart, int jend, int kstart, int kend, bool clear = true)
+	{
+		if (clear)
+			for (int i = istart; i < iend; i++)
+				for (int k = kstart; k < kend; k++)
+					C[i][k] = 0.0;
+		for (int i = istart; i < iend; i++)
+			for (int j = jstart; j < jend; j++)
+				for (int k = kstart; k < kend; k++)
+					C[i][k] += A[i][j] * B[k][j] * W[j] * W[j];
+	}
+#endif
 
 }
 #endif

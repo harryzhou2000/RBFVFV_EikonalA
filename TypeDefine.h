@@ -6,15 +6,21 @@
 // #define USE_RBFA1
 #define USE_RBFB1
 
+#if defined USE_RBFB1
+// #define USE_RBFB1_N
+// #define RBFB1_GlobalPoly
+#endif
+
 
 // #define TRIAL
 // #define DEBUG_RBFB
 // #define USE_RBF
 
-#define rO 2 //reconstruction polynomal order {1,2,3}
-#define fO 5 //face integral order {1,3,5}
-#define vO 3 //volume integral order {1,2,3}
-#define mO 1 //mesh order {1,2}
+#define rO 2 // reconstruction polynomal order {1,2,3}
+#define fO 5 // face integral order {1,3,5}
+#define vO 3 // volume integral order {1,2,3}
+#define mO 1 // mesh order {1,2}
+
 //-----------------------
 #define O1mesh
 //#define O2mesh
@@ -26,7 +32,8 @@
 
 namespace ScalarCfv
 {
-	enum boundaryType{
+	enum boundaryType
+	{
 		Wall = -1,
 		FarField = -2,
 		Symmetric = -3,
@@ -34,7 +41,8 @@ namespace ScalarCfv
 		InFlow = -5,
 		Periodic = -10
 	};
-	enum boundaryCellType{
+	enum boundaryCellType
+	{
 		InnerCell,
 		WallCell,
 		FarFieldCell,
@@ -44,50 +52,62 @@ namespace ScalarCfv
 		PeriodicCell,
 		MixedCell
 	};
-	enum timeMarchType{
+	enum timeMarchType
+	{
 		EX_RK3 = 0,
 		EX_LUSGS = 1,
 		IM_LUSGS = 2
 	};
 
-	enum cellType{
+	enum cellType
+	{
 		Triangle = 3,
 		Quadrilateral = 4
 	};
 	typedef double real;
+	const real UNINITReal = 1e100;
 	typedef std::vector<real> realVector;
 	typedef std::vector<realVector> realVectorVector;
 
-	template<typename T>
-	T getMax(T a[], int idx) {
+	template <typename T>
+	T getMax(T a[], int idx)
+	{
 		T max = a[0];
-		for (int ii = 1; ii<idx; ++ii){
-			if (max < a[ii]){
+		for (int ii = 1; ii < idx; ++ii)
+		{
+			if (max < a[ii])
+			{
 				max = a[ii];
 			}
 		}
 		return max;
-	}    
+	}
 
-	template<typename T>
-	T getMin(T a[], int idx) {
+	template <typename T>
+	T getMin(T a[], int idx)
+	{
 		T min = a[0];
-		for (int ii = 1; ii<idx; ++ii){
-			if (min > a[ii]){
+		for (int ii = 1; ii < idx; ++ii)
+		{
+			if (min > a[ii])
+			{
 				min = a[ii];
 			}
 		}
 		return min;
 	}
 
-	template<typename T>
-	T getMax(T  a, T  b) {
+	template <typename T>
+	T getMax(T a, T b)
+	{
 		return a > b ? a : b;
 	}
 
-	template<typename T>
-	T getMin(T a, T b) {
+	template <typename T>
+	T getMin(T a, T b)
+	{
 		return a < b ? a : b;
 	}
+
 }
 #endif

@@ -1,4 +1,5 @@
 #include "FieldSolver.h"
+#include <cmath>
 // 20200220 ���������ļ����ڵ���-1����0�ſ�ʼ //���޸� 20200326
 namespace ScalarCfv
 {
@@ -173,6 +174,18 @@ namespace ScalarCfv
 				}
 			}
 			(*iterCellFieldData).timeMarchingRHSRK.resize(parameter_->nStepTimeMarching + 1); //ָ���빫ʽ��Ӧ��
+
+			iterCellFieldData->diffBaseValueData.resize(iterCellFieldData->PG);
+			for (auto &i : iterCellFieldData->diffBaseValueData)
+			{
+				i.resize(reconstruction_->ReturnNDOFS());
+				for (auto &j : i)
+					j.resize(reconstruction_->ReturnNDIFFS(), UNINITReal);
+			}
+
+			iterCellFieldData->diffBaseValueDataBary.resize(reconstruction_->ReturnNDOFS());
+			for (auto &i : iterCellFieldData->diffBaseValueDataBary)
+				i.resize(reconstruction_->ReturnNDIFFS(), UNINITReal);
 		}
 
 		std::cout << " ..cell variables array has been allocated." << std::endl;
@@ -237,6 +250,26 @@ namespace ScalarCfv
 			(*iterFaceFieldData).fPG = (*iterFaceGaussData).PG[fO];
 			(*iterFaceFieldData).NDOFS = reconstruction_->ReturnNDIFFS();
 			(*iterFaceFieldData).faceWeightVF.resize((*iterFaceFieldData).NDOFS);
+
+			(*iterFaceFieldData).diffBaseValueData.resize(2);
+			for (auto &i : (*iterFaceFieldData).diffBaseValueData)
+			{
+				i.resize((*iterFaceGaussData).PG[fO]);
+				for (auto &j : i)
+				{
+					j.resize(reconstruction_->ReturnNDOFS());
+					for (auto &k : j)
+						k.resize(reconstruction_->ReturnNDIFFS(), UNINITReal);
+				}
+			}
+			(*iterFaceFieldData).diffBaseValueDataMid.resize(2);
+			for (auto &j : (*iterFaceFieldData).diffBaseValueDataMid)
+			{
+				j.resize(reconstruction_->ReturnNDOFS());
+				for (auto &k : j)
+					k.resize(reconstruction_->ReturnNDIFFS(), UNINITReal);
+			}
+
 			// flux?
 			// debug
 			//	std::cout << "----------------------------------------------" << std::endl;
@@ -1053,106 +1086,106 @@ namespace ScalarCfv
 		{
 			fileOut << (*iterNode).nodePhysical.x << "\t";
 			if (((*iterNode).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 		for (iterNode = node->begin(); iterNode != node->end(); ++iterNode)
 		{
 			fileOut << (*iterNode).nodePhysical.y << "\t";
 			if (((*iterNode).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 		cellFieldDataVector::iterator iterCell;
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).timeMarchingRHSTn;
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[1];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[2];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[3];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[4];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[5];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[6];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[7];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[8];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
 			real f = (*iterCell).scalarVariableTnCR[9];
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
@@ -1163,7 +1196,7 @@ namespace ScalarCfv
 					fileOut << (*iterCell).cellNode[jj].first << " ";
 				}
 				fileOut << (*iterCell).cellNode[(*iterCell).cellNodeNumber].first;
-				fileOut << std::endl;
+				fileOut << '\n';
 			}
 			else if ((*iterCell).cellType_ == Quadrilateral)
 			{
@@ -1171,10 +1204,10 @@ namespace ScalarCfv
 				{
 					fileOut << (*iterCell).cellNode[jj].first << " ";
 				}
-				fileOut << std::endl;
+				fileOut << '\n';
 			}
 		}
-		fileOut << std::endl;
+		fileOut << std::;
 		fileOut.close();
 
 #else
@@ -1193,21 +1226,21 @@ namespace ScalarCfv
 			std::cerr << "		error: unable to open \"" << fileName << "\"\n";
 			exit(1);
 		}
-		std::cout << "	exporting sln in Tecplot format, to file : " << fileName << "..." << std::endl;
+		std::cout << "	exporting sln in Tecplot format, to file : " << fileName << "..." << '\n';
 
 #ifndef USE_RBFB1_N
 		fileOut << "VARIABLES = \"x\", \"y\", \"sln\", \"smooth\", \"dx\", \"dy\"\n";
 		fileOut << "ZONE N =" << parameter_->nodeNumber << ","
 				<< "E=" << parameter_->cellNumber << ","
-				<< "VARLOCATION=([1-2]=NODAL,[3-6]=CELLCENTERED)" << std::endl;
+				<< "VARLOCATION=([1-2]=NODAL,[3-6]=CELLCENTERED)" << '\n';
 #else
 		fileOut << "VARIABLES = \"x\", \"y\", \"sln\", \"smooth\", \"dx\", \"dy\"\n";
 		fileOut << "ZONE N =" << parameter_->nodeNumber << ","
 				<< "E=" << parameter_->cellNumber << ","
-				<< "VARLOCATION=([1-3]=NODAL,[4-6]=CELLCENTERED)" << std::endl;
+				<< "VARLOCATION=([1-3]=NODAL,[4-6]=CELLCENTERED)" << '\n';
 #endif
 		fileOut << ", "
-				<< "DATAPACKING=BLOCK, ZONETYPE=FEQUADRILATERAL" << std::endl;
+				<< "DATAPACKING=BLOCK, ZONETYPE=FEQUADRILATERAL" << '\n';
 		fileOut << std::setprecision(15);
 
 		vertexVector::iterator iterNode;
@@ -1215,19 +1248,19 @@ namespace ScalarCfv
 		{
 			fileOut << (*iterNode).nodePhysical.x << "\t";
 			if (((*iterNode).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 		for (iterNode = node->begin(); iterNode != node->end(); ++iterNode)
 		{
 			fileOut << (*iterNode).nodePhysical.y << "\t";
 			if (((*iterNode).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 		cellFieldDataVector::iterator iterCell;
 
-		std::vector<real> nodeSln( node->size(), 0.0);
+		std::vector<real> nodeSln(node->size(), 0.0);
 		std::vector<real> nodeCount(node->size(), 0.0);
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
@@ -1250,7 +1283,7 @@ namespace ScalarCfv
 				scaleI,
 				momentI,
 				matrixDiffBaseI);
-#else
+#ifdef USE_RBFB1
 			assert(iterCell->cellType_ == Quadrilateral);
 			CfvMath::getDiffBaseValueRBFB1(
 				point(0.5, 0.5),
@@ -1259,6 +1292,9 @@ namespace ScalarCfv
 				momentI,
 				matrixDiffBaseI,
 				*iterCell);
+#endif
+
+#else
 
 			CfvMath::getDiffBaseValueRBFB1(
 				point(0, 0),
@@ -1325,7 +1361,7 @@ namespace ScalarCfv
 #ifndef USE_RBFB1_N
 			fileOut << f << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 #endif
 		}
 #ifdef USE_RBFB1_N
@@ -1333,10 +1369,10 @@ namespace ScalarCfv
 		{
 			fileOut << nodeSln[i] / nodeCount[i] << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
 #endif
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
@@ -1351,7 +1387,7 @@ namespace ScalarCfv
 			{
 				momentI[kk] = (*iterCell).baseMoment[kk];
 			}
-#ifndef USE_RBFB1_N
+#ifndef USE_RBFB1
 			CfvMath::getDiffBaseValue(
 				p,
 				baryCenterI,
@@ -1384,9 +1420,9 @@ namespace ScalarCfv
 
 			fileOut << std::fabs(1.0 - std::pow(dPhi.length(), 2)) << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		//------------------
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
@@ -1402,7 +1438,7 @@ namespace ScalarCfv
 			{
 				momentI[kk] = (*iterCell).baseMoment[kk];
 			}
-#ifndef USE_RBFB1_N
+#ifndef USE_RBFB1
 			CfvMath::getDiffBaseValue(
 				p,
 				baryCenterI,
@@ -1428,9 +1464,9 @@ namespace ScalarCfv
 
 			fileOut << dfdx << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
@@ -1445,7 +1481,7 @@ namespace ScalarCfv
 			{
 				momentI[kk] = (*iterCell).baseMoment[kk];
 			}
-#ifndef USE_RBFB1_N
+#ifndef USE_RBFB1
 			CfvMath::getDiffBaseValue(
 				p,
 				baryCenterI,
@@ -1472,9 +1508,9 @@ namespace ScalarCfv
 
 			fileOut << dfdy << "\t";
 			if (((*iterCell).index % lineControl) == 0)
-				fileOut << std::endl;
+				fileOut << '\n';
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 		//------------------
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
@@ -1486,7 +1522,7 @@ namespace ScalarCfv
 					fileOut << (*iterCell).cellNode[jj].first << " ";
 				}
 				fileOut << (*iterCell).cellNode[(*iterCell).cellNodeNumber - (*iterCell).o2PointNumber].first;
-				fileOut << std::endl;
+				fileOut << '\n';
 			}
 			else if ((*iterCell).cellType_ == Quadrilateral)
 			{
@@ -1494,10 +1530,10 @@ namespace ScalarCfv
 				{
 					fileOut << (*iterCell).cellNode[jj].first << " ";
 				}
-				fileOut << std::endl;
+				fileOut << '\n';
 			}
 		}
-		fileOut << std::endl;
+		fileOut << '\n';
 		fileOut.close();
 #endif
 		return true;
@@ -1555,6 +1591,17 @@ namespace ScalarCfv
 			fileOut << "VARIABLES = \"Steps\", \"L1(Res)\"\n";
 		}
 		fileOut << step << "\t" << residual << std::endl;
+		if (isnan(residual))
+		{
+			std::cout << "\
+ | \\ | |     /\\     | \\ | |           |  _ \\  | |       / __ \\  \\ \\        / / | |  | | |  __ \\    | | | | | |\n\
+ |  \\| |    /  \\    |  \\| |           | |_) | | |      | |  | |  \\ \\  /\\  / /  | |  | | | |__) |   | | | | | |\n\
+ | . ` |   / /\\ \\   | . ` |           |  _ <  | |      | |  | |   \\ \\/  \\/ /   | |  | | |  ___/    | | | | | |\n\
+ | |\\  |  / ____ \\  | |\\  |           | |_) | | |____  | |__| |    \\  /\\  /    | |__| | | |        |_| |_| |_|\n\
+ |_| \\_| /_/    \\_\\ |_| \\_|           |____/  |______|  \\____/      \\/  \\/      \\____/  |_|        (_) (_) (_)\n\
+";
+			exit(-5);
+		}
 		flag += 1;
 		return true;
 	};
