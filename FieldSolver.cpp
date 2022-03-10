@@ -127,29 +127,35 @@ namespace ScalarCfv
 			// iterCellFieldData NDOFS should conform with that of recstruciton
 			// (*iterCellFieldData).NDOFS = (rO + 2)*(rO + 1) / 2;
 			(*iterCellFieldData).NDOFS = reconstruction_->ReturnNDOFS();
+			(*iterCellFieldData).NDOFSCR = reconstruction_->ReturnNDOFSCR();
 			// std::cout << (*iterCellFieldData).NDOFS << std::endl;
 			// exit(1);
 
 			(*iterCellFieldData).baseMoment.resize((*iterCellFieldData).NDOFS);
+			(*iterCellFieldData).baseMomentCR.resize((*iterCellFieldData).NDOFSCR);
+
 			(*iterCellFieldData).scalarVariableTn.resize((*iterCellFieldData).NDOFS);
 			(*iterCellFieldData).scalarVariableTm.resize((*iterCellFieldData).NDOFS);
 			(*iterCellFieldData).scalarVariableTnLimited.resize((*iterCellFieldData).NDOFS);
-			(*iterCellFieldData).scalarVariableTnCR.resize((*iterCellFieldData).NDOFS);
+			(*iterCellFieldData).scalarVariableTnCR.resize((*iterCellFieldData).NDOFSCR);
 			(*iterCellFieldData).deltaScalarVariableTn.resize((*iterCellFieldData).NDOFS);
 			(*iterCellFieldData).deltaScalarVariableTm.resize((*iterCellFieldData).NDOFS);
-			(*iterCellFieldData).scalarVariableTnCRLimited.resize((*iterCellFieldData).NDOFS);
+			(*iterCellFieldData).scalarVariableTnCRLimited.resize((*iterCellFieldData).NDOFSCR);
 
 			(*iterCellFieldData).matrixAiiInverse.resize((*iterCellFieldData).NDOFS);
 			(*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS);
-			(*iterCellFieldData).matrixAiiInverseCR.resize((*iterCellFieldData).NDOFS);
-			(*iterCellFieldData).matrixAiiCR.resize((*iterCellFieldData).NDOFS);
+			(*iterCellFieldData).matrixAiiInverseCR.resize((*iterCellFieldData).NDOFSCR);
+			(*iterCellFieldData).matrixAiiCR.resize((*iterCellFieldData).NDOFSCR);
 
 			for (int jj = 0; jj < static_cast<int>((*iterCellFieldData).NDOFS); ++jj)
 			{
 				(*iterCellFieldData).matrixAiiInverse[jj].resize((*iterCellFieldData).NDOFS);
 				(*iterCellFieldData).matrixAii[jj].resize((*iterCellFieldData).NDOFS);
-				(*iterCellFieldData).matrixAiiInverseCR[jj].resize((*iterCellFieldData).NDOFS);
-				(*iterCellFieldData).matrixAiiCR[jj].resize((*iterCellFieldData).NDOFS);
+			}
+			for (int jj = 0; jj < static_cast<int>((*iterCellFieldData).NDOFSCR); ++jj)
+			{
+				(*iterCellFieldData).matrixAiiInverseCR[jj].resize((*iterCellFieldData).NDOFSCR);
+				(*iterCellFieldData).matrixAiiCR[jj].resize((*iterCellFieldData).NDOFSCR);
 			}
 
 			// cellFaceNumber->cellCellNumber
@@ -165,12 +171,15 @@ namespace ScalarCfv
 				(*iterCellFieldData).vectorAiiInversebij[jj].resize((*iterCellFieldData).NDOFS);
 				(*iterCellFieldData).matrixBij[jj].resize((*iterCellFieldData).NDOFS);
 				(*iterCellFieldData).matrixAiiInverseBij[jj].resize((*iterCellFieldData).NDOFS);
-				(*iterCellFieldData).matrixBijCR[jj].resize((*iterCellFieldData).NDOFS);
+				(*iterCellFieldData).matrixBijCR[jj].resize((*iterCellFieldData).NDOFSCR);
 				for (int kk = 0; kk < static_cast<int>((*iterCellFieldData).NDOFS); ++kk)
 				{
 					(*iterCellFieldData).matrixBij[jj][kk].resize((*iterCellFieldData).NDOFS);
 					(*iterCellFieldData).matrixAiiInverseBij[jj][kk].resize((*iterCellFieldData).NDOFS);
-					(*iterCellFieldData).matrixBijCR[jj][kk].resize((*iterCellFieldData).NDOFS);
+				}
+				for (int kk = 0; kk < static_cast<int>((*iterCellFieldData).NDOFSCR); ++kk)
+				{
+					(*iterCellFieldData).matrixBijCR[jj][kk].resize((*iterCellFieldData).NDOFSCR);
 				}
 			}
 			(*iterCellFieldData).timeMarchingRHSRK.resize(parameter_->nStepTimeMarching + 1); //ָ���빫ʽ��Ӧ��
@@ -181,6 +190,14 @@ namespace ScalarCfv
 				i.resize(reconstruction_->ReturnNDOFS());
 				for (auto &j : i)
 					j.resize(reconstruction_->ReturnNDIFFS(), UNINITReal);
+			}
+
+			iterCellFieldData->diffBaseValueDataCR.resize(iterCellFieldData->PG);
+			for (auto &i : iterCellFieldData->diffBaseValueDataCR)
+			{
+				i.resize(reconstruction_->ReturnNDOFSCR());
+				for (auto &j : i)
+					j.resize(reconstruction_->ReturnNDIFFSCR(), UNINITReal);
 			}
 
 			iterCellFieldData->diffBaseValueDataBary.resize(reconstruction_->ReturnNDOFS());
@@ -260,6 +277,17 @@ namespace ScalarCfv
 					j.resize(reconstruction_->ReturnNDOFS());
 					for (auto &k : j)
 						k.resize(reconstruction_->ReturnNDIFFS(), UNINITReal);
+				}
+			}
+			(*iterFaceFieldData).diffBaseValueDataCR.resize(2);
+			for (auto &i : (*iterFaceFieldData).diffBaseValueDataCR)
+			{
+				i.resize((*iterFaceGaussData).PG[fO]);
+				for (auto &j : i)
+				{
+					j.resize(reconstruction_->ReturnNDOFSCR());
+					for (auto &k : j)
+						k.resize(reconstruction_->ReturnNDIFFSCR(), UNINITReal);
 				}
 			}
 			(*iterFaceFieldData).diffBaseValueDataMid.resize(2);
@@ -1285,7 +1313,7 @@ namespace ScalarCfv
 				matrixDiffBaseI);
 #ifdef USE_RBFB1
 			assert(iterCell->cellType_ == Quadrilateral);
-			CfvMath::getDiffBaseValueRBFB1(
+			RBFB1GetDiffBaseValue(
 				point(0.5, 0.5),
 				baryCenterI,
 				scaleI,
@@ -1296,7 +1324,7 @@ namespace ScalarCfv
 
 #else
 
-			CfvMath::getDiffBaseValueRBFB1(
+			RBFB1GetDiffBaseValue(
 				point(0, 0),
 				baryCenterI,
 				scaleI,
@@ -1310,7 +1338,7 @@ namespace ScalarCfv
 				nodeSln[iterCell->cellNode[1].first - 1] += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
 			}
 
-			CfvMath::getDiffBaseValueRBFB1(
+			RBFB1GetDiffBaseValue(
 				point(0, 1),
 				baryCenterI,
 				scaleI,
@@ -1324,7 +1352,7 @@ namespace ScalarCfv
 				nodeSln[iterCell->cellNode[2].first - 1] += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
 			}
 
-			CfvMath::getDiffBaseValueRBFB1(
+			RBFB1GetDiffBaseValue(
 				point(1, 0),
 				baryCenterI,
 				scaleI,
@@ -1338,7 +1366,7 @@ namespace ScalarCfv
 				nodeSln[iterCell->cellNode[3].first - 1] += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
 			}
 
-			CfvMath::getDiffBaseValueRBFB1(
+			RBFB1GetDiffBaseValue(
 				point(1, 1),
 				baryCenterI,
 				scaleI,
@@ -1396,7 +1424,7 @@ namespace ScalarCfv
 				matrixDiffBaseI);
 #else
 			assert(iterCell->cellType_ == Quadrilateral);
-			CfvMath::getDiffBaseValueRBFB1(
+			RBFB1GetDiffBaseValue(
 				point(0.5, 0.5),
 				baryCenterI,
 				scaleI,
@@ -1447,7 +1475,7 @@ namespace ScalarCfv
 				matrixDiffBaseI);
 #else
 			assert(iterCell->cellType_ == Quadrilateral);
-			CfvMath::getDiffBaseValueRBFB1(
+			RBFB1GetDiffBaseValue(
 				point(0.5, 0.5),
 				baryCenterI,
 				scaleI,
@@ -1490,7 +1518,7 @@ namespace ScalarCfv
 				matrixDiffBaseI);
 #else
 			assert(iterCell->cellType_ == Quadrilateral);
-			CfvMath::getDiffBaseValueRBFB1(
+			RBFB1GetDiffBaseValue(
 				point(0.5, 0.5),
 				baryCenterI,
 				scaleI,

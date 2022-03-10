@@ -18,15 +18,12 @@ namespace ScalarCfv
 	public:
 		evolutionRBFB1(){};
 		~evolutionRBFB1(){};
-		const static unsigned int NDOFS = (O + 2) * (O + 1) / 2 + 1;
-		// const static unsigned int NDIFFS = (O + 1 + 2) * (O + 1 + 1) / 2;
-		const static unsigned int NDIFFS = (O + 2) * (O + 1) / 2;
+		
 
-		// const static unsigned int NDOFS = (O + 2) * (O + 1) / 2;
-		// const static unsigned int NDIFFS = (O + 2) * (O + 1) / 2;
-
-		// const static unsigned int NDOFS = (O + 2) * (O + 1) / 2 + 1;
-		// const static unsigned int NDIFFS = (O + 2 + 1) * (O + 1 + 1) / 2;
+		const static unsigned int NDOFS = GLOBAL_NDOFS(O);
+		const static unsigned int NDIFFS = GLOBAL_NDIFFS(O);
+		const static unsigned int NDOFSCR = GLOBAL_NDOFSCR(O);
+		const static unsigned int NDIFFSCR = GLOBAL_NDIFFSCR(O);
 
 	public:
 		virtual bool getFaceFlux(
@@ -145,7 +142,7 @@ namespace ScalarCfv
 
 			if (iterFaceFieldData->diffBaseValueDataMid[0][0][0] == UNINITReal)
 			{
-				CfvMath::getDiffBaseValueRBFB1(
+				RBFB1GetDiffBaseValue(
 					pparaml,
 					baryCenterI,
 					scaleI,
@@ -195,7 +192,7 @@ namespace ScalarCfv
 				// 	matrixDiffBaseJ);
 				if (iterFaceFieldData->diffBaseValueDataMid[1][0][0] == UNINITReal)
 				{
-					CfvMath::getDiffBaseValueRBFB1(
+					RBFB1GetDiffBaseValue(
 						pparamr,
 						baryCenterJ,
 						scaleJ,
@@ -556,18 +553,20 @@ namespace ScalarCfv
 			{
 				// diff base matrix i
 				tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
+				tensor2D<real, NDOFSCR, NDIFFSCR> matrixDiffBaseICR;
 				// base moment i
 				tensor1D<real, NDOFS> momentI;
+				tensor1D<real, NDOFSCR> momentICR;
 				point p = (*iterCellFieldData).gaussPairVector_[gg].p;
 				point baryCenterI = (*iterCellFieldData).baryCenter;
 				point scaleI = (*iterCellFieldData).lengthReference;
-				for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
-				{
-					momentI[kk] = (*iterCellFieldData).baseMoment[kk];
-				}
+				
+				// get DBV
 				if (iterCellFieldData->diffBaseValueData[gg][0][0] == UNINITReal)
 				{
-					CfvMath::getDiffBaseValueRBFB1(
+					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+						momentI[kk] = (*iterCellFieldData).baseMoment[kk];
+					RBFB1GetDiffBaseValue(
 						(*iterCellFieldData).parametricValue[gg].first,
 						baryCenterI,
 						scaleI,
@@ -578,6 +577,22 @@ namespace ScalarCfv
 									   0, NDOFS, 0, NDIFFS);
 				}
 				auto &matrixDiffBaseII = iterCellFieldData->diffBaseValueData[gg];
+				// get DBVCR
+				if (iterCellFieldData->diffBaseValueDataCR[gg][0][0] == UNINITReal)
+				{
+					for (int kk = 1; kk < static_cast<int>(NDOFSCR); ++kk)
+						momentICR[kk] = (*iterCellFieldData).baseMomentCR[kk];
+					RBFB1GetDiffBaseValueCR(
+						(*iterCellFieldData).parametricValue[gg].first,
+						baryCenterI,
+						scaleI,
+						momentICR,
+						matrixDiffBaseICR,
+						*iterCellFieldData);
+					CfvMath::VVMatCopy(matrixDiffBaseICR, iterCellFieldData->diffBaseValueDataCR[gg],
+									   0, NDOFSCR, 0, NDIFFSCR);
+				}
+				auto &matrixDiffBaseIICR = iterCellFieldData->diffBaseValueDataCR[gg];
 
 				real phi = (*iterCellFieldData).scalarVariableTn[0];
 				real tempX, tempY;
@@ -601,10 +616,10 @@ namespace ScalarCfv
 				// dPhiTilde
 				tempX = 0.0;
 				tempY = 0.0;
-				for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+				for (int kk = 1; kk < static_cast<int>(NDOFSCR); ++kk)
 				{
-					tempX += matrixDiffBaseII[kk][1] * (*iterCellFieldData).scalarVariableTnCR[kk];
-					tempY += matrixDiffBaseII[kk][2] * (*iterCellFieldData).scalarVariableTnCR[kk];
+					tempX += matrixDiffBaseIICR[kk][1] * (*iterCellFieldData).scalarVariableTnCR[kk];
+					tempY += matrixDiffBaseIICR[kk][2] * (*iterCellFieldData).scalarVariableTnCR[kk];
 				}
 				dPhiTilde.x = tempX;
 				dPhiTilde.y = tempY;
@@ -858,7 +873,7 @@ namespace ScalarCfv
 				assert(iterCellFieldData->cellType_ == Quadrilateral);
 				if (iterCellFieldData->diffBaseValueDataBary[0][0] == UNINITReal)
 				{
-					CfvMath::getDiffBaseValueRBFB1(
+					RBFB1GetDiffBaseValue(
 						point(0.5, 0.5),
 						baryCenterI,
 						scaleI,
@@ -955,7 +970,7 @@ namespace ScalarCfv
 				}
 				// point p = ;
 				point pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ff, (*iterFaceFieldData).parametricValue[gg].first);
-				CfvMath::getDiffBaseValueRBFB1(
+				RBFB1GetDiffBaseValue(
 					pparaml,
 					baryCenterI,
 					scaleI,
@@ -1000,7 +1015,7 @@ namespace ScalarCfv
 					}
 					// p = ;
 					point pparamr = CfvMath::GetFaceParam((*cellFieldData)[cr - 1].cellType_, ffr, (*iterFaceFieldData).parametricValue[gg].first, true);
-					CfvMath::getDiffBaseValueRBFB1(
+					RBFB1GetDiffBaseValue(
 						pparamr, //���ڱ߽�����
 						baryCenterJ,
 						scaleJ,
@@ -1036,12 +1051,12 @@ namespace ScalarCfv
 				// }
 
 				// ftemp = 0.05 * ScalarCfv::getMin(std::fabs(1.0 - dq.length()), 0.4 / std::pow((rO + 1), 2));
-				// ftemp = std::min(0.4 / ((rO + 1) * (rO + 1)), std::fabs(1 - dq.length() * dq.length()));
-				// // if (ftemp < 0.2 / ((rO + 1) * (rO + 1)))
-				// // 	ftemp = 0;
-				// ftemp *= 10;
+				ftemp = std::min(0.4 / ((rO + 1) * (rO + 1)), std::fabs(1 - dq.length() * dq.length()));
+				if (ftemp < 0.2 / ((rO + 1) * (rO + 1)))
+					ftemp = 0;
+				ftemp *= 4;
 
-				ftemp = 10.0 * 0.4 / std::pow((rO + 1), 2);
+				// ftemp = 10.0 * 0.4 / std::pow((rO + 1), 2);
 
 				// 1 done
 				// ftemp = 1.0 * 10.0 * 0.4 / std::pow((rO + 1), 2);

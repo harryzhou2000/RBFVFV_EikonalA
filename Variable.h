@@ -46,6 +46,7 @@ namespace ScalarCfv
 
 	public:
 		unsigned int NDOFS;
+		unsigned int NDOFSCR;
 		unsigned int PG;
 
 		real gama;
@@ -75,6 +76,7 @@ namespace ScalarCfv
 		std::vector<real> timeMarchingRHSRK;
 
 		std::vector<real> baseMoment;
+		std::vector<real> baseMomentCR;
 
 		std::vector<real> scalarVariableTn; // current time step , inlcude the multistep time marching methods, Tn means the newest values
 		std::vector<real> scalarVariableTm; // previous time step
@@ -98,7 +100,8 @@ namespace ScalarCfv
 
 		std::vector<std::pair<point, real>> parametricValue;
 
-		std::vector<std::vector<std::vector<real>>> diffBaseValueData; // ad gauss points
+		std::vector<std::vector<std::vector<real>>> diffBaseValueData; // at gauss points
+		std::vector<std::vector<std::vector<real>>> diffBaseValueDataCR; // at gauss points
 		std::vector<std::vector<real>> diffBaseValueDataBary;
 	};
 
@@ -122,6 +125,7 @@ namespace ScalarCfv
 		real lambdaFace;
 
 		std::vector<std::vector<std::vector<std::vector<real>>>> diffBaseValueData;// at gaussian points
+		std::vector<std::vector<std::vector<std::vector<real>>>> diffBaseValueDataCR; // at gaussian points
 		std::vector<std::vector<std::vector<real>>> diffBaseValueDataMid; 
 	};
 	typedef std::vector<faceFieldData> faceFieldDataVector;

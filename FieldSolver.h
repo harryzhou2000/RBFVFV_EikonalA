@@ -44,8 +44,10 @@ namespace ScalarCfv
 		// const static unsigned int NDOFS = (rO + 2) * (rO + 1) / 2 + 1;
 		// const static unsigned int NDIFFS = (rO + 2 + 1) * (rO + 1 + 1) / 2;
 
-		const static unsigned int NDOFS = (rO + 2) * (rO + 1) / 2;
-		const static unsigned int NDIFFS = (rO + 2) * (rO + 1) / 2;
+		const static unsigned int NDOFS = GLOBAL_NDOFS(rO);
+		const static unsigned int NDIFFS = GLOBAL_NDIFFS(rO);
+		const static unsigned int NDOFSCR = GLOBAL_NDOFSCR(rO);
+		const static unsigned int NDIFFSCR = GLOBAL_NDIFFSCR(rO);
 
 	public:
 		virtual bool allocateArray();

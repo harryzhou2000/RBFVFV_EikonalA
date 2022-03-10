@@ -123,6 +123,8 @@ namespace ScalarCfv
 
 		virtual unsigned ReturnNDOFS() { return NDOFS; };
 		virtual unsigned ReturnNDIFFS() { return NDOFS; };
+		virtual unsigned ReturnNDOFSCR() { return NDOFS; };
+		virtual unsigned ReturnNDIFFSCR() { return NDOFS; };
 	};
 
 //----------------------------------------------------------------------------------

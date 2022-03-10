@@ -360,7 +360,85 @@ namespace CfvMath
 
 		return true;
 	}
+	bool getMatrixGeneralInverse(
+		ScalarCfv::tensor2D<ScalarCfv::real, 5, 5> &A,
+		ScalarCfv::tensor2D<ScalarCfv::real, 5, 5> &IA)
+	{
 
+		int mrow = 5 - 1;
+		int ncol = 5 - 1;
+		MKL_INT m = mrow, n = ncol, lda = ncol, ldu = mrow, ldvt = ncol, info;
+		ScalarCfv::real temp_eps = 1e-16, alpha = 1.0, beta = 0.0;
+		ScalarCfv::real *a = new ScalarCfv::real[m * n];
+		ScalarCfv::real *inva = new ScalarCfv::real[n * m];
+		ScalarCfv::real *temp = new ScalarCfv::real[n * m];
+		MKL_INT min = (m < n) ? m : n;
+		ScalarCfv::real *superb = new ScalarCfv::real[min - 1];
+		ScalarCfv::real *s = new ScalarCfv::real[n];
+		ScalarCfv::real *splus = new ScalarCfv::real[n * m];
+		ScalarCfv::real *u = new ScalarCfv::real[ldu * m];
+		ScalarCfv::real *vt = new ScalarCfv::real[ldvt * n];
+
+		for (int ii = 0; ii < mrow; ++ii)
+		{
+			for (int jj = 0; jj < ncol; ++jj)
+			{
+				a[ii * n + jj] = A[ii + 1][jj + 1];
+			}
+		}
+
+		// SVD
+		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, a, lda, s, u, ldu, vt, ldvt, superb);
+		if (info > 0)
+		{
+			std::cout << "The algorithm computing SVD failed to converge." << std::endl;
+			exit(1);
+		}
+
+		for (int ii = 0; ii < ncol; ++ii)
+		{
+			for (int jj = 0; jj < mrow; ++jj)
+			{
+				splus[ii * mrow + jj] = 0.0;
+				if (jj == ii)
+				{
+					if (abs(s[ii]) > temp_eps)
+					{
+						splus[ii * mrow + jj] = 1.0 / s[ii];
+					}
+				}
+			}
+		}
+		cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, n, m, n, alpha, vt, n, splus, m, beta, temp, m);
+		cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, n, m, m, alpha, temp, m, u, m, beta, inva, m);
+
+		for (int ii = 0; ii < ncol; ++ii)
+		{
+			for (int jj = 0; jj < mrow; ++jj)
+			{
+				IA[ii + 1][jj + 1] = inva[ii * mrow + jj];
+			}
+		}
+
+		delete[] a;
+		delete[] inva;
+		delete[] temp;
+		delete[] superb;
+		delete[] s;
+		delete[] splus;
+		delete[] u;
+		delete[] vt;
+		a = NULL;
+		inva = NULL;
+		temp = NULL;
+		superb = NULL;
+		s = NULL;
+		splus = NULL;
+		u = NULL;
+		vt = NULL;
+
+		return true;
+	}
 	bool getMatrixGeneralInverse(
 		ScalarCfv::tensor2D<ScalarCfv::real, 6, 6> &A,
 		ScalarCfv::tensor2D<ScalarCfv::real, 6, 6> &IA)

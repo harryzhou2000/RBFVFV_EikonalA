@@ -14,7 +14,7 @@
 
 namespace CfvMath
 {
-	const ScalarCfv::real crbf = 0.5;
+	const ScalarCfv::real crbf = 0.3;
 	// getMatrixGeneralInverse just operates with the right down (N-1,N-1) part of A
 	bool getMatrixGeneralInverse(
 		ScalarCfv::tensor2D<ScalarCfv::real, 3, 3> &A,
@@ -23,6 +23,10 @@ namespace CfvMath
 	bool getMatrixGeneralInverse(
 		ScalarCfv::tensor2D<ScalarCfv::real, 4, 4> &A,
 		ScalarCfv::tensor2D<ScalarCfv::real, 4, 4> &IA);
+
+	bool getMatrixGeneralInverse(
+		ScalarCfv::tensor2D<ScalarCfv::real, 5, 5> &A,
+		ScalarCfv::tensor2D<ScalarCfv::real, 5, 5> &IA);
 
 	bool getMatrixGeneralInverse(
 		ScalarCfv::tensor2D<ScalarCfv::real, 6, 6> &A,
@@ -35,6 +39,86 @@ namespace CfvMath
 	bool getMatrixGeneralInverse(
 		ScalarCfv::tensor2D<ScalarCfv::real, 10, 10> &A,
 		ScalarCfv::tensor2D<ScalarCfv::real, 10, 10> &IA);
+
+	// template <unsigned mm, unsigned nn>
+	// bool getMatrixGeneralInverse(
+	// 	ScalarCfv::tensor2D<ScalarCfv::real, mm, nn> &A,
+	// 	ScalarCfv::tensor2D<ScalarCfv::real, nn, mm> &IA)
+	// {
+	// 	int mrow = mm - 1;
+	// 	int ncol = nn - 1;
+	// 	MKL_INT m = mrow, n = ncol, lda = ncol, ldu = mrow, ldvt = ncol, info;
+	// 	ScalarCfv::real temp_eps = 1e-16, alpha = 1.0, beta = 0.0;
+	// 	ScalarCfv::real *a = new ScalarCfv::real[m * n];
+	// 	ScalarCfv::real *inva = new ScalarCfv::real[n * m];
+	// 	ScalarCfv::real *temp = new ScalarCfv::real[n * m];
+	// 	MKL_INT min = (m < n) ? m : n;
+	// 	ScalarCfv::real *superb = new ScalarCfv::real[min - 1];
+	// 	ScalarCfv::real *s = new ScalarCfv::real[n];
+	// 	ScalarCfv::real *splus = new ScalarCfv::real[n * m];
+	// 	ScalarCfv::real *u = new ScalarCfv::real[ldu * m];
+	// 	ScalarCfv::real *vt = new ScalarCfv::real[ldvt * n];
+
+	// 	for (int ii = 0; ii < mrow; ++ii)
+	// 	{
+	// 		for (int jj = 0; jj < ncol; ++jj)
+	// 		{
+	// 			a[ii * n + jj] = A[ii + 1][jj + 1];
+	// 		}
+	// 	}
+
+	// 	// SVD
+	// 	info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, a, lda, s, u, ldu, vt, ldvt, superb);
+	// 	if (info > 0)
+	// 	{
+	// 		std::cout << "The algorithm computing SVD failed to converge." << std::endl;
+	// 		exit(1);
+	// 	}
+
+	// 	for (int ii = 0; ii < ncol; ++ii)
+	// 	{
+	// 		for (int jj = 0; jj < mrow; ++jj)
+	// 		{
+	// 			splus[ii * mrow + jj] = 0.0;
+	// 			if (jj == ii)
+	// 			{
+	// 				if (abs(s[ii]) > temp_eps)
+	// 				{
+	// 					splus[ii * mrow + jj] = 1.0 / s[ii];
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, n, m, n, alpha, vt, n, splus, m, beta, temp, m);
+	// 	cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, n, m, m, alpha, temp, m, u, m, beta, inva, m);
+
+	// 	for (int ii = 0; ii < ncol; ++ii)
+	// 	{
+	// 		for (int jj = 0; jj < mrow; ++jj)
+	// 		{
+	// 			IA[ii + 1][jj + 1] = inva[ii * mrow + jj];
+	// 		}
+	// 	}
+
+	// 	delete[] a;
+	// 	delete[] inva;
+	// 	delete[] temp;
+	// 	delete[] superb;
+	// 	delete[] s;
+	// 	delete[] splus;
+	// 	delete[] u;
+	// 	delete[] vt;
+	// 	a = NULL;
+	// 	inva = NULL;
+	// 	temp = NULL;
+	// 	superb = NULL;
+	// 	s = NULL;
+	// 	splus = NULL;
+	// 	u = NULL;
+	// 	vt = NULL;
+
+	// 	return true;
+	// }
 
 	// ScalarCfv::real getMoment(
 	//	ScalarCfv::point p,
@@ -73,6 +157,20 @@ namespace CfvMath
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A,
 		ScalarCfv::cellFieldData &cell); // adding 4
 
+	bool getMomentRBFB1_7_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A,
+		ScalarCfv::cellFieldData &cell); // adding 4
+
+	bool getMomentRBFB1_5_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 5> &A,
+		ScalarCfv::cellFieldData &cell); // adding 4
+
 	// rO=2
 	bool getMoment(
 		ScalarCfv::point p,
@@ -86,7 +184,7 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A);
 
-	bool getMomentRBFB1(
+	bool getMomentRBFB1_POLY(
 		ScalarCfv::point p,			 // parametric place
 		ScalarCfv::point baryCenter, // dummy
 		ScalarCfv::point scale,		 // dummy
@@ -152,6 +250,22 @@ namespace CfvMath
 		ScalarCfv::tensor2D<ScalarCfv::real, 7, 3> &A,
 		ScalarCfv::cellFieldData &cell); // adding 4
 
+	bool getDiffBaseValueRBFB1_7_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 7, 3> &A,
+		ScalarCfv::cellFieldData &cell); // adding 4
+
+	bool getDiffBaseValueRBFB1_5_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 5> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 5, 3> &A,
+		ScalarCfv::cellFieldData &cell); // adding 4
+
 	// rO=2
 	bool getDiffBaseValue(
 		ScalarCfv::point p,
@@ -171,7 +285,7 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
 		ScalarCfv::tensor2D<ScalarCfv::real, 7, 10> &A);
-	bool getDiffBaseValueRBFB1(
+	bool getDiffBaseValueRBFB1_POLY(
 		ScalarCfv::point p,			 // parametric place
 		ScalarCfv::point baryCenter, // dummy
 		ScalarCfv::point scale,		 // dummy
@@ -222,6 +336,22 @@ namespace CfvMath
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A,
 		ScalarCfv::cellFieldData &cell); // adding 0
 
+	bool getBaseValueRBFB1_7_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
+	bool getBaseValueRBFB1_5_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 5> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 5> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
 	// rO=2
 	bool getBaseValue(
 		ScalarCfv::point p,
@@ -235,7 +365,7 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A);
-	bool getBaseValueRBFB1(
+	bool getBaseValueRBFB1_POLY(
 		ScalarCfv::point p,			 // parametric place
 		ScalarCfv::point baryCenter, // dummy
 		ScalarCfv::point scale,		 // dummy
@@ -249,6 +379,34 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 10> &moment,
 		ScalarCfv::tensor1D<ScalarCfv::real, 10> &A);
+
+	//////////////////////////
+	bool getMomentRBFB1_4_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 4> &A,
+		ScalarCfv::cellFieldData &cell) // adding 1
+		;
+	bool getBaseValueRBFB1_4_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 4> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 4> &A,
+		ScalarCfv::cellFieldData &cell) // adding 1
+		;
+
+	bool getDiffBaseValueRBFB1_4_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 4> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 4, 3> &A,
+		ScalarCfv::cellFieldData &cell) // adding 1
+		;
+
+	//////////////////////////
 
 	template <typename T>
 	T getSign(T a)
