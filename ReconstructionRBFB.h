@@ -1595,11 +1595,13 @@ namespace ScalarCfv
 	{
 		//		std::cout << "excuting reconstruction ..." << std::endl;
 
-		cellFieldDataVector::iterator iterCellFieldData;
-		cellFieldDataVector::iterator iterCellFieldData_;
-		faceFieldDataVector::iterator iterFaceFieldData_;
-		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+// #pragma omp parallel for schedule(guided)
+		for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 		{
+			cellFieldDataVector::iterator iterCellFieldData;
+			cellFieldDataVector::iterator iterCellFieldData_;
+			faceFieldDataVector::iterator iterFaceFieldData_;
+			iterCellFieldData = cellFieldData->begin() + iCell;
 			if ((*iterCellFieldData).boundaryCellType_ == InnerCell)
 			{
 				// assign gradient values
@@ -1643,26 +1645,6 @@ namespace ScalarCfv
 						// get the vector on each face Gauss point.
 						for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData_).fPG); ++gg)
 						{
-							// tensor1D<real, NDOFS> momentI;
-							// base moment i
-							// tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
-							// point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
-							// point pparaml;
-							// pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ii, iterFaceFieldData_->parametricValue[gg].first);
-
-							// point baryCenterI = (*iterCellFieldData_).baryCenter;
-							// point scaleI = (*iterCellFieldData_).lengthReference;
-							// for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
-							// {
-							// 	momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
-							// }
-							// CfvMath::getDiffBaseValueRBFB1(
-							// 	pparaml,
-							// 	baryCenterI,
-							// 	scaleI,
-							// 	momentI,
-							// 	matrixDiffBaseI,
-							// 	*iterCellFieldData_);
 							auto &matrixDiffBaseII = iterFaceFieldData_->diffBaseValueData[0][gg];
 							real uI = (*iterCellFieldData_).scalarVariableTn[0];
 							real uBV = 0.0;
@@ -1704,27 +1686,6 @@ namespace ScalarCfv
 						// get the vector on each face Gauss point.
 						for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData_).fPG); ++gg)
 						{
-							// base moment i
-							// tensor1D<real, NDOFS> momentI;
-							// // base i
-							// // tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
-							// point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
-							// point pparaml;
-							// pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ii, iterFaceFieldData_->parametricValue[gg].first);
-
-							// point baryCenterI = (*iterCellFieldData_).baryCenter;
-							// point scaleI = (*iterCellFieldData_).lengthReference;
-							// for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
-							// {
-							// 	momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
-							// }
-							// CfvMath::getDiffBaseValueRBFB1(
-							// 	pparaml,
-							// 	baryCenterI,
-							// 	scaleI,
-							// 	momentI,
-							// 	matrixDiffBaseI,
-							// 	*iterCellFieldData_);
 							auto &matrixDiffBaseII = iterFaceFieldData_->diffBaseValueData[0][gg];
 
 							real uI = (*iterCellFieldData_).scalarVariableTn[0];
@@ -1777,27 +1738,6 @@ namespace ScalarCfv
 						// get the vector on each face Gauss point.
 						for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData_).fPG); ++gg)
 						{
-							// base moment i
-							// tensor1D<real, NDOFS> momentI;
-							// base i
-							// tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
-							// point p = (*iterFaceFieldData_).gaussPairVector_[gg].p;
-							// point pparaml;
-							// pparaml = CfvMath::GetFaceParam((*cellFieldData)[cl - 1].cellType_, ii, iterFaceFieldData_->parametricValue[gg].first);
-
-							// point baryCenterI = (*iterCellFieldData_).baryCenter;
-							// point scaleI = (*iterCellFieldData_).lengthReference;
-							// for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
-							// {
-							// 	momentI[kk] = (*iterCellFieldData_).baseMoment[kk];
-							// }
-							// CfvMath::getDiffBaseValueRBFB1(
-							// 	pparaml,
-							// 	baryCenterI,
-							// 	scaleI,
-							// 	momentI,
-							// 	matrixDiffBaseI,
-							// 	*iterCellFieldData_);
 							auto &matrixDiffBaseII = iterFaceFieldData_->diffBaseValueData[0][gg];
 
 							real uI = (*iterCellFieldData_).scalarVariableTn[0];
@@ -2756,12 +2696,13 @@ namespace ScalarCfv
 		GaussIntegralFaceO1Grid<fO> *gaussIntegralFace)
 	{
 
-		cellFieldDataVector::iterator iterCellFieldData;
-		cellFieldDataVector::iterator iterCellFieldData_;
-		faceFieldDataVector::iterator iterFaceFieldData_;
-
-		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+#pragma omp parallel for schedule(guided)
+		for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 		{
+			cellFieldDataVector::iterator iterCellFieldData;
+			cellFieldDataVector::iterator iterCellFieldData_;
+			faceFieldDataVector::iterator iterFaceFieldData_;
+			iterCellFieldData = cellFieldData->begin() + iCell;
 			tensor1D<real, NDOFSCR> bi;
 			// deal with boundary
 			for (int ff = 1; ff < (*iterCellFieldData).cellFaceNumber + 1; ++ff)

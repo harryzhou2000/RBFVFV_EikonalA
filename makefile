@@ -1,9 +1,9 @@
 
 
-LIB=-lmkl_sequential -lmkl_core -lmkl_intel_lp64
+LIB=-lmkl_sequential -lmkl_core -lmkl_intel_lp64 -fopenmp
 
 # OPT=-g
-OPT= -O3 -g
+OPT= -O3 -g 
 
 OBJ=FieldSolver.o Grid.o Math.o Parameter.o
 
@@ -19,7 +19,7 @@ test2.exe: test2.cpp Math.o
 	$(CPC) $^ -o $@ $(LIB)
 
 %.o: %.cpp
-	$(CPC) $^ -c -o $@ $(OPT)
+	$(CPC) $^ -c -o $@ $(OPT) $(LIB)
 
 .PHONY: clean
 clean:

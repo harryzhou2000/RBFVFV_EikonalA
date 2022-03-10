@@ -99,14 +99,14 @@ namespace RBF
     // auto F1 = Gaussian1;
     // auto F2 = Gaussian2;
     // auto F3 = Gaussian3;
-    auto F0 = MQ0;
-    auto F1 = MQ1;
-    auto F2 = MQ2;
-    auto F3 = MQ3;
-    // auto F0 = PHSpline3P0;
-    // auto F1 = PHSpline3P1;
-    // auto F2 = PHSpline3P2;
-    // auto F3 = PHSpline3P3;
+    // auto F0 = MQ0;
+    // auto F1 = MQ1;
+    // auto F2 = MQ2;
+    // auto F3 = MQ3;
+    auto F0 = PHSpline3P0;
+    auto F1 = PHSpline3P1;
+    auto F2 = PHSpline3P2;
+    auto F3 = PHSpline3P3;
 
     typedef std::function<ScalarCfv::real(ScalarCfv::real, ScalarCfv::real)> functionRBF;
 

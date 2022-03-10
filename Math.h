@@ -14,7 +14,7 @@
 
 namespace CfvMath
 {
-	const ScalarCfv::real crbf = 0.3;
+	const ScalarCfv::real crbf = 1;
 	// getMatrixGeneralInverse just operates with the right down (N-1,N-1) part of A
 	bool getMatrixGeneralInverse(
 		ScalarCfv::tensor2D<ScalarCfv::real, 3, 3> &A,
@@ -184,13 +184,6 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A);
 
-	bool getMomentRBFB1_POLY(
-		ScalarCfv::point p,			 // parametric place
-		ScalarCfv::point baryCenter, // dummy
-		ScalarCfv::point scale,		 // dummy
-		ScalarCfv::tensor1D<ScalarCfv::real, 6> &A,
-		ScalarCfv::cellFieldData &cell); // adding 0
-
 	// rO=3
 	bool getMoment(
 		ScalarCfv::point p,
@@ -285,13 +278,6 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
 		ScalarCfv::tensor2D<ScalarCfv::real, 7, 10> &A);
-	bool getDiffBaseValueRBFB1_POLY(
-		ScalarCfv::point p,			 // parametric place
-		ScalarCfv::point baryCenter, // dummy
-		ScalarCfv::point scale,		 // dummy
-		ScalarCfv::tensor1D<ScalarCfv::real, 6> &moment,
-		ScalarCfv::tensor2D<ScalarCfv::real, 6, 6> &A,
-		ScalarCfv::cellFieldData &cell); // adding 0
 
 	// rO=3
 	bool getDiffBaseValue(
@@ -365,13 +351,7 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &moment,
 		ScalarCfv::tensor1D<ScalarCfv::real, 7> &A);
-	bool getBaseValueRBFB1_POLY(
-		ScalarCfv::point p,			 // parametric place
-		ScalarCfv::point baryCenter, // dummy
-		ScalarCfv::point scale,		 // dummy
-		ScalarCfv::tensor1D<ScalarCfv::real, 6> &moment,
-		ScalarCfv::tensor1D<ScalarCfv::real, 6> &A,
-		ScalarCfv::cellFieldData &cell); // adding 0
+
 	// rO=3
 	bool getBaseValue(
 		ScalarCfv::point p,
@@ -379,6 +359,10 @@ namespace CfvMath
 		ScalarCfv::point scale,
 		ScalarCfv::tensor1D<ScalarCfv::real, 10> &moment,
 		ScalarCfv::tensor1D<ScalarCfv::real, 10> &A);
+	/**
+	 * EXTENDED:
+	 *
+	 */
 
 	//////////////////////////
 	bool getMomentRBFB1_4_3(
@@ -405,7 +389,51 @@ namespace CfvMath
 		ScalarCfv::tensor2D<ScalarCfv::real, 4, 3> &A,
 		ScalarCfv::cellFieldData &cell) // adding 1
 		;
+	bool getMomentRBFB1_POLY(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 6> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
 
+	bool getBaseValueRBFB1_POLY(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 6> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 6> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
+	bool getDiffBaseValueRBFB1_POLY(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 6> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 6, 6> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
+	bool getMomentRBFB1_POLY(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 10> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
+	bool getBaseValueRBFB1_POLY(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 10> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 10> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
+
+	bool getDiffBaseValueRBFB1_POLY(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 10> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 10, 10> &A,
+		ScalarCfv::cellFieldData &cell); // adding 0
 	//////////////////////////
 
 	template <typename T>
@@ -602,6 +630,39 @@ namespace CfvMath
 					C[i][k] += csumA * csumB;
 					// C[i][k] += 0.5 * (csumA * csumB + csumD * csumW);
 					// C[i][k] = 0.67 * C[i][k] + 0.33 * (A[i][3] + A[i][5]) * (B[k][3] + B[k][5]) * (W[3] + W[5]) * (W[3] + W[5]);
+				}
+		else if (jstart == 0 && jend == 10)
+			for (int i = istart; i < iend; i++)
+				for (int k = kstart; k < kend; k++)
+				{
+					C[i][k] += A[i][0] * B[k][0] * W[0] * W[0];
+					ScalarCfv::real csumA = 0.0;
+					ScalarCfv::real csumB = 0.0;
+					ScalarCfv::real csumD = 0.0;
+					ScalarCfv::real csumW = 0.0;
+					for (int j = 1; j < 3; j++)
+					{
+						csumA += A[i][j] * (W[j]);
+						csumB += B[k][j] * (W[j]);
+						csumD += A[i][j] * B[k][j];
+						csumW += W[j] * W[j];
+					}
+					C[i][k] += 0.5 * (csumA * csumB + csumD * csumW);
+					// C[i][k] += csumA * csumB;
+					csumA = csumB = csumD = csumW = 0;
+					for (int j = 3; j < 6; j++)
+					{
+						csumA += A[i][j] * (W[j]);
+						csumB += B[k][j] * (W[j]);
+					}
+					C[i][k] += csumA * csumB;
+					csumA = csumB = csumD = csumW = 0;
+					for (int j = 6; j < 10; j++)
+					{
+						csumA += A[i][j] * (W[j]);
+						csumB += B[k][j] * (W[j]);
+					}
+					C[i][k] += csumA * csumB;
 				}
 		else if (jstart == 0 && jend == 3)
 			for (int i = istart; i < iend; i++)

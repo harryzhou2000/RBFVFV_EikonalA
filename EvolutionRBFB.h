@@ -1054,7 +1054,7 @@ namespace ScalarCfv
 				ftemp = std::min(0.4 / ((rO + 1) * (rO + 1)), std::fabs(1 - dq.length() * dq.length()));
 				if (ftemp < 0.2 / ((rO + 1) * (rO + 1)))
 					ftemp = 0;
-				ftemp *= 4;
+				ftemp *= 10;
 
 				// ftemp = 10.0 * 0.4 / std::pow((rO + 1), 2);
 

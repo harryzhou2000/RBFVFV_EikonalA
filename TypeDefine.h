@@ -2,30 +2,32 @@
 #define _TYPE_DEFINE_H
 #include <vector>
 #include <assert.h>
+#include <omp.h>
 
 // #define USE_RBFA1
 #define USE_RBFB1
 
 #if defined USE_RBFB1
 // #define USE_RBFB1_N
-// #define RBFB1_GlobalPoly
+#define RBFB1_GlobalPoly
 
 #define RBFB1GetMoment CfvMath::getMomentRBFB1_POLY
 #define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_POLY
 #define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_POLY
 
-// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1
-// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1
-// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1
-/*
+// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_POLY
+// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_POLY
+// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_POLY
+
+/***
 with VF=POLY2
 unstable??
 */
-// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_7_3
-// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_7_3
-// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_7_3
+#define RBFB1GetMomentCR CfvMath::getMomentRBFB1_7_3
+#define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_7_3
+#define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_7_3
 
-/*
+/***
 with VF=POLY2
 PHSpline c=1 works, but strange
 */
@@ -33,13 +35,13 @@ PHSpline c=1 works, but strange
 // #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_5_3
 // #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_5_3
 
-/*
+/***
 with VF=POLY2
 MQ c=0.3 works
 */
-#define RBFB1GetMomentCR CfvMath::getMomentRBFB1_4_3
-#define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_4_3
-#define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_4_3
+// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_4_3
+// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_4_3
+// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_4_3
 
 #endif
 
@@ -47,13 +49,13 @@ constexpr int GLOBAL_NDOFS(int O) { return (O + 2) * (O + 1) / 2; }
 //#define NDIFFS  (O + 1 + 2) * (O + 1 + 1) / 2
 constexpr int GLOBAL_NDIFFS(int O) { return (O + 2) * (O + 1) / 2; }
 
-constexpr int GLOBAL_NDOFSCR(int O) { return 4; }
+constexpr int GLOBAL_NDOFSCR(int O) { return 7; }
 constexpr int GLOBAL_NDIFFSCR(int O) { return 3; }
 // #define TRIAL
 // #define DEBUG_RBFB
 // #define USE_RBF
 
-#define rO 2 // reconstruction polynomal order {1,2,3}
+#define rO 3 // reconstruction polynomal order {1,2,3}
 #define fO 5 // face integral order {1,3,5}
 #define vO 3 // volume integral order {1,2,3}
 #define mO 1 // mesh order {1,2}

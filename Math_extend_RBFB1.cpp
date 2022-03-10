@@ -8,7 +8,7 @@
 
 namespace CfvMath
 {
-    ScalarCfv::real rbfScale =  0.5;
+    ScalarCfv::real rbfScale = 1.0;
     /*
 
     3-3
@@ -457,6 +457,351 @@ namespace CfvMath
         return true;
     }
 
+    bool getMomentRBFB1_POLY(
+        ScalarCfv::point p,          // parametric place
+        ScalarCfv::point baryCenter, // dummy
+        ScalarCfv::point scale,      // dummy
+        ScalarCfv::tensor1D<ScalarCfv::real, 10> &A,
+        ScalarCfv::cellFieldData &cell) // adding 0 for rO == 2
+    {
+#ifndef RBFB1_GlobalPoly
+        auto pc = p;
+        pc.x -= 0.5;
+        pc.y -= 0.5;
+        A[1] = pc.x;
+        A[2] = pc.y;
+        A[3] = pc.x * pc.x;
+        A[4] = pc.x * pc.y;
+        A[5] = pc.y * pc.y;
+        A[6] = pc.x * pc.x * pc.x;
+        A[7] = pc.x * pc.x * pc.y;
+        A[8] = pc.x * pc.y * pc.y;
+        A[9] = pc.y * pc.y * pc.y;
+
+#else
+        assert(cell.cellType_ == ScalarCfv::Quadrilateral);
+        Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+        Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+                                             {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+        Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+                                         {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+        Eigen::Vector2d pp = XiNj * Nj;
+        ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+        A[1] = delta.x / scale.x;
+        A[2] = delta.y / scale.y;
+        A[3] = delta.x * delta.x / scale.x / scale.x;
+        A[4] = delta.x * delta.y / scale.x / scale.y;
+        A[5] = delta.y * delta.y / scale.y / scale.y;
+        A[6] = delta.x * delta.x * delta.x / scale.x / scale.x / scale.x;
+        A[7] = delta.x * delta.x * delta.y / scale.x / scale.x / scale.y;
+        A[8] = delta.x * delta.y * delta.y / scale.x / scale.y / scale.y;
+        A[9] = delta.y * delta.y * delta.y / scale.y / scale.y / scale.y;
+#endif
+
+        return true;
+    }
+
+    bool getBaseValueRBFB1_POLY(
+        ScalarCfv::point p,          // parametric place
+        ScalarCfv::point baryCenter, // dummy
+        ScalarCfv::point scale,      // dummy
+        ScalarCfv::tensor1D<ScalarCfv::real, 10> &moment,
+        ScalarCfv::tensor1D<ScalarCfv::real, 10> &A,
+        ScalarCfv::cellFieldData &cell) // adding 0 for rO = 2
+    {
+#ifndef RBFB1_GlobalPoly
+        auto pc = p;
+        pc.x -= 0.5;
+        pc.y -= 0.5;
+        A[1] = pc.x - moment[1];
+        A[2] = pc.y - moment[2];
+        A[3] = pc.x * pc.x - moment[3];
+        A[4] = pc.x * pc.y - moment[4];
+        A[5] = pc.y * pc.y - moment[5];
+        A[6] = pc.x * pc.x * pc.x - moment[6];
+        A[7] = pc.x * pc.x * pc.y - moment[7];
+        A[8] = pc.x * pc.y * pc.y - moment[8];
+        A[9] = pc.y * pc.y * pc.y - moment[9];
+#else
+        assert(cell.cellType_ == ScalarCfv::Quadrilateral);
+        Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+        Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+                                             {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+        Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+                                         {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+        Eigen::Vector2d pp = XiNj * Nj;
+        ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+        A[1] = delta.x / scale.x - moment[1];
+        A[2] = delta.y / scale.y - moment[2];
+        A[3] = delta.x * delta.x / scale.x / scale.x - moment[3];
+        A[4] = delta.x * delta.y / scale.x / scale.y - moment[4];
+        A[5] = delta.y * delta.y / scale.y / scale.y - moment[5];
+        A[6] = delta.x * delta.x * delta.x / scale.x / scale.x / scale.x - moment[6];
+        A[7] = delta.x * delta.x * delta.y / scale.x / scale.x / scale.y - moment[7];
+        A[8] = delta.x * delta.y * delta.y / scale.x / scale.y / scale.y - moment[8];
+        A[9] = delta.y * delta.y * delta.y / scale.y / scale.y / scale.y - moment[9];
+#endif
+
+        return true;
+    }
+
+    bool getDiffBaseValueRBFB1_POLY(
+        ScalarCfv::point p,          // parametric place
+        ScalarCfv::point baryCenter, // dummy
+        ScalarCfv::point scale,      // dummy
+        ScalarCfv::tensor1D<ScalarCfv::real, 10> &moment,
+        ScalarCfv::tensor2D<ScalarCfv::real, 10, 10> &A,
+        ScalarCfv::cellFieldData &cell) // adding 0 for rO = 2
+    {
+        auto pc = p;
+        pc.x -= 0.5;
+        pc.y -= 0.5;
+
+        assert(cell.cellType_ == ScalarCfv::Quadrilateral);
+        Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+        Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+                                             {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+        Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+                                         {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+        Eigen::Matrix2d Jacobi = dNjdetai * XiNj.transpose(); // = dxj/detai
+        Eigen::Matrix2d iJacobi = Jacobi.inverse();           // = detaj/dxi // iJabcobi * dphideetaj = dphidxj
+
+#ifndef RBFB1_GlobalPoly
+        Eigen::Vector2d dphidetaj, dphidxj;
+        Eigen::Matrix2d ddphidetaidetaj, ddphidxidxj;
+        Eigen::ETensorR3<ScalarCfv::real, 2, 2, 2> dddphidetaidetajdetak, dddphidxidxj;
+        ScalarCfv::real dxxx, dxxy, dxyy, dyyy;
+
+        A[1][0] = pc.x - moment[1];
+        A[2][0] = pc.y - moment[2];
+        A[3][0] = pc.x * pc.x - moment[3];
+        A[4][0] = pc.x * pc.y - moment[4];
+        A[5][0] = pc.y * pc.y - moment[5];
+        A[6][0] = pc.x * pc.x * pc.x - moment[6];
+        A[7][0] = pc.x * pc.x * pc.y - moment[7];
+        A[8][0] = pc.x * pc.y * pc.y - moment[8];
+        A[9][0] = pc.y * pc.y * pc.y - moment[9];
+        dphidetaj << 1, 0;
+        dphidxj = iJacobi * dphidetaj;
+        A[1][1] = dphidxj(0);
+        A[1][2] = dphidxj(1);
+        A[1][3] = A[1][4] = A[1][5] = A[1][6] = A[1][7] = A[1][8] = A[1][9] = 0;
+
+        dphidetaj << 0, 1;
+        dphidxj = iJacobi * dphidetaj;
+        A[2][1] = dphidxj(0);
+        A[2][2] = dphidxj(1);
+        A[2][3] = A[2][4] = A[2][5] = A[2][6] = A[2][7] = A[2][8] = A[2][9] = 0;
+
+        dphidetaj << 2 * pc.x, 0;
+        dphidxj = iJacobi * dphidetaj;
+        A[3][1] = dphidxj(0);
+        A[3][2] = dphidxj(1);
+        ddphidetaidetaj << 2, 0, 0, 0;
+        ddphidxidxj = iJacobi * ddphidetaidetaj * iJacobi.transpose();
+        A[3][3] = ddphidxidxj(0, 0);
+        A[3][4] = ddphidxidxj(0, 1);
+        A[3][5] = ddphidxidxj(1, 1);
+        A[3][6] = A[3][7] = A[3][8] = A[3][9] = 0;
+
+        dphidetaj << pc.y, pc.x;
+        dphidxj = iJacobi * dphidetaj;
+        A[4][1] = dphidxj(0);
+        A[4][2] = dphidxj(1);
+        ddphidetaidetaj << 0, 1, 1, 0;
+        ddphidxidxj = iJacobi * ddphidetaidetaj * iJacobi.transpose();
+        A[4][3] = ddphidxidxj(0, 0);
+        A[4][4] = ddphidxidxj(0, 1);
+        A[4][5] = ddphidxidxj(1, 1);
+        A[4][6] = A[4][7] = A[4][8] = A[4][9] = 0;
+
+        dphidetaj << 0, 2 * pc.y;
+        dphidxj = iJacobi * dphidetaj;
+        A[5][1] = dphidxj(0);
+        A[5][2] = dphidxj(1);
+        ddphidetaidetaj << 0, 0, 0, 2;
+        ddphidxidxj = iJacobi * ddphidetaidetaj * iJacobi.transpose();
+        A[5][3] = ddphidxidxj(0, 0);
+        A[5][4] = ddphidxidxj(0, 1);
+        A[5][5] = ddphidxidxj(1, 1);
+        A[5][6] = A[5][7] = A[5][8] = A[5][9] = 0;
+
+        dphidetaj << 3 * pc.x * pc.x, 0;
+        dphidxj = iJacobi * dphidetaj;
+        A[6][1] = dphidxj(0);
+        A[6][2] = dphidxj(1);
+        ddphidetaidetaj << 6 * pc.x, 0, 0, 0;
+        ddphidxidxj = iJacobi * ddphidetaidetaj * iJacobi.transpose();
+        A[6][3] = ddphidxidxj(0, 0);
+        A[6][4] = ddphidxidxj(0, 1);
+        A[6][5] = ddphidxidxj(1, 1);
+        dxxx = 6, dxxy = 0, dxyy = 0, dyyy = 0;
+        dddphidetaidetajdetak(0, 0, 0) = dxxx;
+        dddphidetaidetajdetak(0, 0, 1) = dddphidetaidetajdetak(0, 1, 0) = dddphidetaidetajdetak(1, 0, 0) = dxxy;
+        dddphidetaidetajdetak(0, 1, 1) = dddphidetaidetajdetak(1, 1, 0) = dddphidetaidetajdetak(1, 0, 1) = dxyy;
+        dddphidetaidetajdetak(1, 1, 1) = dyyy;
+        dddphidetaidetajdetak.MatTransform0(iJacobi.transpose());
+        dddphidetaidetajdetak.MatTransform1(iJacobi.transpose());
+        dddphidetaidetajdetak.MatTransform2(iJacobi.transpose());
+        A[6][6] = dddphidetaidetajdetak(0, 0, 0);
+        A[6][7] = dddphidetaidetajdetak(0, 0, 1);
+        A[6][8] = dddphidetaidetajdetak(0, 1, 1);
+        A[6][9] = dddphidetaidetajdetak(1, 1, 1);
+
+        dphidetaj << 2 * pc.x * pc.y, pc.x * pc.x;
+        dphidxj = iJacobi * dphidetaj;
+        A[7][1] = dphidxj(0);
+        A[7][2] = dphidxj(1);
+        ddphidetaidetaj << 2 * pc.y, 2 * pc.x, 2 * pc.x, 0;
+        ddphidxidxj = iJacobi * ddphidetaidetaj * iJacobi.transpose();
+        A[7][3] = ddphidxidxj(0, 0);
+        A[7][4] = ddphidxidxj(0, 1);
+        A[7][5] = ddphidxidxj(1, 1);
+        dxxx = 0, dxxy = 2, dxyy = 0, dyyy = 0;
+        dddphidetaidetajdetak(0, 0, 0) = dxxx;
+        dddphidetaidetajdetak(0, 0, 1) = dddphidetaidetajdetak(0, 1, 0) = dddphidetaidetajdetak(1, 0, 0) = dxxy;
+        dddphidetaidetajdetak(0, 1, 1) = dddphidetaidetajdetak(1, 1, 0) = dddphidetaidetajdetak(1, 0, 1) = dxyy;
+        dddphidetaidetajdetak(1, 1, 1) = dyyy;
+        dddphidetaidetajdetak.MatTransform0(iJacobi.transpose());
+        dddphidetaidetajdetak.MatTransform1(iJacobi.transpose());
+        dddphidetaidetajdetak.MatTransform2(iJacobi.transpose());
+        A[7][6] = dddphidetaidetajdetak(0, 0, 0);
+        A[7][7] = dddphidetaidetajdetak(0, 0, 1);
+        A[7][8] = dddphidetaidetajdetak(0, 1, 1);
+        A[7][9] = dddphidetaidetajdetak(1, 1, 1);
+
+        dphidetaj << pc.y * pc.y, 2 * pc.x * pc.y;
+        dphidxj = iJacobi * dphidetaj;
+        A[8][1] = dphidxj(0);
+        A[8][2] = dphidxj(1);
+        ddphidetaidetaj << 0, 2 * pc.y, 2 * pc.y, 2 * pc.x;
+        ddphidxidxj = iJacobi * ddphidetaidetaj * iJacobi.transpose();
+        A[8][3] = ddphidxidxj(0, 0);
+        A[8][4] = ddphidxidxj(0, 1);
+        A[8][5] = ddphidxidxj(1, 1);
+        dxxx = 0, dxxy = 0, dxyy = 2, dyyy = 0;
+        dddphidetaidetajdetak(0, 0, 0) = dxxx;
+        dddphidetaidetajdetak(0, 0, 1) = dddphidetaidetajdetak(0, 1, 0) = dddphidetaidetajdetak(1, 0, 0) = dxxy;
+        dddphidetaidetajdetak(0, 1, 1) = dddphidetaidetajdetak(1, 1, 0) = dddphidetaidetajdetak(1, 0, 1) = dxyy;
+        dddphidetaidetajdetak(1, 1, 1) = dyyy;
+        dddphidetaidetajdetak.MatTransform0(iJacobi.transpose());
+        dddphidetaidetajdetak.MatTransform1(iJacobi.transpose());
+        dddphidetaidetajdetak.MatTransform2(iJacobi.transpose());
+        A[8][6] = dddphidetaidetajdetak(0, 0, 0);
+        A[8][7] = dddphidetaidetajdetak(0, 0, 1);
+        A[8][8] = dddphidetaidetajdetak(0, 1, 1);
+        A[8][9] = dddphidetaidetajdetak(1, 1, 1);
+
+        dphidetaj << 0, 3 * pc.y * pc.y;
+        dphidxj = iJacobi * dphidetaj;
+        A[9][1] = dphidxj(0);
+        A[9][2] = dphidxj(1);
+        ddphidetaidetaj << 0, 0, 0, 6 * pc.y;
+        ddphidxidxj = iJacobi * ddphidetaidetaj * iJacobi.transpose();
+        A[9][3] = ddphidxidxj(0, 0);
+        A[9][4] = ddphidxidxj(0, 1);
+        A[9][5] = ddphidxidxj(1, 1);
+        dxxx = 0, dxxy = 0, dxyy = 0, dyyy = 6;
+        dddphidetaidetajdetak(0, 0, 0) = dxxx;
+        dddphidetaidetajdetak(0, 0, 1) = dddphidetaidetajdetak(0, 1, 0) = dddphidetaidetajdetak(1, 0, 0) = dxxy;
+        dddphidetaidetajdetak(0, 1, 1) = dddphidetaidetajdetak(1, 1, 0) = dddphidetaidetajdetak(1, 0, 1) = dxyy;
+        dddphidetaidetajdetak(1, 1, 1) = dyyy;
+        dddphidetaidetajdetak.MatTransform0(iJacobi.transpose());
+        dddphidetaidetajdetak.MatTransform0(iJacobi.transpose());
+        dddphidetaidetajdetak.MatTransform0(iJacobi.transpose());
+        A[9][6] = dddphidetaidetajdetak(0, 0, 0);
+        A[9][7] = dddphidetaidetajdetak(0, 0, 1);
+        A[9][8] = dddphidetaidetajdetak(0, 1, 1);
+        A[9][9] = dddphidetaidetajdetak(1, 1, 1);
+#else
+        Eigen::Vector2d pp = XiNj * Nj;
+        ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+        A[1][0] = delta.x / scale.x - moment[1];
+        A[2][0] = delta.y / scale.y - moment[2];
+        A[3][0] = delta.x * delta.x / scale.x / scale.x - moment[3];
+        A[4][0] = delta.x * delta.y / scale.x / scale.y - moment[4];
+        A[5][0] = delta.y * delta.y / scale.y / scale.y - moment[5];
+        A[6][0] = delta.x * delta.x * delta.x / scale.x / scale.x / scale.x - moment[6];
+        A[7][0] = delta.x * delta.x * delta.y / scale.x / scale.x / scale.y - moment[7];
+        A[8][0] = delta.x * delta.y * delta.y / scale.x / scale.y / scale.y - moment[8];
+        A[9][0] = delta.y * delta.y * delta.y / scale.y / scale.y / scale.y - moment[9];
+
+        A[1][1] = 1 / scale.x;
+        A[1][2] = 0;
+        A[1][3] = A[1][4] = A[1][5] = A[1][6] = A[1][7] = A[1][8] = A[1][9] = 0;
+
+        A[2][1] = 0;
+        A[2][2] = 1 / scale.y;
+        A[2][3] = A[2][4] = A[2][5] = A[2][6] = A[2][7] = A[2][8] = A[2][9] = 0;
+
+        A[3][1] = 2 * delta.x / scale.x / scale.x;
+        A[4][1] = delta.y / scale.x / scale.y;
+        A[5][1] = 0;
+        A[6][1] = 3 * delta.x * delta.x / scale.x / scale.x / scale.x;
+        A[7][1] = 2 * delta.x * delta.y / scale.x / scale.x / scale.y;
+        A[8][1] = delta.y * delta.y / scale.x / scale.y / scale.y;
+        A[9][1] = 0;
+
+        A[3][2] = 0;
+        A[4][2] = delta.x / scale.x / scale.y;
+        A[5][2] = 2 * delta.y / scale.y / scale.y;
+        A[6][2] = 0;
+        A[7][2] = delta.x * delta.x / scale.x / scale.x / scale.y;
+        A[8][2] = 2 * delta.x * delta.y / scale.x / scale.y / scale.y;
+        A[9][2] = 3 * delta.y * delta.y / scale.y / scale.y / scale.y;
+
+        A[3][3] = 2 / scale.x / scale.x;
+        A[4][3] = 0;
+        A[5][3] = 0;
+        A[6][3] = 6 * delta.x / scale.x / scale.x / scale.x;
+        A[7][3] = 2 * delta.y / scale.x / scale.x / scale.y;
+        A[8][3] = 0;
+        A[9][3] = 0;
+
+        A[3][4] = 0;
+        A[4][4] = 1 / scale.x / scale.y;
+        A[5][4] = 0;
+        A[6][4] = 0;
+        A[7][4] = 2 * delta.x / scale.x / scale.x / scale.y;
+        A[8][4] = 2 * delta.y / scale.x / scale.y / scale.y;
+        A[9][4] = 0;
+
+        A[3][5] = 0;
+        A[4][5] = 0;
+        A[5][5] = 2 / scale.y / scale.y;
+        A[6][5] = 0;
+        A[7][5] = 0;
+        A[8][5] = 2 * delta.x / scale.x / scale.y / scale.y;
+        A[9][5] = 6 * delta.y / scale.y / scale.y / scale.y;
+
+        A[3][6] = A[3][7] = A[3][8] = A[3][9] = 0;
+        A[4][6] = A[4][7] = A[4][8] = A[4][9] = 0;
+        A[5][6] = A[5][7] = A[5][8] = A[5][9] = 0;
+
+        A[6][6] = 6 / scale.x / scale.x / scale.x;
+        A[7][6] = 0;
+        A[8][6] = 0;
+        A[9][6] = 0;
+
+        A[6][7] = 0;
+        A[7][7] = 2 / scale.x / scale.x / scale.y;
+        A[8][7] = 0;
+        A[9][7] = 0;
+
+        A[6][8] = 0;
+        A[7][8] = 0;
+        A[8][8] = 2 / scale.x / scale.y / scale.y;
+        A[9][8] = 0;
+
+        A[6][9] = 0;
+        A[7][9] = 0;
+        A[8][9] = 0;
+        A[9][9] = 6 / scale.y / scale.y / scale.y;
+
+#endif
+
+        return true;
+    }
 
     ScalarCfv::real B1_QuadP3[3][2] = {{0.2, 0.2}, {0.8, 0.2}, {0.5, 0.8}};
 
@@ -577,7 +922,6 @@ namespace CfvMath
         return true;
     }
 
-
     // ScalarCfv::real B1_QuadP4[4][2] = {{0.45, 0.45}, {0.55, 0.45}, {0.45, 0.55}, {0.55, 0.55}};
     ScalarCfv::real B1_QuadP4[4][2] = {{0.2, 0.2}, {0.2, 0.8}, {0.8, 0.2}, {0.8, 0.8}};
     /*
@@ -585,9 +929,6 @@ namespace CfvMath
     7-6
 
     */
-
-
-
 
     bool getMomentRBFB1_7_6(
         ScalarCfv::point p,          // parametric place
@@ -751,7 +1092,6 @@ namespace CfvMath
         return true;
     }
 
-
     /*
 
     7-3
@@ -856,9 +1196,6 @@ namespace CfvMath
 
         return true;
     }
-
-
-
 
     bool getMomentRBFB1_7_6_P2(
         ScalarCfv::point p,          // parametric place
@@ -1135,4 +1472,3 @@ namespace CfvMath
         return true;
     }
 }
-

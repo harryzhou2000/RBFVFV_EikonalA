@@ -707,25 +707,28 @@ namespace ScalarCfv
 		const int iStep,
 		cellFieldDataVector *cellFieldData)
 	{
-		cellFieldDataVector::iterator iterCellFieldData;
+		// cellFieldDataVector::iterator iterCellFieldData;
 		real cof3[4] = {0.0, 1.0, 0.25, 2.0 / 3.0};
 		if (iStep == 1)
 		{
-			for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+#pragma omp parallel for schedule(static)
+			for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 			{
-				(*iterCellFieldData).scalarVariableTm[0] = (*iterCellFieldData).scalarVariableTn[0];
+				(*cellFieldData)[iCell].scalarVariableTm[0] = (*cellFieldData)[iCell].scalarVariableTn[0];
 			}
 		}
-		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+#pragma omp parallel for schedule(static)
+		for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 		{
-			(*iterCellFieldData).scalarVariableTn[0] =
-				(1.0 - cof3[iStep]) * (*iterCellFieldData).scalarVariableTm[0] + cof3[iStep] * ((*iterCellFieldData).scalarVariableTn[0] + (*iterCellFieldData).dTPhysical * (*iterCellFieldData).timeMarchingRHSTn);
+			(*cellFieldData)[iCell].scalarVariableTn[0] =
+				(1.0 - cof3[iStep]) * (*cellFieldData)[iCell].scalarVariableTm[0] + cof3[iStep] * ((*cellFieldData)[iCell].scalarVariableTn[0] + (*cellFieldData)[iCell].dTPhysical * (*cellFieldData)[iCell].timeMarchingRHSTn);
+			(*cellFieldData)[iCell].timeMarchingRHSRK[iStep] = (*cellFieldData)[iCell].timeMarchingRHSTn;
 		}
 
-		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
-		{
-			(*iterCellFieldData).timeMarchingRHSRK[iStep] = (*iterCellFieldData).timeMarchingRHSTn;
-		}
+		// for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
+		// {
+			
+		// }
 
 		return true;
 	}
@@ -735,37 +738,41 @@ namespace ScalarCfv
 		const int iStep,
 		cellFieldDataVector *cellFieldData)
 	{
-		cellFieldDataVector::iterator iterCellFieldData;
+		// cellFieldDataVector::iterator iterCellFieldData;
 		real cof4[5] = {0.0, 0.5, 0.5, 1.0, 1.0 / 6.0};
 		if (iStep == 1)
 		{
-			for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+#pragma omp parallel for schedule(static)
+			for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 			{
-				(*iterCellFieldData).scalarVariableTm[0] = (*iterCellFieldData).scalarVariableTn[0];
+				(*cellFieldData)[iCell].scalarVariableTm[0] = (*cellFieldData)[iCell].scalarVariableTn[0];
 			}
 		}
 		if (iStep < 4)
 		{
-			for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+#pragma omp parallel for schedule(static)
+			for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 			{
-				(*iterCellFieldData).scalarVariableTn[0] =
-					(1.0 - cof4[iStep]) * (*iterCellFieldData).scalarVariableTm[0] + cof4[iStep] * ((*iterCellFieldData).scalarVariableTn[0] + (*iterCellFieldData).dTPhysical * (*iterCellFieldData).timeMarchingRHSTn);
+				(*cellFieldData)[iCell].scalarVariableTn[0] =
+					(1.0 - cof4[iStep]) * (*cellFieldData)[iCell].scalarVariableTm[0] + cof4[iStep] * ((*cellFieldData)[iCell].scalarVariableTn[0] + (*cellFieldData)[iCell].dTPhysical * (*cellFieldData)[iCell].timeMarchingRHSTn);
+				(*cellFieldData)[iCell].timeMarchingRHSRK[iStep] = (*cellFieldData)[iCell].timeMarchingRHSTn;
 			}
-			for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
-			{
-				(*iterCellFieldData).timeMarchingRHSRK[iStep] = (*iterCellFieldData).timeMarchingRHSTn;
-			}
+			// for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+			// {
+				
+			// }
 		}
 		else if (iStep == 4)
 		{
-			for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+#pragma omp parallel for schedule(static)
+			for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 			{
-				(*iterCellFieldData).scalarVariableTn[0] =
-					(*iterCellFieldData).scalarVariableTm[0] + cof4[iStep] * (*iterCellFieldData).dTPhysical * ((*iterCellFieldData).timeMarchingRHSTn			  // current result,	<-> (4)
-																												+ (*iterCellFieldData).timeMarchingRHSRK[1]		  // Tm result,		<-> (1)
-																												+ 2.0 * (*iterCellFieldData).timeMarchingRHSRK[2] // Tm+(1) result,	<-> (2)
-																												+ 2.0 * (*iterCellFieldData).timeMarchingRHSRK[3] // Tm+(2) result,	<-> (3)
-																											   );
+				(*cellFieldData)[iCell].scalarVariableTn[0] =
+					(*cellFieldData)[iCell].scalarVariableTm[0] + cof4[iStep] * (*cellFieldData)[iCell].dTPhysical * ((*cellFieldData)[iCell].timeMarchingRHSTn			   // current result,	<-> (4)
+																													  + (*cellFieldData)[iCell].timeMarchingRHSRK[1]	   // Tm result,		<-> (1)
+																													  + 2.0 * (*cellFieldData)[iCell].timeMarchingRHSRK[2] // Tm+(1) result,	<-> (2)
+																													  + 2.0 * (*cellFieldData)[iCell].timeMarchingRHSRK[3] // Tm+(2) result,	<-> (3)
+																													 );
 			}
 		}
 		return true;

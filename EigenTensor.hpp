@@ -56,8 +56,8 @@ namespace Eigen
             return Map02(data + i1 * stride1);
         }
 
-        template <class TDerived>
-        void MatTransform0(const DenseBase<TDerived> &Rmat)
+        template <class Tmat>
+        void MatTransform0(const Tmat &Rmat)
         {
             assert(Rmat.cols() == Rmat.rows() && Rmat.rows() == d0);
             for (Index i2 = 0; i2 < d2; i2++)
@@ -67,8 +67,8 @@ namespace Eigen
             }
         }
 
-        template <class TDerived>
-        void MatTransform1(const DenseBase<TDerived> &Rmat)
+        template <class Tmat>
+        void MatTransform1(const Tmat &Rmat)
         {
             assert(Rmat.cols() == Rmat.rows() && Rmat.rows() == d1);
             for (Index i2 = 0; i2 < d2; i2++)
@@ -78,8 +78,8 @@ namespace Eigen
             }
         }
 
-        template <class TDerived>
-        void MatTransform2(const MatrixBase<TDerived> &Rmat)
+        template <class Tmat>
+        void MatTransform2(const Tmat &Rmat)
         {
             assert(Rmat.cols() == Rmat.rows() && Rmat.rows() == d2);
             for (Index i0 = 0; i0 < d0; i0++)
