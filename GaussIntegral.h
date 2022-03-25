@@ -133,23 +133,25 @@ namespace ScalarCfv
 			(*iterGaussData).sideOff = (*iterFace).sideOff;
 
 
-			switch (OG){
-			case 1:
-				(*iterGaussData).PG.resize(1 + 1);
-				(*iterGaussData).PG[1] = (OG + 1) / 2;
-				break;
-			case 3:
-				(*iterGaussData).PG.resize(3 + 1);
-				(*iterGaussData).PG[3] = (OG + 1) / 2;
-				break;
-			case 5:
-				(*iterGaussData).PG.resize(5 + 1);
-				(*iterGaussData).PG[5] = (OG + 1) / 2;
-				break;
-			default:
-				std::cout << "	error: currently only support PG from 1-3!" << std::endl;
-				exit(1);
-			}
+			// switch (OG){
+			// case 1:
+			// 	(*iterGaussData).PG.resize(1 + 1);
+			// 	(*iterGaussData).PG[1] = (OG + 1) / 2;
+			// 	break;
+			// case 3:
+			// 	(*iterGaussData).PG.resize(3 + 1);
+			// 	(*iterGaussData).PG[3] = (OG + 1) / 2;
+			// 	break;
+			// case 5:
+			// 	(*iterGaussData).PG.resize(5 + 1);
+			// 	(*iterGaussData).PG[5] = (OG + 1) / 2;
+			// 	break;
+			// default:
+			// 	std::cout << "	error: currently only support PG from 1-3!" << std::endl;
+			// 	exit(1);
+			// }
+			(*iterGaussData).PG.resize(OG + 1);
+			(*iterGaussData).PG[OG] = (OG + 1) / 2;
 
 			(*iterGaussData).parametricValue.resize((*iterGaussData).PG[OG]);
 
@@ -279,6 +281,16 @@ namespace ScalarCfv
 				(*iterGaussData).parametricValue[1].second = 0.888888888888888*0.5;
 				(*iterGaussData).parametricValue[2].first.x = (0.774596669241483 + 1)*0.5;
 				(*iterGaussData).parametricValue[2].second = 0.555555555555555*0.5;
+				break;
+			case 7:
+				(*iterGaussData).parametricValue[0].first.x = (-0.861136311594054 + 1) * 0.5;
+				(*iterGaussData).parametricValue[0].second = 0.347854845137452 * 0.5;
+				(*iterGaussData).parametricValue[1].first.x = (-0.339981043584857 + 1) * 0.5;
+				(*iterGaussData).parametricValue[1].second = 0.652145154862546 * 0.5;
+				(*iterGaussData).parametricValue[2].first.x = (0.339981043584857 + 1) * 0.5;
+				(*iterGaussData).parametricValue[2].second = 0.652145154862546 * 0.5;
+				(*iterGaussData).parametricValue[3].first.x = (0.861136311594054 + 1) * 0.5;
+				(*iterGaussData).parametricValue[3].second = 0.347854845137452 * 0.5;
 				break;
 			default:
 				std::cout << "	error: currently only support PG from 1-3!" << std::endl;

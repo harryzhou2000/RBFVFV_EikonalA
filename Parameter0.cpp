@@ -3,29 +3,47 @@
 
 namespace ScalarCfv
 {
-	extern std::string fileIn_Mesh("D:/calculations/new_test/grid.in");
-	//		extern std::string fileIn_Mesh("D:/calculations/new_test/grid_o2.in");
-	extern std::string fileOut_Mesh("D:/calculations/new_test/grid.plt");
-	//extern std::string fileIn_Parameter("D:/calculations/new_test/inputParameters.txt");
-	extern std::string fileIn_Parameter("D:/calculations/new_test/inputParameters_notes.txt");
-	extern std::string fileOut_debug_sln("D:/calculations/new_test/sln.plt");
+	// extern std::string fileIn_Mesh("D:/calculations/new_test/grid.in");
+	// //		extern std::string fileIn_Mesh("D:/calculations/new_test/grid_o2.in");
+	// extern std::string fileOut_Mesh("D:/calculations/new_test/grid.plt");
+	// //extern std::string fileIn_Parameter("D:/calculations/new_test/inputParameters.txt");
+	// extern std::string fileIn_Parameter("D:/calculations/new_test/inputParameters_notes.txt");
+	// extern std::string fileOut_debug_sln("D:/calculations/new_test/sln.plt");
 
-	extern std::string fileIn_BackUp("D:/calculations/new_test/sln.sav");
-	extern std::string fileOut_BackUp("D:/calculations/new_test/sln.sav");
-	extern std::string fileOut_Sln("D:/calculations/new_test/sln");
-	extern std::string fileOut_Residual("D:/calculations/new_test/residual.txt");
-	//debug
-	//extern std::string fileOut_debug("D:/calculations/new_test/debug.txt");
-	extern std::string fileOut_debug("D:/calculations/new_test/debug.plt");
-	extern std::string fileOut_debug_dsln("D:/calculations/new_test/dsln.plt");
+	// extern std::string fileIn_BackUp("D:/calculations/new_test/sln.sav");
+	// extern std::string fileOut_BackUp("D:/calculations/new_test/sln.sav");
+	// extern std::string fileOut_Sln("D:/calculations/new_test/sln");
+	// extern std::string fileOut_Residual("D:/calculations/new_test/residual.txt");
+	// //debug
+	// //extern std::string fileOut_debug("D:/calculations/new_test/debug.txt");
+	// extern std::string fileOut_debug("D:/calculations/new_test/debug.plt");
+	// extern std::string fileOut_debug_dsln("D:/calculations/new_test/dsln.plt");
 
-	extern std::string fileOut_Error("D:/calculations/new_test/error.txt");
+	// extern std::string fileOut_Error("D:/calculations/new_test/error.txt");
+
+	// extern std::string fileIn_Mesh("Cases/test/grid.in");
+	// //		extern std::string fileIn_Mesh("D:/calculations/new_test/grid_o2.in");
+	// extern std::string fileOut_Mesh("Cases/test/grid.plt");
+	// //extern std::string fileIn_Parameter("D:/calculations/new_test/inputParameters.txt");
+	// extern std::string fileIn_Parameter("Cases/test/inputParameters_notes.txt");
+	// extern std::string fileOut_debug_sln("Cases/test/sln.plt");
+
+	// extern std::string fileIn_BackUp("Cases/test/sln.sav");
+	// extern std::string fileOut_BackUp("Cases/test/sln.sav");
+	// extern std::string fileOut_Sln("Cases/test/sln");
+	// extern std::string fileOut_Residual("Cases/test/residual.txt");
+	// //debug
+	// //extern std::string fileOut_debug("D:/calculations/new_test/debug.txt");
+	// extern std::string fileOut_debug("Cases/test/debug.plt");
+	// extern std::string fileOut_debug_dsln("Cases/test/dsln.plt");
+
+	// extern std::string fileOut_Error("Cases/test/error.txt");
 
 	bool parameter::readParameterFile(const std::string & filename){
 #define IF_NOTES
 
 #ifdef IF_NOTES
-		real inputParameters[50];//×î¶à¿ÉÒÔÊäÈë50¸ö²ÎÊý
+		real inputParameters[50];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½50ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		std::ifstream fileIn;
 		fileIn.open(filename.c_str());
 		if (!fileIn){

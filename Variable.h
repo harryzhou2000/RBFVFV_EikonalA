@@ -5,6 +5,7 @@
 //#include "Point.h"
 //#include "Tensor.h"
 #include <cmath>
+#include "Eigen/Dense"
 
 namespace ScalarCfv
 {
@@ -103,6 +104,8 @@ namespace ScalarCfv
 		std::vector<std::vector<std::vector<real>>> diffBaseValueData; // at gauss points
 		std::vector<std::vector<std::vector<real>>> diffBaseValueDataCR; // at gauss points
 		std::vector<std::vector<real>> diffBaseValueDataBary;
+
+		Eigen::Matrix2d MeanIJ;
 	};
 
 	typedef std::vector<cellFieldData> cellFieldDataVector;
@@ -126,7 +129,10 @@ namespace ScalarCfv
 
 		std::vector<std::vector<std::vector<std::vector<real>>>> diffBaseValueData;// at gaussian points
 		std::vector<std::vector<std::vector<std::vector<real>>>> diffBaseValueDataCR; // at gaussian points
-		std::vector<std::vector<std::vector<real>>> diffBaseValueDataMid; 
+		std::vector<std::vector<std::vector<real>>> diffBaseValueDataMid;
+		// std::vector<Eigen::Matrix2d> interFacialJacobi;
+		Eigen::Matrix2d interFacialJacobi;
+
 	};
 	typedef std::vector<faceFieldData> faceFieldDataVector;
 }

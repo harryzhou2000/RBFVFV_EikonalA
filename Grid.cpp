@@ -84,7 +84,7 @@ namespace ScalarCfv
 			auto x = (*iterNode).nodePhysical.x, y = (*iterNode).nodePhysical.y;
 
 			// DEBUG: rotate the grid 
-			real theta = 1.0 * std::acos(-1) / 4.0;
+			real theta = 1.0/45.0*double(GRID_ROT) * std::acos(-1) / 4.0;
 			(*iterNode).nodePhysical.x = std::cos(theta) * x + std::sin(theta) * y;
 			(*iterNode).nodePhysical.y = -std::sin(theta) * x + std::cos(theta) * y;
 			++ii;

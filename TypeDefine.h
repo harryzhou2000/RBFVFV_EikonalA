@@ -8,24 +8,57 @@
 #define USE_RBFB1
 
 #if defined USE_RBFB1
+// #define RBFB1_CR_DIFFBOUND
+// #define RBFB1_CR_DIFFDIM 0.1
+// #define RBFB1_INCREMENT_CR
 // #define USE_RBFB1_N
-#define RBFB1_GlobalPoly
+// #define RBFB1_GlobalPoly
+// #define RBFB1_GlobalPoly_ESC // for vfv functional research
+
+#define RBFB1_USE_UNITARY_MEANIJ
+// #define RBFB1_USE_DELTA_Jacobi_INTERFACEJ
+// #define RBFB1_USE_DELTA_NT_INTERFACEJ
+#define RBFB1_USE_DELTA_INTERFACEJ	
+
+#define RBFB1_RBF_USE_MEANIJ
+// #define RBFB1_POLY_USE_MEANIJ
+
+#define RBFB1_AR0 4
+
+
+#define GRID_ROT 0
 
 #define RBFB1GetMoment CfvMath::getMomentRBFB1_POLY
 #define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_POLY
 #define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_POLY
 
+// #define RBFB1GetMoment CfvMath::getMomentRBFB1_7_6
+// #define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_7_6
+// #define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_7_6
+
+// #define RBFB1GetMoment CfvMath::getMomentRBFB1_4_6
+// #define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_4_6
+// #define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_4_6
+
 // #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_POLY
 // #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_POLY
 // #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_POLY
+
+// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_7_6
+// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_7_6
+// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_7_6
+
+// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_4_6
+// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_4_6
+// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_4_6
 
 /***
 with VF=POLY2
 unstable??
 */
-#define RBFB1GetMomentCR CfvMath::getMomentRBFB1_7_3
-#define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_7_3
-#define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_7_3
+// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_7_3
+// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_7_3
+// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_7_3
 
 /***
 with VF=POLY2
@@ -39,23 +72,30 @@ PHSpline c=1 works, but strange
 with VF=POLY2
 MQ c=0.3 works
 */
-// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_4_3
-// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_4_3
-// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_4_3
+#define RBFB1GetMomentCR CfvMath::getMomentRBFB1_4_3
+#define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_4_3
+#define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_4_3
 
+
+#define RBFB1_CRBF  0.3
 #endif
 
-constexpr int GLOBAL_NDOFS(int O) { return (O + 2) * (O + 1) / 2; }
-//#define NDIFFS  (O + 1 + 2) * (O + 1 + 1) / 2
-constexpr int GLOBAL_NDIFFS(int O) { return (O + 2) * (O + 1) / 2; }
+// constexpr int GLOBAL_NDOFS(int O) { return (O + 2) * (O + 1) / 2; }
+// constexpr int GLOBAL_NDIFFS(int O) { return (O + 2) * (O + 1) / 2; }
 
-constexpr int GLOBAL_NDOFSCR(int O) { return 7; }
+constexpr int GLOBAL_NDOFS(int O) { return 6; }
+constexpr int GLOBAL_NDIFFS(int O) { return 6; }
+
+constexpr int GLOBAL_NDOFSCR(int O) { return 4; }
 constexpr int GLOBAL_NDIFFSCR(int O) { return 3; }
+
+// constexpr int GLOBAL_NDOFSCR(int O) { return (O + 2) * (O + 1) / 2; }
+// constexpr int GLOBAL_NDIFFSCR(int O) { return (O + 2) * (O + 1) / 2; }
 // #define TRIAL
 // #define DEBUG_RBFB
 // #define USE_RBF
 
-#define rO 3 // reconstruction polynomal order {1,2,3}
+#define rO 1 // reconstruction polynomal order {1,2,3}
 #define fO 5 // face integral order {1,3,5}
 #define vO 3 // volume integral order {1,2,3}
 #define mO 1 // mesh order {1,2}

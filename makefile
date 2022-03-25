@@ -2,8 +2,9 @@
 
 LIB=-lmkl_sequential -lmkl_core -lmkl_intel_lp64 -fopenmp
 
-# OPT=-g
-OPT= -O3 -g 
+OPT=-g
+# OPT= -O3 -g 
+OPT= -O3 -DNDEBUG
 
 OBJ=FieldSolver.o Grid.o Math.o Parameter.o
 

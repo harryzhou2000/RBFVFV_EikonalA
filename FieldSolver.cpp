@@ -423,6 +423,7 @@ namespace ScalarCfv
 			{
 				for (int isubrk = 1; isubrk <= parameter_->nInnerStepTimeMarching; ++isubrk)
 				{
+					for (int irec = 1; irec <= 1; irec++)
 					reconstruction_->excuteReconstruction(
 						parameter_,
 						cellFieldData_,
@@ -592,6 +593,7 @@ namespace ScalarCfv
 			{
 				for (int isubrk = 1; isubrk <= parameter_->nInnerStepTimeMarching; ++isubrk)
 				{
+					// for (int irec = 1; irec <= 3; irec++)
 					reconstruction_->excuteReconstruction(
 						parameter_,
 						cellFieldData_,
@@ -1295,7 +1297,7 @@ namespace ScalarCfv
 			// base moment i
 			tensor1D<real, NDOFS> momentI;
 			// base i
-			tensor2D<real, NDOFS, NDOFS> matrixDiffBaseI;
+			tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 			point p = (*iterCell).baryCenter;
 			point baryCenterI = (*iterCell).baryCenter;
 			point scaleI = (*iterCell).lengthReference;
@@ -1305,12 +1307,7 @@ namespace ScalarCfv
 			}
 
 #ifndef USE_RBFB1_N
-			CfvMath::getDiffBaseValue(
-				p,
-				baryCenterI,
-				scaleI,
-				momentI,
-				matrixDiffBaseI);
+
 #ifdef USE_RBFB1
 			assert(iterCell->cellType_ == Quadrilateral);
 			RBFB1GetDiffBaseValue(
@@ -1320,6 +1317,13 @@ namespace ScalarCfv
 				momentI,
 				matrixDiffBaseI,
 				*iterCell);
+#else
+			CfvMath::getDiffBaseValue(
+				p,
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI);
 #endif
 
 #else
@@ -1407,7 +1411,7 @@ namespace ScalarCfv
 			// base moment i
 			tensor1D<real, NDOFS> momentI;
 			// base i
-			tensor2D<real, NDOFS, NDOFS> matrixDiffBaseI;
+			tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 			point p = (*iterCell).baryCenter;
 			point baryCenterI = (*iterCell).baryCenter;
 			point scaleI = (*iterCell).lengthReference;
@@ -1458,7 +1462,7 @@ namespace ScalarCfv
 			// base moment i
 			tensor1D<real, NDOFS> momentI;
 			// base i
-			tensor2D<real, NDOFS, NDOFS> matrixDiffBaseI;
+			tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 			point p = (*iterCell).baryCenter;
 			point baryCenterI = (*iterCell).baryCenter;
 			point scaleI = (*iterCell).lengthReference;
@@ -1501,7 +1505,7 @@ namespace ScalarCfv
 			// base moment i
 			tensor1D<real, NDOFS> momentI;
 			// base i
-			tensor2D<real, NDOFS, NDOFS> matrixDiffBaseI;
+			tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
 			point p = (*iterCell).baryCenter;
 			point baryCenterI = (*iterCell).baryCenter;
 			point scaleI = (*iterCell).lengthReference;
