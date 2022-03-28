@@ -79,20 +79,38 @@ namespace ScalarCfv
 		std::vector<real> baseMoment;
 		std::vector<real> baseMomentCR;
 
-		std::vector<real> scalarVariableTn; // current time step , inlcude the multistep time marching methods, Tn means the newest values
-		std::vector<real> scalarVariableTm; // previous time step
-		std::vector<real> scalarVariableTnLimited;
-		std::vector<real> scalarVariableTnCR;
-		std::vector<real> scalarVariableTnCRLimited;
-		std::vector<real> deltaScalarVariableTn;
-		std::vector<real> deltaScalarVariableTm;
+		Eigen::VectorXd scalarVariableTn;
+		Eigen::VectorXd scalarVariableTm;
+		Eigen::VectorXd scalarVariableTnLimited;
+		Eigen::VectorXd scalarVariableTnCR;
+		Eigen::VectorXd scalarVariableTnCRLimited;
+		Eigen::VectorXd deltaScalarVariableTn;
+		Eigen::VectorXd deltaScalarVariableTm;
 
-		std::vector<std::vector<real>> vectorbij;
-		std::vector<std::vector<real>> vectorAiiInversebij;
-		std::vector<std::vector<real>> matrixAiiInverse;
-		std::vector<std::vector<real>> matrixAii;
-		std::vector<std::vector<std::vector<real>>> matrixBij;
-		std::vector<std::vector<std::vector<real>>> matrixAiiInverseBij;
+		// std::vector<real> scalarVariableTn; // current time step , inlcude the multistep time marching methods, Tn means the newest values
+		// std::vector<real> scalarVariableTm; // previous time step
+		// std::vector<real> scalarVariableTnLimited;
+		// std::vector<real> scalarVariableTnCR;
+		// std::vector<real> scalarVariableTnCRLimited;
+		// std::vector<real> deltaScalarVariableTn;
+		// std::vector<real> deltaScalarVariableTm;
+
+		// std::vector<std::vector<real>> vectorbij;
+		Eigen::Matrix<real,-1,-1> vectorbij;
+		// std::vector<std::vector<real>> vectorAiiInversebij;
+		Eigen::Matrix<real,-1,-1> vectorAiiInversebij;
+		// std::vector<std::vector<real>> matrixAiiInverse;
+		Eigen::Matrix<real,-1,-1> matrixAiiInverse;
+		// std::vector<std::vector<real>> matrixAii;
+		Eigen::Matrix<real, -1, -1> matrixAii;
+
+		// std::vector<std::vector<std::vector<real>>> matrixBij;
+		// std::vector<std::vector<std::vector<real>>> matrixAiiInverseBij;
+		std::vector<Eigen::Matrix<real, -1, -1>> matrixBij;
+		std::vector<Eigen::Matrix<real, -1, -1>> matrixAiiInverseBij;
+
+
+
 		std::vector<std::vector<real>> matrixAiiInverseCR;
 		std::vector<std::vector<real>> matrixAiiCR;
 		std::vector<std::vector<std::vector<real>>> matrixBijCR; // CR�ƺ�����Ҫ

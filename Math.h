@@ -4,8 +4,6 @@
 #include <iostream>
 #include <iomanip>
 #include <stdlib.h>
-#include "mkl_cblas.h"
-#include "mkl_lapacke.h"
 #include "TypeDefine.h"
 #include "Tensor.h"
 #include "Point.h"
@@ -655,6 +653,19 @@ namespace CfvMath
 		}
 	}
 
+	// single Eigen
+	template <class TA, class TB, class TC>
+	void VEMatVec(TA &A, const TB &b, TC &c,
+				  int istart, int iend, int jstart, int jend, bool clear = true)
+	{
+		if (clear)
+			for (int i = istart; i < iend; i++)
+				c[i] = 0.0;
+		for (int i = istart; i < iend; i++)
+			for (int j = jstart; j < jend; j++)
+				c[i] += A[i][j] * b(j);
+	}
+
 	// B = A
 	template <class TA, class TB>
 	void VVMatCopy(TA &A, TB &B, int istart, int iend, int jstart, int jend)
@@ -670,6 +681,14 @@ namespace CfvMath
 	{
 		for (int i = istart; i < iend; i++)
 			B[i] = A[i];
+	}
+
+	// B = A // single Eigen
+	template <class TA, class TB>
+	void VEVecMatCopy(TA &A, TB &B, int brow, int istart, int iend)
+	{
+		for (int i = istart; i < iend; i++)
+			B(brow,i) = A[i];
 	}
 
 	// B = alpha * A

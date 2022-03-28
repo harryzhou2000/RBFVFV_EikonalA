@@ -919,9 +919,10 @@ namespace ScalarCfv
 					iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 					for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 						for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-							(*iterCellFieldData_).matrixBij[cc][ll][rr] = Bij[ll][rr];
+							(*iterCellFieldData_).matrixBij[cc](ll,rr) = Bij[ll][rr];
 						}
-						(*iterCellFieldData_).vectorbij[cc][ll] = bi[ll];
+						// (*iterCellFieldData_).vectorbij[cc][ll] = bi[ll];
+						(*iterCellFieldData_).vectorbij(cc,ll) = bi[ll];
 					}
 					delete[] fII;
 					delete[] fIJ;
@@ -1157,7 +1158,7 @@ namespace ScalarCfv
 			//assign Aii 
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).matrixAii[ll][rr] = Aii[ll][rr];
+					(*iterCellFieldData).matrixAii(ll,rr) = Aii[ll][rr];
 				}
 			}
 			tensor2D<real, NDOFS, NDOFS> inverseAii;
@@ -1165,7 +1166,7 @@ namespace ScalarCfv
 			//assign inverse Aii 
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).matrixAiiInverse[ll][rr] = inverseAii[ll][rr];
+					(*iterCellFieldData).matrixAiiInverse(ll,rr) = inverseAii[ll][rr];
 				}
 			}
 			//assign inverseAii*Bij & inverseAii*bi, for convenient calculation 
@@ -1173,19 +1174,21 @@ namespace ScalarCfv
 				//assign inverseAii*Bij
 				for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 					for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-						(*iterCellFieldData).matrixAiiInverseBij[cc][ll][rr] = 0.0;
+						(*iterCellFieldData).matrixAiiInverseBij[cc](ll,rr) = 0.0;
 						for (int pp = 1; pp < static_cast<int>(NDOFS); ++pp){
-							(*iterCellFieldData).matrixAiiInverseBij[cc][ll][rr] +=
-								inverseAii[ll][pp] * (*iterCellFieldData).matrixBij[cc][pp][rr];
+							(*iterCellFieldData).matrixAiiInverseBij[cc](ll,rr) +=
+								inverseAii[ll][pp] * (*iterCellFieldData).matrixBij[cc](pp,rr);
 						}
 					}
 				}
 				//assign inverseAii*bi
 				for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
-					(*iterCellFieldData).vectorAiiInversebij[cc][ll] = 0.0;
+					(*iterCellFieldData).vectorAiiInversebij(cc,ll) = 0.0;
 					for (int pp = 1; pp < static_cast<int>(NDOFS); ++pp){
-						(*iterCellFieldData).vectorAiiInversebij[cc][ll] +=
-							inverseAii[ll][pp] * (*iterCellFieldData).vectorbij[cc][pp];
+						// (*iterCellFieldData).vectorAiiInversebij[cc][ll] +=
+						// 	inverseAii[ll][pp] * (*iterCellFieldData).vectorbij[cc][pp];
+						(*iterCellFieldData).vectorAiiInversebij(cc,ll) +=
+							inverseAii[ll][pp] * (*iterCellFieldData).vectorbij(cc,pp);
 					}
 				}
 			}
@@ -1504,9 +1507,10 @@ namespace ScalarCfv
 					iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 					for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 						for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-							(*iterCellFieldData_).matrixBij[cc][ll][rr] = Bij[ll][rr];
+							(*iterCellFieldData_).matrixBij[cc](ll,rr) = Bij[ll][rr];
 						}
-						(*iterCellFieldData_).vectorbij[cc][ll] = bi[ll];
+						// (*iterCellFieldData_).vectorbij[cc][ll] = bi[ll];
+						(*iterCellFieldData_).vectorbij(cc,ll) = bi[ll];
 					}
 					delete[] fII;
 					delete[] fIJ;
@@ -1742,7 +1746,7 @@ namespace ScalarCfv
 			//assign Aii 
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).matrixAii[ll][rr] = Aii[ll][rr];
+					(*iterCellFieldData).matrixAii(ll,rr) = Aii[ll][rr];
 				}
 			}
 			tensor2D<real, NDOFS, NDOFS> inverseAii;
@@ -1750,7 +1754,7 @@ namespace ScalarCfv
 			//assign inverse Aii 
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).matrixAiiInverse[ll][rr] = inverseAii[ll][rr];
+					(*iterCellFieldData).matrixAiiInverse(ll,rr) = inverseAii[ll][rr];
 				}
 			}
 			//assign inverseAii*Bij & inverseAii*bi, for convenient calculation 
@@ -1758,19 +1762,21 @@ namespace ScalarCfv
 				//assign inverseAii*Bij
 				for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 					for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-						(*iterCellFieldData).matrixAiiInverseBij[cc][ll][rr] = 0.0;
+						(*iterCellFieldData).matrixAiiInverseBij[cc](ll,rr) = 0.0;
 						for (int pp = 1; pp < static_cast<int>(NDOFS); ++pp){
-							(*iterCellFieldData).matrixAiiInverseBij[cc][ll][rr] +=
-								inverseAii[ll][pp] * (*iterCellFieldData).matrixBij[cc][pp][rr];
+							(*iterCellFieldData).matrixAiiInverseBij[cc](ll,rr) +=
+								inverseAii[ll][pp] * (*iterCellFieldData).matrixBij[cc](pp,rr);
 						}
 					}
 				}
 				//assign inverseAii*bi
 				for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
-					(*iterCellFieldData).vectorAiiInversebij[cc][ll] = 0.0;
+					(*iterCellFieldData).vectorAiiInversebij(cc,ll) = 0.0;
 					for (int pp = 1; pp < static_cast<int>(NDOFS); ++pp){
-						(*iterCellFieldData).vectorAiiInversebij[cc][ll] +=
-							inverseAii[ll][pp] * (*iterCellFieldData).vectorbij[cc][pp];
+						// (*iterCellFieldData).vectorAiiInversebij[cc][ll] +=
+						// 	inverseAii[ll][pp] * (*iterCellFieldData).vectorbij[cc][pp];
+						(*iterCellFieldData).vectorAiiInversebij(cc,ll) +=
+							inverseAii[ll][pp] * (*iterCellFieldData).vectorbij(cc,pp);
 					}
 				}
 			}
@@ -1808,7 +1814,7 @@ namespace ScalarCfv
 					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
 						real sumLocal = 0.0;
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk){
-							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii][jj][kk] * (*iterCellFieldData_).scalarVariableTn[kk];
+							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii](jj,kk) * (*iterCellFieldData_).scalarVariableTn[kk];
 						}
 						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;//+ means sum of neighbour cells
 					}
@@ -1818,7 +1824,7 @@ namespace ScalarCfv
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
 					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
-						real sumLocal = (*iterCellFieldData).vectorAiiInversebij[ii][jj] *
+						real sumLocal = (*iterCellFieldData).vectorAiiInversebij(ii,jj) *
 							((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
 						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;//+ means sum of neighbour cells
 					}
@@ -2048,7 +2054,7 @@ namespace ScalarCfv
 					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
 						real sumLocal = 0.0;
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk){
-							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii][jj][kk] * (*iterCellFieldData_).scalarVariableTn[kk];
+							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii](jj,kk) * (*iterCellFieldData_).scalarVariableTn[kk];
 						}
 						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
 					}
@@ -2058,7 +2064,7 @@ namespace ScalarCfv
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
 					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
-						real sumLocal = (*iterCellFieldData).vectorAiiInversebij[ii][jj] *
+						real sumLocal = (*iterCellFieldData).vectorAiiInversebij(ii,jj) *
 							((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
 						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
 					}
@@ -2067,7 +2073,7 @@ namespace ScalarCfv
 				for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
 					real sumLocal = 0.0;
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk){
-						sumLocal += (*iterCellFieldData).matrixAiiInverse[jj][kk] * vectorBoundaryCorrection[kk];
+						sumLocal += (*iterCellFieldData).matrixAiiInverse(jj,kk) * vectorBoundaryCorrection[kk];
 					}
 					(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
 				}
@@ -2105,7 +2111,7 @@ namespace ScalarCfv
 					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
 						real sumLocal = 0.0;
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk){
-							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii][jj][kk] * (*iterCellFieldData_).scalarVariableTn[kk];
+							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii](jj,kk) * (*iterCellFieldData_).scalarVariableTn[kk];
 						}
 						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;//+ means sum of neighbour cells
 						//---------------------------------
@@ -2122,7 +2128,7 @@ namespace ScalarCfv
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
 					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
-						real sumLocal = (*iterCellFieldData).vectorAiiInversebij[ii][jj] *
+						real sumLocal = (*iterCellFieldData).vectorAiiInversebij(ii,jj) *
 							((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
 						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;//+ means sum of neighbour cells
 					}
@@ -2299,7 +2305,7 @@ namespace ScalarCfv
 					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
 						real sumLocal = 0.0;
 						for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk){
-							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii][jj][kk] * (*iterCellFieldData_).scalarVariableTn[kk];
+							sumLocal += (*iterCellFieldData).matrixAiiInverseBij[ii](jj,kk) * (*iterCellFieldData_).scalarVariableTn[kk];
 						}
 						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
 					}
@@ -2309,7 +2315,7 @@ namespace ScalarCfv
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
 					for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
-						real sumLocal = (*iterCellFieldData).vectorAiiInversebij[ii][jj] *
+						real sumLocal = (*iterCellFieldData).vectorAiiInversebij(ii,jj) *
 							((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
 						(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
 					}
@@ -2318,7 +2324,7 @@ namespace ScalarCfv
 				for (int jj = 1; jj < static_cast<int>(NDOFS); ++jj){
 					real sumLocal = 0.0;
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk){
-						sumLocal += (*iterCellFieldData).matrixAiiInverse[jj][kk] * vectorBoundaryCorrection[kk];
+						sumLocal += (*iterCellFieldData).matrixAiiInverse(jj,kk) * vectorBoundaryCorrection[kk];
 					}
 					(*iterCellFieldData).scalarVariableTn[jj] += (*iterCellFieldData).relaxFactor * sumLocal;
 				}

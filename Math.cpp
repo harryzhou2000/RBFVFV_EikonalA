@@ -9,6 +9,7 @@ namespace ScalarCfv
 	std::ostream &operator<<(std::ostream &out, const point2D &p)
 	{
 		out << '[' << p.x << ", " << p.y << ']';
+		return out;
 	}
 }
 

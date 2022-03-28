@@ -83,8 +83,8 @@ namespace ScalarCfv
 			(*iterNode).nodePhysical = (1.0 / parameter_->unit) * (*iterNode).nodePhysical;
 			auto x = (*iterNode).nodePhysical.x, y = (*iterNode).nodePhysical.y;
 
-			// DEBUG: rotate the grid 
-			real theta = 1.0/45.0*double(GRID_ROT) * std::acos(-1) / 4.0;
+			// DEBUG: rotate the grid
+			real theta = 1.0 / 45.0 * double(GRID_ROT) * std::acos(-1) / 4.0;
 			(*iterNode).nodePhysical.x = std::cos(theta) * x + std::sin(theta) * y;
 			(*iterNode).nodePhysical.y = -std::sin(theta) * x + std::cos(theta) * y;
 			++ii;
@@ -1603,6 +1603,7 @@ namespace ScalarCfv
 	{
 		for (auto &c : *cell_)
 		{
+			// std::cout << c.cellType_ << std::endl;
 			if (c.cellType_ == Quadrilateral)
 			{
 				int a[4][2] = {{1, 2}, {2, 3}, {3, 4}, {4, 1}};
@@ -1636,5 +1637,7 @@ namespace ScalarCfv
 				}
 			}
 		}
+
+		return true;
 	}
 }

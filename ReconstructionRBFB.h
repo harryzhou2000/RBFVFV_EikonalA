@@ -24,8 +24,7 @@ namespace ScalarCfv
 		const static unsigned int NDIFFSCR = GLOBAL_NDIFFSCR(O);
 
 	public:
-		bool
-		initBaseMomentAndRelaxFactor(
+		inline bool initBaseMomentAndRelaxFactor(
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
@@ -37,12 +36,12 @@ namespace ScalarCfv
 		// 	cellGaussDataVector *cellGaussData,
 		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell) override;
 
-		bool initFaceWeight(
+		inline bool initFaceWeight(
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			faceFieldDataVector *faceFieldData) override;
 
-		bool initReconstructionMatrixAndVector(
+		inline bool initReconstructionMatrixAndVector(
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
@@ -51,7 +50,7 @@ namespace ScalarCfv
 			GaussIntegralCellO1Grid<vO> *gaussIntegralCell,
 			GaussIntegralFaceO1Grid<fO> *gaussIntegralFace) override;
 
-		bool getBoundaryValueCheck(
+		inline bool getBoundaryValueCheck(
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
@@ -70,7 +69,7 @@ namespace ScalarCfv
 		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
 		// 	GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
 
-		bool excuteReconstruction(
+		inline bool excuteReconstruction(
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
@@ -89,7 +88,7 @@ namespace ScalarCfv
 		// 	GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
 
 		// CR
-		bool initReconstructionMatrixAndVectorCR(
+		inline bool initReconstructionMatrixAndVectorCR(
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
@@ -107,7 +106,7 @@ namespace ScalarCfv
 		// 	GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
 		// 	GaussIntegralFaceO2Grid<fO> *gaussIntegralFace) override;
 
-		bool excuteReconstructionCR(
+		inline bool excuteReconstructionCR(
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
@@ -133,7 +132,7 @@ namespace ScalarCfv
 
 	//----------------------------------------------------------------------------------
 	template <unsigned int O>
-	bool reconstructionRBFB1<O>::initBaseMomentAndRelaxFactor(
+	inline bool reconstructionRBFB1<O>::initBaseMomentAndRelaxFactor(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -403,7 +402,7 @@ namespace ScalarCfv
 	//----------------------------------------------------------------------------------
 
 	template <unsigned int O>
-	bool reconstructionRBFB1<O>::initFaceWeight(
+	inline bool reconstructionRBFB1<O>::initFaceWeight(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		faceFieldDataVector *faceFieldData)
@@ -626,7 +625,7 @@ namespace ScalarCfv
 
 	// Upgrade V1
 	template <unsigned int O>
-	bool reconstructionRBFB1<O>::initReconstructionMatrixAndVector(
+	inline bool reconstructionRBFB1<O>::initReconstructionMatrixAndVector(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -643,7 +642,10 @@ namespace ScalarCfv
 		// matrix A B b
 		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
 		{
-			tensor2D<real, NDOFS, NDOFS> Aii;
+			// tensor2D<real, NDOFS, NDOFS> Aii;
+			// int Aiisize = NDOFS;
+			Eigen::MatrixXd Aii(6, 6);
+			Aii.setZero();
 
 #ifdef TRIAL
 			std::cout << "\n Some Cell: \n";
@@ -675,8 +677,12 @@ namespace ScalarCfv
 
 				//�����
 				iterCellFieldData_ = cellFieldData->begin() + cl - 1;
-				tensor2D<real, NDOFS, NDOFS> Bij;
-				tensor1D<real, NDOFS> bi;
+				// tensor2D<real, NDOFS, NDOFS> Bij;
+				Eigen::MatrixXd Bij(6,6);
+				Bij.setZero();
+				// tensor1D<real, NDOFS> bi;
+				Eigen::VectorXd bi(6);
+				bi.setZero();
 				if (cr > 0)
 				{
 					int ffr = 1;
@@ -849,7 +855,7 @@ namespace ScalarCfv
 								cofJacobi,
 								parametricArea,
 								result);
-							Aii[ll][rr] += result; //+ means sum of each face
+							Aii(ll, rr) += result; //+ means sum of each face
 
 							for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData_).fPG); ++gg)
 							{
@@ -865,7 +871,7 @@ namespace ScalarCfv
 								cofJacobi,
 								parametricArea,
 								result);
-							Bij[ll][rr] = result;
+							Bij(ll,rr) = result;
 
 							delete[] f;
 							delete[] weight;
@@ -907,8 +913,10 @@ namespace ScalarCfv
 					}
 					// assign the matrix and vector with respect to each face
 					iterCellFieldData_ = cellFieldData->begin() + cl - 1;
-					CfvMath::VVVecCopy(bi, iterCellFieldData_->vectorbij[cc], 1, NDOFS);
-					CfvMath::VVMatCopy(Bij, iterCellFieldData_->matrixBij[cc], 1, NDOFS, 1, NDOFS);
+					// CfvMath::VEVecMatCopy(bi, iterCellFieldData_->vectorbij, cc, 1, NDOFS);
+					iterCellFieldData_->vectorbij.row(cc) = bi;
+					// CfvMath::VVMatCopy(Bij, iterCellFieldData_->matrixBij[cc], 1, NDOFS, 1, NDOFS);
+					iterCellFieldData_->matrixBij[cc] = Bij;
 					delete[] fII;
 					delete[] fIJ;
 					delete[] fI;
@@ -991,7 +999,7 @@ namespace ScalarCfv
 								cofJacobi,
 								parametricArea,
 								result);
-							Aii[ll][rr] += result; //+ means sum of each face
+							Aii(ll, rr) += result; //+ means sum of each face
 							delete[] f;
 							delete[] weight;
 							delete[] cofJacobi;
@@ -1014,20 +1022,29 @@ namespace ScalarCfv
 			}
 			// iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 			// assign Aii
-			CfvMath::VVMatCopy(Aii, iterCellFieldData->matrixAii, 1, NDOFS, 1, NDOFS);
-			tensor2D<real, NDOFS, NDOFS> inverseAii;
-			CfvMath::getMatrixGeneralInverse(Aii, inverseAii);
+			// CfvMath::VVMatCopy(Aii, iterCellFieldData->matrixAii, 1, NDOFS, 1, NDOFS);
+			iterCellFieldData->matrixAii = Aii;
+			// tensor2D<real, NDOFS, NDOFS> inverseAii;
+			// CfvMath::getMatrixGeneralInverse(Aii, inverseAii);
 			// assign inverse Aii
-			CfvMath::VVMatCopy(inverseAii, iterCellFieldData->matrixAiiInverse, 1, NDOFS, 1, NDOFS);
+			// CfvMath::VVMatCopy(inverseAii, iterCellFieldData->matrixAiiInverse, 1, NDOFS, 1, NDOFS);
+			// auto SVDResult = iterCellFieldData->matrixAii.bottomRightCorner(iterCellFieldData->matrixAii.rows() - 1, iterCellFieldData->matrixAii.cols() - 1).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+			auto SVDResult = Aii.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+			iterCellFieldData->matrixAiiInverse=
+				SVDResult.solve(Eigen::MatrixXd::Identity(iterCellFieldData->matrixAii.cols(), iterCellFieldData->matrixAii.rows()));
 			// assign inverseAii*Bij & inverseAii*bi, for convenient calculation
 			for (int cc = 1; cc < (*iterCellFieldData).cellCellNumber + 1; ++cc)
 			{ // cellFaceNumber -> cellCellNumber
 				// assign inverseAii*Bij
 				// assign inverseAii*bi
-				CfvMath::VVMatMat(inverseAii, iterCellFieldData->matrixBij[cc], iterCellFieldData->matrixAiiInverseBij[cc],
-								  1, NDOFS, 1, NDOFS, 1, NDOFS);
-				CfvMath::VVMatVec(inverseAii, iterCellFieldData->vectorbij[cc], iterCellFieldData->vectorAiiInversebij[cc],
-								  1, NDOFS, 1, NDOFS);
+				// CfvMath::VVMatMat(inverseAii, iterCellFieldData->matrixBij[cc], iterCellFieldData->matrixAiiInverseBij[cc],
+				// 				  1, NDOFS, 1, NDOFS, 1, NDOFS);
+				iterCellFieldData->matrixAiiInverseBij[cc] = iterCellFieldData->matrixAiiInverse * iterCellFieldData->matrixBij[cc];
+				// CfvMath::VEMatVec(inverseAii, (iterCellFieldData->vectorbij.row(cc)), iterCellFieldData->vectorAiiInversebij[cc],
+				// 				  1, NDOFS, 1, NDOFS);
+				iterCellFieldData->vectorAiiInversebij.row(cc) =
+					iterCellFieldData->vectorbij.row(cc) *
+					iterCellFieldData->matrixAiiInverse.transpose();
 			}
 		}
 		std::cout << " ..reconstruction matrix and vector has been initialized." << std::endl;
@@ -1036,7 +1053,7 @@ namespace ScalarCfv
 
 	// Upgrade V1
 	template <unsigned int O>
-	bool reconstructionRBFB1<O>::getBoundaryValueCheck(
+	inline bool reconstructionRBFB1<O>::getBoundaryValueCheck(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -1682,7 +1699,7 @@ namespace ScalarCfv
 	//----------------------------------------------------------------------------------
 	// Upgrade V1
 	template <unsigned int O>
-	bool reconstructionRBFB1<O>::excuteReconstruction(
+	inline bool reconstructionRBFB1<O>::excuteReconstruction(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -1713,22 +1730,28 @@ namespace ScalarCfv
 				{
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
-					CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverseBij[ii], iterCellFieldData_->scalarVariableTn, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
-									  1, NDOFS, 1, NDOFS, false);
+					// CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverseBij[ii], iterCellFieldData_->scalarVariableTn, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
+					// 				  1, NDOFS, 1, NDOFS, false);
+					iterCellFieldData->scalarVariableTn += iterCellFieldData->relaxFactor *
+														   (iterCellFieldData->matrixAiiInverseBij[ii] * iterCellFieldData_->scalarVariableTn);
 				}
 				// deal with bi
 				for (int ii = 1; ii < (*iterCellFieldData).cellCellNumber + 1; ++ii)
 				{
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
-					CfvMath::VVVecAdd(iterCellFieldData->vectorAiiInversebij[ii], iterCellFieldData->scalarVariableTn,
-									  iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]),
-									  1, NDOFS);
+					// CfvMath::VVVecAdd(iterCellFieldData->vectorAiiInversebij[ii], iterCellFieldData->scalarVariableTn,
+					// 				  iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]),
+					// 				  1, NDOFS);
+					iterCellFieldData->scalarVariableTn += iterCellFieldData->vectorAiiInversebij.row(ii) *
+														   iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
 				}
 			}
 			else
 			{
-				tensor1D<real, NDOFS> vectorBoundaryCorrection;
+				// tensor1D<real, NDOFS> vectorBoundaryCorrection;
+				Eigen::VectorXd vectorBoundaryCorrection(6);
+				vectorBoundaryCorrection.setZero();
 				for (int ii = 1; ii < (*iterCellFieldData).cellFaceNumber + 1; ++ii)
 				{
 					int ff = (*iterCellFieldData).cellFaceIndex[ii];
@@ -1931,21 +1954,30 @@ namespace ScalarCfv
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
 
-					CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverseBij[ii], iterCellFieldData_->scalarVariableTn, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
-									  1, NDOFS, 1, NDOFS, false);
+					// CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverseBij[ii], iterCellFieldData_->scalarVariableTn, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
+					// 				  1, NDOFS, 1, NDOFS, false);
+					iterCellFieldData->scalarVariableTn += iterCellFieldData->relaxFactor *
+														   (iterCellFieldData->matrixAiiInverseBij[ii] * iterCellFieldData_->scalarVariableTn);
 				}
 				// deal with bi
 				for (int ii = 1; ii < (*iterCellFieldData).cellCellNumber + 1; ++ii)
 				{
 					int cr = (*iterCellFieldData).cellCellIndex[ii];
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
-					CfvMath::VVVecAdd(iterCellFieldData->vectorAiiInversebij[ii], iterCellFieldData->scalarVariableTn,
-									  iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]),
-									  1, NDOFS);
+					// CfvMath::VVVecAdd(iterCellFieldData->vectorAiiInversebij[ii], iterCellFieldData->scalarVariableTn,
+					// 				  iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]),
+					// 				  1, NDOFS);
+					iterCellFieldData->scalarVariableTn +=
+						iterCellFieldData->vectorAiiInversebij.row(ii) *
+						iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
 				}
 				// deal with boundary correction
-				CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverse, vectorBoundaryCorrection, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
-								  1, NDOFS, 1, NDOFS, false);
+				// CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverse, vectorBoundaryCorrection, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
+				// 				  1, NDOFS, 1, NDOFS, false);
+				iterCellFieldData->scalarVariableTn += iterCellFieldData->relaxFactor *
+													   iterCellFieldData->matrixAiiInverse *
+													   vectorBoundaryCorrection;
+
 				// // RBFB1:
 				// //	attempt a restriction
 				// switch (NDOFS)
@@ -2268,7 +2300,7 @@ namespace ScalarCfv
 
 	//----------------------------------------------------------------------------------
 	template <unsigned int O>
-	bool reconstructionRBFB1<O>::initReconstructionMatrixAndVectorCR(
+	inline bool reconstructionRBFB1<O>::initReconstructionMatrixAndVectorCR(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
@@ -2804,7 +2836,7 @@ namespace ScalarCfv
 	//----------------------------------------------------------------------------------
 	// Update V1
 	template <unsigned int O>
-	bool reconstructionRBFB1<O>::excuteReconstructionCR(
+	inline bool reconstructionRBFB1<O>::excuteReconstructionCR(
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,

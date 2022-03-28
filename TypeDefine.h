@@ -189,4 +189,20 @@ namespace ScalarCfv
 	}
 
 }
+
+
+// Linking issues
+// #define EIGEN_USE_BLAS
+// #define EIGEN_USE_LAPACKE
+#ifdef USE_OPEN_BLAS
+#include<cblas.h>
+#include<lapacke.h>
+#define MKL_INT lapack_int
+
+#else
+#include "mkl_cblas.h"
+#include "mkl_lapacke.h"
+
+#endif
+
 #endif

@@ -142,15 +142,17 @@ namespace ScalarCfv
 			(*iterCellFieldData).deltaScalarVariableTm.resize((*iterCellFieldData).NDOFS);
 			(*iterCellFieldData).scalarVariableTnCRLimited.resize((*iterCellFieldData).NDOFSCR);
 
-			(*iterCellFieldData).matrixAiiInverse.resize((*iterCellFieldData).NDOFS);
-			(*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS);
+			(*iterCellFieldData).matrixAiiInverse.resize((*iterCellFieldData).NDOFS, (*iterCellFieldData).NDOFS);
+			(*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS,(*iterCellFieldData).NDOFS);
+			// (*iterCellFieldData).matrixAiiInverse.resize((*iterCellFieldData).NDOFS);
+			// (*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS);
 			(*iterCellFieldData).matrixAiiInverseCR.resize((*iterCellFieldData).NDOFSCR);
 			(*iterCellFieldData).matrixAiiCR.resize((*iterCellFieldData).NDOFSCR);
 
 			for (int jj = 0; jj < static_cast<int>((*iterCellFieldData).NDOFS); ++jj)
 			{
-				(*iterCellFieldData).matrixAiiInverse[jj].resize((*iterCellFieldData).NDOFS);
-				(*iterCellFieldData).matrixAii[jj].resize((*iterCellFieldData).NDOFS);
+				// (*iterCellFieldData).matrixAiiInverse[jj].resize((*iterCellFieldData).NDOFS);
+				// (*iterCellFieldData).matrixAii[jj].resize((*iterCellFieldData).NDOFS);
 			}
 			for (int jj = 0; jj < static_cast<int>((*iterCellFieldData).NDOFSCR); ++jj)
 			{
@@ -159,23 +161,27 @@ namespace ScalarCfv
 			}
 
 			// cellFaceNumber->cellCellNumber
-			(*iterCellFieldData).vectorbij.resize((*iterCellFieldData).cellCellNumber + 1);
-			(*iterCellFieldData).vectorAiiInversebij.resize((*iterCellFieldData).cellCellNumber + 1);
+			(*iterCellFieldData).vectorbij.resize((*iterCellFieldData).cellCellNumber + 1, (*iterCellFieldData).NDOFS);
+			(*iterCellFieldData).vectorAiiInversebij.resize((*iterCellFieldData).cellCellNumber + 1, (*iterCellFieldData).NDOFS);
+			// (*iterCellFieldData).vectorbij.resize((*iterCellFieldData).cellCellNumber + 1);
+			// (*iterCellFieldData).vectorAiiInversebij.resize((*iterCellFieldData).cellCellNumber + 1);
 			(*iterCellFieldData).matrixBij.resize((*iterCellFieldData).cellCellNumber + 1);
 			(*iterCellFieldData).matrixAiiInverseBij.resize((*iterCellFieldData).cellCellNumber + 1);
 			(*iterCellFieldData).matrixBijCR.resize((*iterCellFieldData).cellCellNumber + 1);
 
 			for (int jj = 1; jj < (*iterCellFieldData).cellCellNumber + 1; ++jj)
 			{
-				(*iterCellFieldData).vectorbij[jj].resize((*iterCellFieldData).NDOFS);
-				(*iterCellFieldData).vectorAiiInversebij[jj].resize((*iterCellFieldData).NDOFS);
-				(*iterCellFieldData).matrixBij[jj].resize((*iterCellFieldData).NDOFS);
-				(*iterCellFieldData).matrixAiiInverseBij[jj].resize((*iterCellFieldData).NDOFS);
+				// (*iterCellFieldData).vectorbij[jj].resize((*iterCellFieldData).NDOFS);
+				// (*iterCellFieldData).vectorAiiInversebij[jj].resize((*iterCellFieldData).NDOFS);
+				(*iterCellFieldData).matrixBij[jj].resize((*iterCellFieldData).NDOFS,(*iterCellFieldData).NDOFS);
+				(*iterCellFieldData).matrixAiiInverseBij[jj].resize((*iterCellFieldData).NDOFS, (*iterCellFieldData).NDOFS);
+				// (*iterCellFieldData).matrixBij[jj].resize((*iterCellFieldData).NDOFS);
+				// (*iterCellFieldData).matrixAiiInverseBij[jj].resize((*iterCellFieldData).NDOFS);
 				(*iterCellFieldData).matrixBijCR[jj].resize((*iterCellFieldData).NDOFSCR);
 				for (int kk = 0; kk < static_cast<int>((*iterCellFieldData).NDOFS); ++kk)
 				{
-					(*iterCellFieldData).matrixBij[jj][kk].resize((*iterCellFieldData).NDOFS);
-					(*iterCellFieldData).matrixAiiInverseBij[jj][kk].resize((*iterCellFieldData).NDOFS);
+					// (*iterCellFieldData).matrixBij[jj][kk].resize((*iterCellFieldData).NDOFS);
+					// (*iterCellFieldData).matrixAiiInverseBij[jj][kk].resize((*iterCellFieldData).NDOFS);
 				}
 				for (int kk = 0; kk < static_cast<int>((*iterCellFieldData).NDOFSCR); ++kk)
 				{
@@ -424,14 +430,14 @@ namespace ScalarCfv
 				for (int isubrk = 1; isubrk <= parameter_->nInnerStepTimeMarching; ++isubrk)
 				{
 					for (int irec = 1; irec <= 1; irec++)
-					reconstruction_->excuteReconstruction(
-						parameter_,
-						cellFieldData_,
-						cellGaussData_,
-						faceFieldData_,
-						faceGaussData_,
-						gaussIntegralCell,
-						gaussIntegralFace);
+						reconstruction_->excuteReconstruction(
+							parameter_,
+							cellFieldData_,
+							cellGaussData_,
+							faceFieldData_,
+							faceGaussData_,
+							gaussIntegralCell,
+							gaussIntegralFace);
 					reconstruction_->excuteReconstructionCR(
 						parameter_,
 						cellFieldData_,
