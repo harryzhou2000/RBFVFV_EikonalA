@@ -12,8 +12,8 @@
 // #define RBFB1_CR_DIFFDIM 0.1
 // #define RBFB1_INCREMENT_CR
 // #define USE_RBFB1_N
-// #define RBFB1_GlobalPoly
-// #define RBFB1_GlobalPoly_ESC // for vfv functional research
+#define RBFB1_GlobalPoly
+#define RBFB1_GlobalPoly_ESC // for vfv functional research
 
 #define RBFB1_USE_UNITARY_MEANIJ
 // #define RBFB1_USE_DELTA_Jacobi_INTERFACEJ
@@ -95,7 +95,7 @@ constexpr int GLOBAL_NDIFFSCR(int O) { return (O + 2) * (O + 1) / 2; }
 // #define DEBUG_RBFB
 // #define USE_RBF
 
-#define rO 2 // reconstruction polynomal order {1,2,3}
+#define rO 3 // reconstruction polynomal order {1,2,3}
 #define fO 5 // face integral order {1,3,5}
 #define vO 3 // volume integral order {1,2,3}
 #define mO 1 // mesh order {1,2}
