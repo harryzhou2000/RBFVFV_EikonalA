@@ -1,5 +1,7 @@
 #include "FieldSolver.h"
 #include <cmath>
+#include <chrono>
+
 // 20200220 ���������ļ����ڵ���-1����0�ſ�ʼ //���޸� 20200326
 namespace ScalarCfv
 {
@@ -414,6 +416,8 @@ namespace ScalarCfv
 		exportCurrentSln(node, 0, filenameOutputSln);
 		// main loop
 		parameter_->refTn = 0.0; // global time marching
+
+		auto tstart = std::chrono::system_clock::now();
 		for (int iStep = parameter_->nStart; iStep <= parameter_->nEnd; ++iStep)
 		{
 			evolution_->getTimeStep(
@@ -504,6 +508,9 @@ namespace ScalarCfv
 
 			if (iStep % parameter_->nScreenOutput == 0)
 			{
+				auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - tstart);
+				tstart = std::chrono::system_clock::now();
+				std::cout << "Time: " << double(duration.count()) * std::chrono::microseconds::period::num / std::chrono::microseconds::period::den << std::endl;
 				std::cout << "--------------------------------------" << std::endl;
 				std::cout << "Current step:"
 						  << "\t"

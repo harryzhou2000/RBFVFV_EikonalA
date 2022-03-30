@@ -751,6 +751,10 @@ namespace CfvMath
 
 	// }
 
+	// // TEMPLATE BUT INSTANTIATED AT math.cpp
+	void EigenLeastSquareInverse(const Eigen::MatrixXd &A, Eigen::MatrixXd &AI);
+
+
 #ifndef RBFB1_GlobalPoly_ESC
 	// Cik = sum_j -- Aij WjWj Bkj with tensored diffs
 	template <class TA, class TB, class TC, class TW>

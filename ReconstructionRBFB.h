@@ -589,7 +589,7 @@ namespace ScalarCfv
 			iterFaceFieldData->interFacialJacobi(1, 1) = unitNormalVector.x * faceL.length() * wtgt;
 #endif
 #ifdef RBFB1_USE_DELTA_INTERFACEJ
-			real wtgt = .1;
+			real wtgt = 1;
 			iterFaceFieldData->interFacialJacobi(0, 0) = unitNormalVector.x * delta.length();
 			iterFaceFieldData->interFacialJacobi(0, 1) = unitNormalVector.y * delta.length();
 			iterFaceFieldData->interFacialJacobi(1, 0) = -unitNormalVector.y * delta.length() * wtgt;
@@ -643,8 +643,8 @@ namespace ScalarCfv
 		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
 		{
 			// tensor2D<real, NDOFS, NDOFS> Aii;
-			// int Aiisize = NDOFS;
-			Eigen::MatrixXd Aii(6, 6);
+			const int Aiisize = NDOFS;
+			Eigen::MatrixXd Aii(NDOFS, NDOFS);
 			Aii.setZero();
 
 #ifdef TRIAL
@@ -678,10 +678,11 @@ namespace ScalarCfv
 				//�����
 				iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 				// tensor2D<real, NDOFS, NDOFS> Bij;
-				Eigen::MatrixXd Bij(6,6);
+				const int Siz = NDOFS;
+				Eigen::MatrixXd Bij(NDOFS, NDOFS);
 				Bij.setZero();
 				// tensor1D<real, NDOFS> bi;
-				Eigen::VectorXd bi(6);
+				Eigen::VectorXd bi(NDOFS);
 				bi.setZero();
 				if (cr > 0)
 				{
@@ -871,7 +872,7 @@ namespace ScalarCfv
 								cofJacobi,
 								parametricArea,
 								result);
-							Bij(ll,rr) = result;
+							Bij(ll, rr) = result;
 
 							delete[] f;
 							delete[] weight;
@@ -1029,9 +1030,12 @@ namespace ScalarCfv
 			// assign inverse Aii
 			// CfvMath::VVMatCopy(inverseAii, iterCellFieldData->matrixAiiInverse, 1, NDOFS, 1, NDOFS);
 			// auto SVDResult = iterCellFieldData->matrixAii.bottomRightCorner(iterCellFieldData->matrixAii.rows() - 1, iterCellFieldData->matrixAii.cols() - 1).bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
-			auto SVDResult = Aii.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
-			iterCellFieldData->matrixAiiInverse=
-				SVDResult.solve(Eigen::MatrixXd::Identity(iterCellFieldData->matrixAii.cols(), iterCellFieldData->matrixAii.rows()));
+
+			// auto SVDResult = Aii.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+			// iterCellFieldData->matrixAiiInverse=
+			// 	SVDResult.solve(Eigen::MatrixXd::Identity(iterCellFieldData->matrixAii.cols(), iterCellFieldData->matrixAii.rows()));
+			CfvMath::EigenLeastSquareInverse(Aii, iterCellFieldData->matrixAiiInverse);
+
 			// assign inverseAii*Bij & inverseAii*bi, for convenient calculation
 			for (int cc = 1; cc < (*iterCellFieldData).cellCellNumber + 1; ++cc)
 			{ // cellFaceNumber -> cellCellNumber
@@ -1750,7 +1754,7 @@ namespace ScalarCfv
 			else
 			{
 				// tensor1D<real, NDOFS> vectorBoundaryCorrection;
-				Eigen::VectorXd vectorBoundaryCorrection(6);
+				Eigen::VectorXd vectorBoundaryCorrection(NDOFS);
 				vectorBoundaryCorrection.setZero();
 				for (int ii = 1; ii < (*iterCellFieldData).cellFaceNumber + 1; ++ii)
 				{

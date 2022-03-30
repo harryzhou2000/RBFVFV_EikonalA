@@ -21,9 +21,9 @@ namespace ScalarCfv
 			cellGaussDataVector *cellGaussData,
 			faceGaussDataVector *faceGaussData,
 			evolution<rO> *evolution,
-			reconstruction<rO> *reconstruction
+			reconstruction<rO> *reconstruction  
 		)
-		{
+		{ 
 			this->parameter_ = parameter;
 			this->cellFieldData_ = cellFieldData;
 			this->faceFieldData_ = faceFieldData;

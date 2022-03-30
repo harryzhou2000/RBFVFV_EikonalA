@@ -64,8 +64,9 @@ namespace CfvMath
 #else
         A[1] = p.x - 0.5 - moment[1];
         A[2] = p.y - 0.5 - moment[2];
-        return true;
+       
 #endif
+        return true;
     }
 
     bool getDiffBaseValueRBFB1_POLY(
