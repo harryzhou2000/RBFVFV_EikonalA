@@ -188,7 +188,8 @@ namespace ScalarCfv
 			InvMeanIJ(0, Eigen::all) /= IJ0;
 			InvMeanIJ(1, Eigen::all) /= IJ1;
 			// InvMeanIJ *= std::max(IJ0, IJ1);
-			InvMeanIJ *= std::min(IJ0, IJ1);
+			// InvMeanIJ *= std::min(IJ0, IJ1);
+			// not multiplying any scale to
 
 			// real IJ0 = std::sqrt(std::pow(iterCellFieldData->MeanIJ(0, 0), 2) + std::pow(iterCellFieldData->MeanIJ(1, 0), 2));
 			// real IJ1 = std::sqrt(std::pow(iterCellFieldData->MeanIJ(0, 1), 2) + std::pow(iterCellFieldData->MeanIJ(1, 1), 2));
@@ -589,7 +590,9 @@ namespace ScalarCfv
 			iterFaceFieldData->interFacialJacobi(1, 1) = unitNormalVector.x * faceL.length() * wtgt;
 #endif
 #ifdef RBFB1_USE_DELTA_INTERFACEJ
-			real wtgt = 1;
+			// real wtgt = std::pow(std::min(std::max(delta.length() / faceL.length(), 1e-0), 1e3), 0.5);
+			// real wtgt = std::sqrt(delta.length() / faceL.length());
+			real wtgt = 1.;
 			iterFaceFieldData->interFacialJacobi(0, 0) = unitNormalVector.x * delta.length();
 			iterFaceFieldData->interFacialJacobi(0, 1) = unitNormalVector.y * delta.length();
 			iterFaceFieldData->interFacialJacobi(1, 0) = -unitNormalVector.y * delta.length() * wtgt;

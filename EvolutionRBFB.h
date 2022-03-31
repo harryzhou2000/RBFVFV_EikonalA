@@ -1041,6 +1041,10 @@ namespace ScalarCfv
 
 					un = d;
 				}
+				else
+				{
+					qR = 0.0;
+				}
 
 				real qnL_abs = std::fabs(qnL);
 				real qnR_abs = std::fabs(qnR);
@@ -1057,7 +1061,7 @@ namespace ScalarCfv
 				ftemp = std::min(0.4 / ((rO + 1) * (rO + 1)), std::fabs(1 - dq.length() * dq.length()));
 				if (ftemp < 0.2 / ((rO + 1) * (rO + 1)))
 					ftemp = 0;
-				ftemp *= 5;
+				ftemp *= 1;
 
 				// ftemp = 0.0 * 0.4 / std::pow((rO + 1), 2);
 
@@ -1076,7 +1080,8 @@ namespace ScalarCfv
 				// 9 done
 				//  ftemp = 1.0 / 256.0 * 10.0 * 0.4 / std::pow((rO + 1), 2);
 
-				fluxF[gg] = nu * un * ftemp * getInnerProduct(dq, uNV[gg]);
+				// fluxF[gg] = nu * un * ftemp * getInnerProduct(dq, uNV[gg]);
+				fluxF[gg] = nu * ftemp * (qR - qL);
 
 				weight[gg] = (*iterFaceFieldData).parametricValue[gg].second;
 				cofJacobi[gg] = (*iterFaceFieldData).gaussPairVector_[gg].JacobiCof;
@@ -1084,15 +1089,15 @@ namespace ScalarCfv
 			}
 
 			// get integral
-			real *fI = new real[static_cast<int>((*iterFaceFieldData).fPG)];
+			// real *fI = new real[static_cast<int>((*iterFaceFieldData).fPG)];
 			real result;
-			for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData).fPG); ++gg)
-			{
-				fI[gg] = fluxF[gg];
-			}
+			// for (int gg = 0; gg < static_cast<int>((*iterFaceFieldData).fPG); ++gg)
+			// {
+			// 	fI[gg] = fluxF[gg];
+			// }
 			gaussIntegralFace->getIntegral(
 				static_cast<int>((*iterFaceFieldData).fPG),
-				fI,
+				fluxF,
 				weight,
 				cofJacobi,
 				parametricArea,
@@ -1109,8 +1114,8 @@ namespace ScalarCfv
 				//(*iterCell_).timeMarchingRHSTn -= (result / (*iterCell_).volume);
 				(*iterCell_).timeMarchingRHSTn -= (result / (*iterCell_).volume);
 			}
-			delete[] fI;
-			fI = NULL;
+			// delete[] fI;
+			// fI = NULL;
 
 			delete[] uNV;
 			delete[] cofJacobi;
