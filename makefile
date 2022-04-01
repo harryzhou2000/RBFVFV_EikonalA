@@ -9,10 +9,10 @@ all: main.exe
 # CPC=icpc
 
 #### GCC or CLANG/LLVM: 
-FPFLAGS=
-CPC=/usr/bin/clang++
+FPFLAGS=-DUSE_OPEN_BLAS -fopenmp 
+CPC=/usr/bin/clang++ 
 # CPC=/usr/bin/g++
-LIB=-fopenmp -DUSE_OPEN_BLAS -lopenblas -llapacke
+LIB=-lopenblas -llapacke
 
 
 

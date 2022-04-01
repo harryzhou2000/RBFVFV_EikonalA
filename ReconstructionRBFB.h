@@ -506,9 +506,11 @@ namespace ScalarCfv
 
 				// for parametric
 				delta = midPoint - baryCenterL;
+				delta = delta * 2.0;
 
 				w[0] = 1.0;
 				refLR = omegaL / (*iterFaceFieldData).area;
+				w[0] *= std::pow(faceL.length() / delta.length(), -1.0);
 			}
 			else if (cr == FarField)
 			{
@@ -590,9 +592,9 @@ namespace ScalarCfv
 			iterFaceFieldData->interFacialJacobi(1, 1) = unitNormalVector.x * faceL.length() * wtgt;
 #endif
 #ifdef RBFB1_USE_DELTA_INTERFACEJ
-			// real wtgt = std::pow(std::min(std::max(delta.length() / faceL.length(), 1e-0), 1e3), 0.5);
+			real wtgt = std::pow(std::min(std::max(delta.length() / faceL.length(), 1e-0), 1e3), 1);
 			// real wtgt = std::sqrt(delta.length() / faceL.length());
-			real wtgt = 1.;
+			// real wtgt = 1.;
 			iterFaceFieldData->interFacialJacobi(0, 0) = unitNormalVector.x * delta.length();
 			iterFaceFieldData->interFacialJacobi(0, 1) = unitNormalVector.y * delta.length();
 			iterFaceFieldData->interFacialJacobi(1, 0) = -unitNormalVector.y * delta.length() * wtgt;

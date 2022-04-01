@@ -1,7 +1,4 @@
-main.o: main.cpp main.h Variable.h GaussIntegral.h TypeDefine.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_cblas.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_types.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_lapacke.h Point.h \
+main.o: main.cpp main.h Variable.h GaussIntegral.h TypeDefine.h Point.h \
   Parameter.h Geometry.h Eigen/Dense Eigen/Core \
   Eigen/src/Core/util/DisableStupidWarnings.h \
   Eigen/src/Core/util/Macros.h \

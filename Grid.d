@@ -1,8 +1,5 @@
-Grid.o: Grid.cpp Grid.h GaussIntegral.h TypeDefine.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_cblas.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_types.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_lapacke.h Point.h \
-  Parameter.h Geometry.h EigenTensor.hpp Eigen/Dense Eigen/Core \
+Grid.o: Grid.cpp Grid.h GaussIntegral.h TypeDefine.h Point.h Parameter.h \
+  Geometry.h EigenTensor.hpp Eigen/Dense Eigen/Core \
   Eigen/src/Core/util/DisableStupidWarnings.h \
   Eigen/src/Core/util/Macros.h \
   Eigen/src/Core/util/ConfigureVectorization.h \

@@ -1,9 +1,6 @@
-MathHard.o: MathHard.cpp Math.h TypeDefine.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_cblas.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_types.h \
-  /opt/intel/oneapi/mkl/2021.3.0/include/mkl_lapacke.h Tensor.h Point.h \
-  Variable.h GaussIntegral.h Parameter.h Geometry.h Eigen/Dense \
-  Eigen/Core Eigen/src/Core/util/DisableStupidWarnings.h \
+MathHard.o: MathHard.cpp Math.h TypeDefine.h Tensor.h Point.h Variable.h \
+  GaussIntegral.h Parameter.h Geometry.h Eigen/Dense Eigen/Core \
+  Eigen/src/Core/util/DisableStupidWarnings.h \
   Eigen/src/Core/util/Macros.h \
   Eigen/src/Core/util/ConfigureVectorization.h \
   Eigen/src/Core/util/MKL_support.h Eigen/src/Core/util/Constants.h \

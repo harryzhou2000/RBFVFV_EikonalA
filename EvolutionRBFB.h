@@ -955,6 +955,7 @@ namespace ScalarCfv
 			{
 				real qL, qnL, omegaL;
 				real qR, qnR, omegaR;
+				real qLM, qRM;
 				point dq;
 				point dqL(0.0, 0.0);
 				point dqR(0.0, 0.0);
@@ -981,7 +982,7 @@ namespace ScalarCfv
 				// 	*iterCell_);
 				auto &matrixDiffBaseII = iterFaceFieldData->diffBaseValueData[0][gg];
 
-				qL = (*iterCell_).scalarVariableTn[0];
+				qLM = qL = (*iterCell_).scalarVariableTn[0];
 				for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 				{
 					qL += matrixDiffBaseII[kk][0] * (*iterCell_).scalarVariableTn[kk];
@@ -1025,7 +1026,7 @@ namespace ScalarCfv
 					// 	matrixDiffBaseJ,
 					// 	*iterCell_);
 					auto &matrixDiffBaseJJ = iterFaceFieldData->diffBaseValueData[1][gg];
-					qR = (*iterCell_).scalarVariableTn[0];
+					qRM = qR = (*iterCell_).scalarVariableTn[0];
 					for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
 					{
 						qR += matrixDiffBaseJJ[kk][0] * (*iterCell_).scalarVariableTn[kk];
@@ -1043,7 +1044,9 @@ namespace ScalarCfv
 				}
 				else
 				{
-					qR = 0.0;
+					// warning: need to specialize to boundary types
+					qR = qL;
+					qRM = qLM;
 				}
 
 				real qnL_abs = std::fabs(qnL);
@@ -1061,7 +1064,7 @@ namespace ScalarCfv
 				ftemp = std::min(0.4 / ((rO + 1) * (rO + 1)), std::fabs(1 - dq.length() * dq.length()));
 				if (ftemp < 0.2 / ((rO + 1) * (rO + 1)))
 					ftemp = 0;
-				ftemp *= 1;
+				ftemp *= .01;
 
 				// ftemp = 0.0 * 0.4 / std::pow((rO + 1), 2);
 
@@ -1081,7 +1084,8 @@ namespace ScalarCfv
 				//  ftemp = 1.0 / 256.0 * 10.0 * 0.4 / std::pow((rO + 1), 2);
 
 				// fluxF[gg] = nu * un * ftemp * getInnerProduct(dq, uNV[gg]);
-				fluxF[gg] = nu * ftemp * (qR - qL);
+				// fluxF[gg] = nu * ftemp * (qR - qL + getInnerProduct(dq, uNV[gg]) * un);
+				fluxF[gg] = nu * ftemp * (qRM - qLM);
 
 				weight[gg] = (*iterFaceFieldData).parametricValue[gg].second;
 				cofJacobi[gg] = (*iterFaceFieldData).gaussPairVector_[gg].JacobiCof;
