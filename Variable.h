@@ -87,6 +87,8 @@ namespace ScalarCfv
 		Eigen::VectorXd deltaScalarVariableTn;
 		Eigen::VectorXd deltaScalarVariableTm;
 
+		
+		Eigen::VectorXd scalarVariableTnJI;
 		// Eigen::VectorXd scalarVariablePCG_b;
 		// Eigen::VectorXd scalarVariablePCG_r;
 		// Eigen::VectorXd scalarVariablePCG_z;

@@ -441,6 +441,8 @@ namespace CfvMath
 
             A[1] = pc.x;
             A[2] = pc.y;
+            // if (cell.boundaryCellType_ == ScalarCfv::boundaryCellType::WallCell)
+            //     return false;
             int ic = 3;
             for (int cf = 1; cf <= cell.cellFaceNumber; cf++)
             {
@@ -493,6 +495,8 @@ namespace CfvMath
             A[1] = pc.x - moment[1];
             A[2] = pc.y - moment[2];
             int ic = 3;
+            // if (cell.boundaryCellType_ == ScalarCfv::boundaryCellType::WallCell)
+            //     return false;
             for (int cf = 1; cf <= cell.cellFaceNumber; cf++)
             {
                 auto &face = faceVec[cell.cellFaceIndex[cf] - 1];
@@ -563,7 +567,8 @@ namespace CfvMath
             dphidxj = iJacobi * dphidetaj;
             A[2][1] = dphidxj[0];
             A[2][2] = dphidxj[1];
-
+            // if (cell.boundaryCellType_ == ScalarCfv::boundaryCellType::WallCell)
+            //     return false;
             int ic = 3;
             for (int cf = 1; cf <= cell.cellFaceNumber; cf++)
             {

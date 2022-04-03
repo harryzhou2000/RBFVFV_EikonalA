@@ -144,8 +144,10 @@ namespace ScalarCfv
 			(*iterCellFieldData).deltaScalarVariableTm.resize((*iterCellFieldData).NDOFS);
 			(*iterCellFieldData).scalarVariableTnCRLimited.resize((*iterCellFieldData).NDOFSCR);
 
+			(*iterCellFieldData).scalarVariableTnJI.resize((*iterCellFieldData).NDOFS);
+
 			(*iterCellFieldData).matrixAiiInverse.resize((*iterCellFieldData).NDOFS, (*iterCellFieldData).NDOFS);
-			(*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS,(*iterCellFieldData).NDOFS);
+			(*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS, (*iterCellFieldData).NDOFS);
 			// (*iterCellFieldData).matrixAiiInverse.resize((*iterCellFieldData).NDOFS);
 			// (*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS);
 			(*iterCellFieldData).matrixAiiInverseCR.resize((*iterCellFieldData).NDOFSCR, (*iterCellFieldData).NDOFSCR);
@@ -177,7 +179,7 @@ namespace ScalarCfv
 			{
 				// (*iterCellFieldData).vectorbij[jj].resize((*iterCellFieldData).NDOFS);
 				// (*iterCellFieldData).vectorAiiInversebij[jj].resize((*iterCellFieldData).NDOFS);
-				(*iterCellFieldData).matrixBij[jj].resize((*iterCellFieldData).NDOFS,(*iterCellFieldData).NDOFS);
+				(*iterCellFieldData).matrixBij[jj].resize((*iterCellFieldData).NDOFS, (*iterCellFieldData).NDOFS);
 				(*iterCellFieldData).matrixAiiInverseBij[jj].resize((*iterCellFieldData).NDOFS, (*iterCellFieldData).NDOFS);
 				// (*iterCellFieldData).matrixBij[jj].resize((*iterCellFieldData).NDOFS);
 				// (*iterCellFieldData).matrixAiiInverseBij[jj].resize((*iterCellFieldData).NDOFS);
@@ -394,7 +396,8 @@ namespace ScalarCfv
 			parameter_,
 			cellFieldData_,
 			cellGaussData_,
-			gaussIntegralCell);
+			gaussIntegralCell,
+			faceFieldData_);
 		reconstruction_->initFaceWeight(
 			parameter_,
 			cellFieldData_,
@@ -435,7 +438,7 @@ namespace ScalarCfv
 			{
 				for (int isubrk = 1; isubrk <= parameter_->nInnerStepTimeMarching; ++isubrk)
 				{
-					for (int irec = 1; irec <= 1; irec++)
+					for (int irec = 1; irec <= 10; irec++)
 						reconstruction_->excuteReconstruction(
 							parameter_,
 							cellFieldData_,
@@ -569,7 +572,8 @@ namespace ScalarCfv
 			parameter_,
 			cellFieldData_,
 			cellGaussData_,
-			gaussIntegralCell);
+			gaussIntegralCell,
+			faceFieldData_);
 		reconstruction_->initFaceWeight(
 			parameter_,
 			cellFieldData_,
@@ -712,7 +716,8 @@ namespace ScalarCfv
 			parameter_,
 			cellFieldData_,
 			cellGaussData_,
-			gaussIntegralCell);
+			gaussIntegralCell,
+			faceFieldData_);
 		reconstruction_->initFaceWeight(
 			parameter_,
 			cellFieldData_,
@@ -875,7 +880,8 @@ namespace ScalarCfv
 			parameter_,
 			cellFieldData_,
 			cellGaussData_,
-			gaussIntegralCell);
+			gaussIntegralCell,
+			faceFieldData_);
 		reconstruction_->initFaceWeight(
 			parameter_,
 			cellFieldData_,

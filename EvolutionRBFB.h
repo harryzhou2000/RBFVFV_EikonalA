@@ -587,7 +587,12 @@ namespace ScalarCfv
 						scaleI,
 						momentICR,
 						matrixDiffBaseICR,
-						*iterCellFieldData);
+						*iterCellFieldData
+#ifdef RBFB1_CR_INTERPOLATE
+						,
+						*faceFieldData
+#endif
+					);
 					CfvMath::VVMatCopy(matrixDiffBaseICR, iterCellFieldData->diffBaseValueDataCR[gg],
 									   0, NDOFSCR, 0, NDIFFSCR);
 				}

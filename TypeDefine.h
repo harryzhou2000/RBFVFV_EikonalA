@@ -8,14 +8,16 @@
 #define USE_RBFB1
 
 #if defined USE_RBFB1
+#define RBFB1_NO_GS
+
 // #define RBFB1_CR_DIFFBOUND
 // #define RBFB1_CR_DIFFDIM 0.1
 // #define RBFB1_INCREMENT_CR
 // #define USE_RBFB1_N
-// #define RBFB1_GlobalPoly
+#define RBFB1_GlobalPoly
 // #define RBFB1_GlobalPoly_ESC // for vfv functional research
 
-#define RBFB1_USE_UNITARY_MEANIJ
+// #define RBFB1_USE_UNITARY_MEANIJ
 // #define RBFB1_USE_DELTA_Jacobi_INTERFACEJ
 // #define RBFB1_USE_DELTA_NT_INTERFACEJ
 #define RBFB1_USE_DELTA_INTERFACEJ	

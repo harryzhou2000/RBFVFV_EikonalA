@@ -28,13 +28,16 @@ namespace ScalarCfv
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
-			GaussIntegralCellO1Grid<vO> *gaussIntegralCell) override;
+			GaussIntegralCellO1Grid<vO> *gaussIntegralCell,
+			faceFieldDataVector* faceFieldData
+			) override;
 
 		bool initBaseMomentAndRelaxFactor(
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
-			GaussIntegralCellO2Grid<vO> *gaussIntegralCell) override;
+			GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
+			faceFieldDataVector* faceFieldData) override;
 
 		bool initFaceWeight(
 			parameter *parameter,
@@ -134,7 +137,8 @@ namespace ScalarCfv
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
-		GaussIntegralCellO1Grid<vO> *gaussIntegralCell)
+		GaussIntegralCellO1Grid<vO> *gaussIntegralCell,
+		faceFieldDataVector *faceFieldData)
 	{
 		std::cout << "initializing base moment and relax factor..." << std::endl;
 		cellFieldDataVector::iterator iterCellFieldData;
@@ -223,7 +227,8 @@ namespace ScalarCfv
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
-		GaussIntegralCellO2Grid<vO> *gaussIntegralCell)
+		GaussIntegralCellO2Grid<vO> *gaussIntegralCell,
+		faceFieldDataVector *faceFieldData)
 	{
 		std::cout << "initializing base moment and relax factor..." << std::endl;
 

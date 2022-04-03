@@ -503,6 +503,32 @@ namespace CfvMath
 		ScalarCfv::tensor1D<ScalarCfv::real, 10> &moment,
 		ScalarCfv::tensor2D<ScalarCfv::real, 10, 10> &A,
 		ScalarCfv::cellFieldData &cell); // adding 0
+
+	bool getMomentRBFB1_Interp_15_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 15> &A,
+		ScalarCfv::cellFieldData &cell,
+		std::vector<ScalarCfv::faceFieldData> &faceVec); // adding 0
+
+	bool getBaseValueRBFB1_Interp_15_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 15> &moment,
+		ScalarCfv::tensor1D<ScalarCfv::real, 15> &A,
+		ScalarCfv::cellFieldData &cell,
+		std::vector<ScalarCfv::faceFieldData> &faceVec); // adding 0
+
+	bool getDiffBaseValueRBFB1_Interp_15_3(
+		ScalarCfv::point p,			 // parametric place
+		ScalarCfv::point baryCenter, // dummy
+		ScalarCfv::point scale,		 // dummy
+		ScalarCfv::tensor1D<ScalarCfv::real, 15> &moment,
+		ScalarCfv::tensor2D<ScalarCfv::real, 15, 3> &A,
+		ScalarCfv::cellFieldData &cell,
+		std::vector<ScalarCfv::faceFieldData> &faceVec); // adding 0
 	//////////////////////////
 
 	template <typename T>

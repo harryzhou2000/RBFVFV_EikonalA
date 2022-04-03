@@ -28,7 +28,8 @@ namespace ScalarCfv
 			parameter *parameter,
 			cellFieldDataVector *cellFieldData,
 			cellGaussDataVector *cellGaussData,
-			GaussIntegralCellO1Grid<vO> *gaussIntegralCell) override;
+			GaussIntegralCellO1Grid<vO> *gaussIntegralCell,
+			faceFieldDataVector *faceFieldData) override;
 
 		// bool initBaseMomentAndRelaxFactor(
 		// 	parameter *parameter,
@@ -136,7 +137,8 @@ namespace ScalarCfv
 		parameter *parameter,
 		cellFieldDataVector *cellFieldData,
 		cellGaussDataVector *cellGaussData,
-		GaussIntegralCellO1Grid<vO> *gaussIntegralCell)
+		GaussIntegralCellO1Grid<vO> *gaussIntegralCell,
+		faceFieldDataVector *faceFieldData)
 	{
 		std::cout << "initializing base moment and relax factor..." << std::endl;
 		cellFieldDataVector::iterator iterCellFieldData;
@@ -261,7 +263,12 @@ namespace ScalarCfv
 					(*iterCellFieldData).baryCenter,
 					(*iterCellFieldData).lengthReference,
 					phiG,
-					*iterCellFieldData);
+					*iterCellFieldData
+#ifdef RBFB1_CR_INTERPOLATE
+					,
+					*faceFieldData
+#endif
+				);
 				for (int jj = 1; jj < NDOFSCR; ++jj)
 				{							  //ע�������ָ�귶Χ����20200315
 					phiCR[ii][jj] = phiG[jj]; // phi: first->Gauss points; second->base function
@@ -783,7 +790,12 @@ namespace ScalarCfv
 							scaleI,
 							momentICR,
 							matrixDiffBaseICR,
-							*iterCellFieldData_);
+							*iterCellFieldData_
+#ifdef RBFB1_CR_INTERPOLATE
+							,
+							*faceFieldData
+#endif
+						);
 						if (iterFaceFieldData_->diffBaseValueDataCR[cff][gg][0][0] == UNINITReal)
 							CfvMath::VVMatCopy(matrixDiffBaseICR, iterFaceFieldData_->diffBaseValueDataCR[cff][gg],
 											   0, NDOFSCR, 0, NDIFFSCR);
@@ -816,7 +828,12 @@ namespace ScalarCfv
 							scaleJ,
 							momentJCR,
 							matrixDiffBaseJCR,
-							*iterCellFieldData_);
+							*iterCellFieldData_
+#ifdef RBFB1_CR_INTERPOLATE
+							,
+							*faceFieldData
+#endif
+						);
 						if (iterFaceFieldData_->diffBaseValueDataCR[cffr][gg][0][0] == UNINITReal)
 							CfvMath::VVMatCopy(matrixDiffBaseJCR, iterFaceFieldData_->diffBaseValueDataCR[cffr][gg],
 											   0, NDOFSCR, 0, NDIFFSCR);
@@ -970,7 +987,12 @@ namespace ScalarCfv
 							scaleI,
 							momentICR,
 							matrixDiffBaseICR,
-							*iterCellFieldData_);
+							*iterCellFieldData_
+#ifdef RBFB1_CR_INTERPOLATE
+							,
+							*faceFieldData
+#endif
+						);
 						if (iterFaceFieldData_->diffBaseValueDataCR[cff][gg][0][0] == UNINITReal)
 							CfvMath::VVMatCopy(matrixDiffBaseICR, iterFaceFieldData_->diffBaseValueDataCR[cff][gg],
 											   0, NDOFSCR, 0, NDIFFSCR);
@@ -1135,7 +1157,12 @@ namespace ScalarCfv
 							scaleI,
 							momentICR,
 							baseValueICR,
-							*iterCellFieldData_);
+							*iterCellFieldData_
+#ifdef RBFB1_CR_INTERPOLATE
+							,
+							*faceFieldData
+#endif
+						);
 
 						real pointRecValue = (*iterCellFieldData).scalarVariableTn[0];
 						real pointRecValueCR = (*iterCellFieldData).scalarVariableTnCR[0];
@@ -1720,8 +1747,9 @@ namespace ScalarCfv
 		GaussIntegralFaceO1Grid<fO> *gaussIntegralFace)
 	{
 		//		std::cout << "excuting reconstruction ..." << std::endl;
-
-		// #pragma omp parallel for schedule(guided)
+#ifdef RBFB1_NO_GS
+#pragma omp parallel for schedule(guided)
+#endif
 		for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 		{
 			cellFieldDataVector::iterator iterCellFieldData;
@@ -1733,7 +1761,11 @@ namespace ScalarCfv
 				// assign gradient values
 				for (int ii = 1; ii < static_cast<int>(NDOFS); ++ii)
 				{
+#ifdef RBFB1_NO_GS
+					(*iterCellFieldData).scalarVariableTnJI[ii] =
+#else
 					(*iterCellFieldData).scalarVariableTn[ii] =
+#endif
 						(1.0 - (*iterCellFieldData).relaxFactor) * (*iterCellFieldData).scalarVariableTn[ii];
 				}
 				// deal with Bij*uj
@@ -1743,8 +1775,13 @@ namespace ScalarCfv
 					iterCellFieldData_ = cellFieldData->begin() + cr - 1;
 					// CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverseBij[ii], iterCellFieldData_->scalarVariableTn, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
 					// 				  1, NDOFS, 1, NDOFS, false);
-					iterCellFieldData->scalarVariableTn += iterCellFieldData->relaxFactor *
-														   (iterCellFieldData->matrixAiiInverseBij[ii] * iterCellFieldData_->scalarVariableTn);
+#ifdef RBFB1_NO_GS
+					iterCellFieldData->scalarVariableTnJI +=
+#else
+					iterCellFieldData->scalarVariableTn +=
+#endif
+						iterCellFieldData->relaxFactor *
+						(iterCellFieldData->matrixAiiInverseBij[ii] * iterCellFieldData_->scalarVariableTn);
 				}
 				// deal with bi
 				for (int ii = 1; ii < (*iterCellFieldData).cellCellNumber + 1; ++ii)
@@ -1754,8 +1791,13 @@ namespace ScalarCfv
 					// CfvMath::VVVecAdd(iterCellFieldData->vectorAiiInversebij[ii], iterCellFieldData->scalarVariableTn,
 					// 				  iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]),
 					// 				  1, NDOFS);
-					iterCellFieldData->scalarVariableTn += iterCellFieldData->vectorAiiInversebij.row(ii) *
-														   iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
+#ifdef RBFB1_NO_GS
+					iterCellFieldData->scalarVariableTnJI +=
+#else
+					iterCellFieldData->scalarVariableTn +=
+#endif
+						iterCellFieldData->vectorAiiInversebij.row(ii) *
+						iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
 				}
 			}
 			else
@@ -1956,7 +1998,11 @@ namespace ScalarCfv
 				// assign gradient values
 				for (int ii = 1; ii < static_cast<int>(NDOFS); ++ii)
 				{
+#ifdef RBFB1_NO_GS
+					iterCellFieldData->scalarVariableTnJI[ii] =
+#else
 					(*iterCellFieldData).scalarVariableTn[ii] =
+#endif
 						(1.0 - (*iterCellFieldData).relaxFactor) * (*iterCellFieldData).scalarVariableTn[ii];
 				}
 				// deal with Bij*uj
@@ -1967,8 +2013,13 @@ namespace ScalarCfv
 
 					// CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverseBij[ii], iterCellFieldData_->scalarVariableTn, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
 					// 				  1, NDOFS, 1, NDOFS, false);
-					iterCellFieldData->scalarVariableTn += iterCellFieldData->relaxFactor *
-														   (iterCellFieldData->matrixAiiInverseBij[ii] * iterCellFieldData_->scalarVariableTn);
+#ifdef RBFB1_NO_GS
+					iterCellFieldData->scalarVariableTnJI +=
+#else
+					iterCellFieldData->scalarVariableTn +=
+#endif
+						iterCellFieldData->relaxFactor *
+						(iterCellFieldData->matrixAiiInverseBij[ii] * iterCellFieldData_->scalarVariableTn);
 				}
 				// deal with bi
 				for (int ii = 1; ii < (*iterCellFieldData).cellCellNumber + 1; ++ii)
@@ -1978,16 +2029,25 @@ namespace ScalarCfv
 					// CfvMath::VVVecAdd(iterCellFieldData->vectorAiiInversebij[ii], iterCellFieldData->scalarVariableTn,
 					// 				  iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]),
 					// 				  1, NDOFS);
+#ifdef RBFB1_NO_GS
+					iterCellFieldData->scalarVariableTnJI +=
+#else
 					iterCellFieldData->scalarVariableTn +=
+#endif
 						iterCellFieldData->vectorAiiInversebij.row(ii) *
 						iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
 				}
 				// deal with boundary correction
 				// CfvMath::VVMatVec(iterCellFieldData->matrixAiiInverse, vectorBoundaryCorrection, iterCellFieldData->scalarVariableTn, iterCellFieldData->relaxFactor,
 				// 				  1, NDOFS, 1, NDOFS, false);
-				iterCellFieldData->scalarVariableTn += iterCellFieldData->relaxFactor *
-													   iterCellFieldData->matrixAiiInverse *
-													   vectorBoundaryCorrection;
+#ifdef RBFB1_NO_GS
+				iterCellFieldData->scalarVariableTnJI +=
+#else
+				iterCellFieldData->scalarVariableTn +=
+#endif
+					iterCellFieldData->relaxFactor *
+					iterCellFieldData->matrixAiiInverse *
+					vectorBoundaryCorrection;
 
 				// // RBFB1:
 				// //	attempt a restriction
@@ -2013,6 +2073,14 @@ namespace ScalarCfv
 				// }
 			}
 		}
+#ifdef RBFB1_NO_GS
+#pragma omp parallel for schedule(guided)
+		for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
+		{
+			auto iterCellFieldData = cellFieldData->begin() + iCell;
+			iterCellFieldData->scalarVariableTn = iterCellFieldData->scalarVariableTnJI;
+		}
+#endif
 		//		std::cout << " ..reconstruction has been completed." << std::endl;
 		return true;
 	}
