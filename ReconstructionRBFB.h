@@ -510,7 +510,9 @@ namespace ScalarCfv
 
 				w[0] = 1.0;
 				refLR = omegaL / (*iterFaceFieldData).area;
-				w[0] *= std::pow(faceL.length() / delta.length(), -1.0);
+#ifdef RBFB1_USE_DELTA_INTERFACEJ
+				// w[0] *= std::pow(faceL.length() / delta.length(), -1.0);
+#endif
 			}
 			else if (cr == FarField)
 			{
@@ -592,9 +594,9 @@ namespace ScalarCfv
 			iterFaceFieldData->interFacialJacobi(1, 1) = unitNormalVector.x * faceL.length() * wtgt;
 #endif
 #ifdef RBFB1_USE_DELTA_INTERFACEJ
-			real wtgt = std::pow(std::min(std::max(delta.length() / faceL.length(), 1e-0), 1e3), 1);
+			// real wtgt = std::pow(std::min(std::max(delta.length() / faceL.length(), 1e-0), 1e3), 1);
 			// real wtgt = std::sqrt(delta.length() / faceL.length());
-			// real wtgt = 1.;
+			real wtgt = 1.;
 			iterFaceFieldData->interFacialJacobi(0, 0) = unitNormalVector.x * delta.length();
 			iterFaceFieldData->interFacialJacobi(0, 1) = unitNormalVector.y * delta.length();
 			iterFaceFieldData->interFacialJacobi(1, 0) = -unitNormalVector.y * delta.length() * wtgt;
@@ -2326,7 +2328,9 @@ namespace ScalarCfv
 		// matrix A
 		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
 		{
-			tensor2D<real, NDOFSCR, NDOFSCR> Aii;
+			// tensor2D<real, NDOFSCR, NDOFSCR> Aii;
+			Eigen::MatrixXd Aii(NDOFSCR, NDOFSCR);
+			Aii.setZero();
 			for (int ff = 1; ff < (*iterCellFieldData).cellFaceNumber + 1; ++ff)
 			{ //ע��ѭ�����ޣ���20200314
 				int kf = (*iterCellFieldData).cellFaceIndex[ff];
@@ -2380,7 +2384,12 @@ namespace ScalarCfv
 							scaleI,
 							momentI,
 							vectorBaseI,
-							*iterCellFieldData_);
+							*iterCellFieldData_
+#ifdef RBFB1_CR_INTERPOLATE
+							,
+							*faceFieldData
+#endif
+						);
 #else
 						RBFB1GetBaseValueCR(
 							pparaml,
@@ -2388,7 +2397,12 @@ namespace ScalarCfv
 							scaleI,
 							momentI,
 							vectorBaseI,
-							*iterCellFieldData_);
+							*iterCellFieldData_
+#ifdef RBFB1_CR_INTERPOLATE
+							,
+							*faceFieldData
+#endif
+						);
 #endif
 						// ll: row    rr: col
 						// get the integrated function values on each face Gauss point
@@ -2432,7 +2446,7 @@ namespace ScalarCfv
 								cofJacobi,
 								parametricArea,
 								result);
-							Aii[ll][rr] += result; //+ means sum of each face
+							Aii(ll, rr) += result; //+ means sum of each face
 							delete[] f;
 							delete[] weight;
 							delete[] cofJacobi;
@@ -2455,11 +2469,13 @@ namespace ScalarCfv
 			}
 			// iterCellFieldData_ = cellFieldData->begin() + cl - 1;
 			// assign Aii
-			CfvMath::VVMatCopy(Aii, iterCellFieldData->matrixAiiCR, 1, NDOFSCR, 1, NDOFSCR);
-			tensor2D<real, NDOFSCR, NDOFSCR> inverseAii;
-			CfvMath::getMatrixGeneralInverse(Aii, inverseAii);
+			// redundancy //iterCellFieldData->matrixAiiCR = Aii;
+			// CfvMath::VVMatCopy(Aii, iterCellFieldData->matrixAiiCR, 1, NDOFSCR, 1, NDOFSCR);
+			CfvMath::EigenLeastSquareInverse(Aii, iterCellFieldData->matrixAiiInverseCR);
+			// tensor2D<real, NDOFSCR, NDOFSCR> inverseAii;
+			// CfvMath::getMatrixGeneralInverse(Aii, inverseAii);
 			// assign inverse Aii
-			CfvMath::VVMatCopy(inverseAii, iterCellFieldData->matrixAiiInverseCR, 1, NDOFSCR, 1, NDOFSCR);
+			// CfvMath::VVMatCopy(inverseAii, iterCellFieldData->matrixAiiInverseCR, 1, NDOFSCR, 1, NDOFSCR);
 		}
 		//		std::cout << " ..CR reconstruction matrix and vector has been initialized." << std::endl;
 		return true;
@@ -2862,7 +2878,9 @@ namespace ScalarCfv
 			cellFieldDataVector::iterator iterCellFieldData_;
 			faceFieldDataVector::iterator iterFaceFieldData_;
 			iterCellFieldData = cellFieldData->begin() + iCell;
-			tensor1D<real, NDOFSCR> bi;
+			// tensor1D<real, NDOFSCR> bi;
+			Eigen::VectorXd bi(NDOFSCR);
+			bi.setZero();
 			// deal with boundary
 			for (int ff = 1; ff < (*iterCellFieldData).cellFaceNumber + 1; ++ff)
 			{ //ע��ѭ�����ޣ���20200314
@@ -3315,13 +3333,15 @@ namespace ScalarCfv
 			}
 
 			// assign gradient values : relax
-			for (int ii = 1; ii < static_cast<int>(NDOFSCR); ++ii)
-				(*iterCellFieldData).scalarVariableTnCR[ii] =
-					(1.0 - (*iterCellFieldData).relaxFactorCR) * (*iterCellFieldData).scalarVariableTnCR[ii];
+			// for (int ii = 1; ii < static_cast<int>(NDOFSCR); ++ii)
+			// 	(*iterCellFieldData).scalarVariableTnCR[ii] =
+			// 		(1.0 - (*iterCellFieldData).relaxFactorCR) * (*iterCellFieldData).scalarVariableTnCR[ii];
+			(*iterCellFieldData).scalarVariableTnCR = (1.0 - (*iterCellFieldData).relaxFactorCR) * (*iterCellFieldData).scalarVariableTnCR;
 			// update gradient values
-			for (int ll = 1; ll < static_cast<int>(NDOFSCR); ++ll)
-				for (int rr = 1; rr < static_cast<int>(NDOFSCR); ++rr)
-					(*iterCellFieldData).scalarVariableTnCR[ll] += (*iterCellFieldData).matrixAiiInverseCR[ll][rr] * bi[rr];
+			// for (int ll = 1; ll < static_cast<int>(NDOFSCR); ++ll)
+			// 	for (int rr = 1; rr < static_cast<int>(NDOFSCR); ++rr)
+			// 		(*iterCellFieldData).scalarVariableTnCR[ll] += (*iterCellFieldData).matrixAiiInverseCR[ll][rr] * bi[rr];
+			(*iterCellFieldData).scalarVariableTnCR += (*iterCellFieldData).matrixAiiInverseCR * bi * (*iterCellFieldData).relaxFactorCR;
 		}
 		//		std::cout << " ..CR reconstruction has been completed." << std::endl;
 		return true;

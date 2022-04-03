@@ -2660,7 +2660,7 @@ namespace ScalarCfv
 			//assign Aii 
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).matrixAiiCR[ll][rr] = Aii[ll][rr];
+					// redundancy //(*iterCellFieldData).matrixAiiCR(ll,rr) = Aii[ll][rr];
 				}
 			}
 			tensor2D<real, NDOFS, NDOFS> inverseAii;
@@ -2668,7 +2668,7 @@ namespace ScalarCfv
 			//assign inverse Aii 
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).matrixAiiInverseCR[ll][rr] = inverseAii[ll][rr];
+					(*iterCellFieldData).matrixAiiInverseCR(ll,rr) = inverseAii[ll][rr];
 				}
 			}
 		}
@@ -3001,7 +3001,7 @@ namespace ScalarCfv
 			//assign Aii 
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).matrixAiiCR[ll][rr] = Aii[ll][rr];
+					// redundancy //(*iterCellFieldData).matrixAiiCR(ll,rr) = Aii[ll][rr];
 				}
 			}
 			tensor2D<real, NDOFS, NDOFS> inverseAii;
@@ -3009,7 +3009,7 @@ namespace ScalarCfv
 			//assign inverse Aii 
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).matrixAiiInverseCR[ll][rr] = inverseAii[ll][rr];
+					(*iterCellFieldData).matrixAiiInverseCR(ll,rr) = inverseAii[ll][rr];
 				}
 			}
 		}
@@ -3521,7 +3521,7 @@ namespace ScalarCfv
 			//update gradient values
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).scalarVariableTnCR[ll] += (*iterCellFieldData).matrixAiiInverseCR[ll][rr] * bi[rr];
+					(*iterCellFieldData).scalarVariableTnCR[ll] += (*iterCellFieldData).matrixAiiInverseCR(ll,rr) * bi[rr];
 				}
 			}
 		}
@@ -4031,7 +4031,7 @@ namespace ScalarCfv
 			//update gradient values
 			for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll){
 				for (int rr = 1; rr < static_cast<int>(NDOFS); ++rr){
-					(*iterCellFieldData).scalarVariableTnCR[ll] += (*iterCellFieldData).matrixAiiInverseCR[ll][rr] * bi[rr];
+					(*iterCellFieldData).scalarVariableTnCR[ll] += (*iterCellFieldData).matrixAiiInverseCR(ll,rr) * bi[rr];
 				}
 			}
 		}

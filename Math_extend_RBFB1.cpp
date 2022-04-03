@@ -64,7 +64,7 @@ namespace CfvMath
 #else
         A[1] = p.x - 0.5 - moment[1];
         A[2] = p.y - 0.5 - moment[2];
-       
+
 #endif
         return true;
     }
@@ -402,6 +402,198 @@ namespace CfvMath
 
         return true;
     }
+
+    bool getMomentRBFB1_Interp_15_3(
+        ScalarCfv::point p,          // parametric place
+        ScalarCfv::point baryCenter, // dummy
+        ScalarCfv::point scale,      // dummy
+        ScalarCfv::tensor1D<ScalarCfv::real, 15> &A,
+        ScalarCfv::cellFieldData &cell,
+        std::vector<ScalarCfv::faceFieldData> &faceVec) // adding 1
+    {
+        // Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+        // Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+        //                                      {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+        // Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+        //                                  {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+        // Eigen::Vector2d pp = XiNj * Nj;
+        // ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+        // A[1] = delta.x / scale.x;
+        // A[2] = delta.y / scale.y;
+        assert(fO == 5);
+        if (cell.cellType_ == ScalarCfv::Quadrilateral)
+        {
+
+#ifdef RBFB1_RBF_USE_MEANIJ
+
+            Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+            Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+                                             {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+            Eigen::Matrix2d iJacobi = cell.MeanIJ;
+            Eigen::Vector2d pp = XiNj * Nj;
+            ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+            Eigen::Vector2d deltap = {pp(0) - baryCenter.x, pp(1) - baryCenter.y};
+            Eigen::Vector2d ppc = iJacobi.transpose() * deltap;
+            ScalarCfv::point pc(ppc(0), ppc(1));
+#else
+            auto pc = p - ScalarCfv::point(0.5, 0.5);
+#endif
+
+            A[1] = pc.x;
+            A[2] = pc.y;
+            int ic = 3;
+            for (int cf = 1; cf <= cell.cellFaceNumber; cf++)
+            {
+                auto &face = faceVec[cell.cellFaceIndex[cf] - 1];
+                for (int gg = 0; gg < 3; gg++)
+                {
+                    auto &pg = face.gaussPairVector_[gg].p;
+                    ScalarCfv::point delta = ScalarCfv::point(pg.x - baryCenter.x, pg.y - baryCenter.y);
+                    Eigen::Vector2d deltap = {delta.x, delta.y};
+                    Eigen::Vector2d ppcg = iJacobi.transpose() * deltap;
+                    ScalarCfv::point pcg(ppcg(0), ppcg(1));
+                    A[ic] = RBF::RBF0(pc - pcg, crbf, RBF::F0);
+                    ic++;
+                }
+            }
+        }
+        else if (cell.cellType_ == ScalarCfv::Triangle)
+        {
+            assert(false);
+        }
+        return true;
+    }
+
+    bool getBaseValueRBFB1_Interp_15_3(
+        ScalarCfv::point p,          // parametric place
+        ScalarCfv::point baryCenter, // dummy
+        ScalarCfv::point scale,      // dummy
+        ScalarCfv::tensor1D<ScalarCfv::real, 15> &moment,
+        ScalarCfv::tensor1D<ScalarCfv::real, 15> &A,
+        ScalarCfv::cellFieldData &cell,
+        std::vector<ScalarCfv::faceFieldData> &faceVec) // adding 1
+    {
+        assert(fO == 5);
+        if (cell.cellType_ == ScalarCfv::Quadrilateral)
+        {
+
+#ifdef RBFB1_RBF_USE_MEANIJ
+            Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+            Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+                                             {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+            Eigen::Matrix2d iJacobi = cell.MeanIJ;
+            Eigen::Vector2d pp = XiNj * Nj;
+            ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+            Eigen::Vector2d deltap = {pp(0) - baryCenter.x, pp(1) - baryCenter.y};
+            Eigen::Vector2d ppc = iJacobi.transpose() * deltap;
+            ScalarCfv::point pc(ppc(0), ppc(1));
+#else
+            auto pc = p - ScalarCfv::point(0.5, 0.5);
+#endif
+            A[1] = pc.x - moment[1];
+            A[2] = pc.y - moment[2];
+            int ic = 3;
+            for (int cf = 1; cf <= cell.cellFaceNumber; cf++)
+            {
+                auto &face = faceVec[cell.cellFaceIndex[cf] - 1];
+                for (int gg = 0; gg < 3; gg++)
+                {
+                    auto &pg = face.gaussPairVector_[gg].p;
+                    ScalarCfv::point delta = ScalarCfv::point(pg.x - baryCenter.x, pg.y - baryCenter.y);
+                    Eigen::Vector2d deltap = {delta.x, delta.y};
+                    Eigen::Vector2d ppcg = iJacobi.transpose() * deltap;
+                    ScalarCfv::point pcg(ppcg(0), ppcg(1));
+                    A[ic] = RBF::RBF0(pc - pcg, crbf, RBF::F0) - moment[ic];
+                    ic++;
+                }
+            }
+        }
+        else if (cell.cellType_ == ScalarCfv::Triangle)
+        {
+            assert(false);
+        }
+
+        return true;
+    }
+
+    bool getDiffBaseValueRBFB1_Interp_15_3(
+        ScalarCfv::point p,          // parametric place
+        ScalarCfv::point baryCenter, // dummy
+        ScalarCfv::point scale,      // dummy
+        ScalarCfv::tensor1D<ScalarCfv::real, 15> &moment,
+        ScalarCfv::tensor2D<ScalarCfv::real, 15, 3> &A,
+        ScalarCfv::cellFieldData &cell,
+        std::vector<ScalarCfv::faceFieldData> &faceVec) // adding 1
+    {
+        assert(fO == 5);
+        if (cell.cellType_ == ScalarCfv::Quadrilateral)
+        {
+            //(1-x)(1-y) y(1-x) x*y x*(1-y)
+            Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
+
+            Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
+                                                 {-(1 - p.x), (1 - p.x), p.x, -p.x}};
+            Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
+                                             {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+
+            Eigen::Matrix2d Jacobi = dNjdetai * XiNj.transpose(); // = dxj/detai
+            Eigen::Matrix2d iJacobi = Jacobi.inverse();           // = detaj/dxi // iJabcobi * dphideetaj = dphidxj
+
+#ifdef RBFB1_RBF_USE_MEANIJ
+            iJacobi = cell.MeanIJ;
+            Eigen::Vector2d pp = XiNj * Nj;
+            ScalarCfv::point delta = ScalarCfv::point(pp(0) - baryCenter.x, pp(1) - baryCenter.y);
+            Eigen::Vector2d deltap = {pp(0) - baryCenter.x, pp(1) - baryCenter.y};
+            Eigen::Vector2d ppc = iJacobi.transpose() * deltap;
+            ScalarCfv::point pc(ppc(0), ppc(1));
+#else
+            auto pc = p - ScalarCfv::point(0.5, 0.5);
+#endif
+            A[1][0] = pc.x - moment[1];
+            A[2][0] = pc.y - moment[2];
+
+            // diff 1:
+            Eigen::Vector2d dphidetaj, dphidxj;
+            dphidetaj << 1, 0;
+            dphidxj = iJacobi * dphidetaj;
+            A[1][1] = dphidxj[0];
+            A[1][2] = dphidxj[1];
+
+            dphidetaj << 0, 1;
+            dphidxj = iJacobi * dphidetaj;
+            A[2][1] = dphidxj[0];
+            A[2][2] = dphidxj[1];
+
+            int ic = 3;
+            for (int cf = 1; cf <= cell.cellFaceNumber; cf++)
+            {
+                auto &face = faceVec[cell.cellFaceIndex[cf] - 1];
+                for (int gg = 0; gg < 3; gg++)
+                {
+                    auto &pg = face.gaussPairVector_[gg].p;
+                    ScalarCfv::point delta = ScalarCfv::point(pg.x - baryCenter.x, pg.y - baryCenter.y);
+                    Eigen::Vector2d deltap = {delta.x, delta.y};
+                    Eigen::Vector2d ppcg = iJacobi.transpose() * deltap;
+                    ScalarCfv::point pcg(ppcg(0), ppcg(1));
+                    dphidetaj << RBF::RBF1x(pc - pcg, crbf, RBF::F0, RBF::F1), RBF::RBF1y(pc - pcg, crbf, RBF::F0, RBF::F1);
+                    dphidxj = iJacobi * dphidetaj;
+                    A[ic][1] = dphidxj[0];
+                    A[ic][2] = dphidxj[1];
+                    A[ic][0] = RBF::RBF0(pc - pcg, crbf, RBF::F0) - moment[ic];
+                    ic++;
+                }
+            }
+        }
+        else if (cell.cellType_ == ScalarCfv::Triangle)
+        {
+            assert(false);
+        }
+
+        return true;
+    }
+
+    /*
+     */
 
     /*
 

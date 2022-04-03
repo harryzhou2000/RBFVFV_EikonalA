@@ -148,8 +148,10 @@ namespace ScalarCfv
 			(*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS,(*iterCellFieldData).NDOFS);
 			// (*iterCellFieldData).matrixAiiInverse.resize((*iterCellFieldData).NDOFS);
 			// (*iterCellFieldData).matrixAii.resize((*iterCellFieldData).NDOFS);
-			(*iterCellFieldData).matrixAiiInverseCR.resize((*iterCellFieldData).NDOFSCR);
-			(*iterCellFieldData).matrixAiiCR.resize((*iterCellFieldData).NDOFSCR);
+			(*iterCellFieldData).matrixAiiInverseCR.resize((*iterCellFieldData).NDOFSCR, (*iterCellFieldData).NDOFSCR);
+			// redundancy //(*iterCellFieldData).matrixAiiCR.resize((*iterCellFieldData).NDOFSCR, (*iterCellFieldData).NDOFSCR);
+			//  (*iterCellFieldData).matrixAiiInverseCR.resize((*iterCellFieldData).NDOFSCR);
+			//  (*iterCellFieldData).matrixAiiCR.resize((*iterCellFieldData).NDOFSCR);
 
 			for (int jj = 0; jj < static_cast<int>((*iterCellFieldData).NDOFS); ++jj)
 			{
@@ -158,8 +160,8 @@ namespace ScalarCfv
 			}
 			for (int jj = 0; jj < static_cast<int>((*iterCellFieldData).NDOFSCR); ++jj)
 			{
-				(*iterCellFieldData).matrixAiiInverseCR[jj].resize((*iterCellFieldData).NDOFSCR);
-				(*iterCellFieldData).matrixAiiCR[jj].resize((*iterCellFieldData).NDOFSCR);
+				// (*iterCellFieldData).matrixAiiInverseCR[jj].resize((*iterCellFieldData).NDOFSCR);
+				// (*iterCellFieldData).matrixAiiCR[jj].resize((*iterCellFieldData).NDOFSCR);
 			}
 
 			// cellFaceNumber->cellCellNumber

@@ -87,6 +87,11 @@ namespace ScalarCfv
 		Eigen::VectorXd deltaScalarVariableTn;
 		Eigen::VectorXd deltaScalarVariableTm;
 
+		// Eigen::VectorXd scalarVariablePCG_b;
+		// Eigen::VectorXd scalarVariablePCG_r;
+		// Eigen::VectorXd scalarVariablePCG_z;
+		// Eigen::VectorXd scalarVariablePCG_p;
+
 		// std::vector<real> scalarVariableTn; // current time step , inlcude the multistep time marching methods, Tn means the newest values
 		// std::vector<real> scalarVariableTm; // previous time step
 		// std::vector<real> scalarVariableTnLimited;
@@ -96,11 +101,11 @@ namespace ScalarCfv
 		// std::vector<real> deltaScalarVariableTm;
 
 		// std::vector<std::vector<real>> vectorbij;
-		Eigen::Matrix<real,-1,-1> vectorbij;
+		Eigen::Matrix<real, -1, -1> vectorbij;
 		// std::vector<std::vector<real>> vectorAiiInversebij;
-		Eigen::Matrix<real,-1,-1> vectorAiiInversebij;
+		Eigen::Matrix<real, -1, -1> vectorAiiInversebij;
 		// std::vector<std::vector<real>> matrixAiiInverse;
-		Eigen::Matrix<real,-1,-1> matrixAiiInverse;
+		Eigen::Matrix<real, -1, -1> matrixAiiInverse;
 		// std::vector<std::vector<real>> matrixAii;
 		Eigen::Matrix<real, -1, -1> matrixAii;
 
@@ -109,17 +114,17 @@ namespace ScalarCfv
 		std::vector<Eigen::Matrix<real, -1, -1>> matrixBij;
 		std::vector<Eigen::Matrix<real, -1, -1>> matrixAiiInverseBij;
 
-
-
-		std::vector<std::vector<real>> matrixAiiInverseCR;
-		std::vector<std::vector<real>> matrixAiiCR;
-		std::vector<std::vector<std::vector<real>>> matrixBijCR; // CR�ƺ�����Ҫ
+		Eigen::Matrix<real, -1, -1> matrixAiiInverseCR;
+		// redundancy //Eigen::Matrix<real, -1, -1> matrixAiiCR;
+		//  std::vector<std::vector<real>> matrixAiiInverseCR;
+		//  std::vector<std::vector<real>> matrixAiiCR;
+		std::vector<std::vector<std::vector<real>>> matrixBijCR; // CR�ƺ�����Ҫ // Currently deprecated
 		// std::vector<std::vector<real> > matrixAiInverseInverseCR;
 		// std::vector<std::vector<real> > matrixAiCR;
 
 		std::vector<std::pair<point, real>> parametricValue;
 
-		std::vector<std::vector<std::vector<real>>> diffBaseValueData; // at gauss points
+		std::vector<std::vector<std::vector<real>>> diffBaseValueData;	 // at gauss points
 		std::vector<std::vector<std::vector<real>>> diffBaseValueDataCR; // at gauss points
 		std::vector<std::vector<real>> diffBaseValueDataBary;
 
@@ -145,12 +150,11 @@ namespace ScalarCfv
 		// std::vector<real> flux;
 		real lambdaFace;
 
-		std::vector<std::vector<std::vector<std::vector<real>>>> diffBaseValueData;// at gaussian points
+		std::vector<std::vector<std::vector<std::vector<real>>>> diffBaseValueData;	  // at gaussian points
 		std::vector<std::vector<std::vector<std::vector<real>>>> diffBaseValueDataCR; // at gaussian points
 		std::vector<std::vector<std::vector<real>>> diffBaseValueDataMid;
 		// std::vector<Eigen::Matrix2d> interFacialJacobi;
 		Eigen::Matrix2d interFacialJacobi;
-
 	};
 	typedef std::vector<faceFieldData> faceFieldDataVector;
 }

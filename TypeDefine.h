@@ -15,7 +15,7 @@
 // #define RBFB1_GlobalPoly
 // #define RBFB1_GlobalPoly_ESC // for vfv functional research
 
-// #define RBFB1_USE_UNITARY_MEANIJ
+#define RBFB1_USE_UNITARY_MEANIJ
 // #define RBFB1_USE_DELTA_Jacobi_INTERFACEJ
 // #define RBFB1_USE_DELTA_NT_INTERFACEJ
 #define RBFB1_USE_DELTA_INTERFACEJ	
@@ -25,6 +25,7 @@
 
 #define RBFB1_AR0 4
 
+// #define RBFB1_CR_INTERPOLATE
 
 #define GRID_ROT 0
 
@@ -43,6 +44,10 @@
 #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_POLY
 #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_POLY
 #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_POLY
+
+// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_Interp_15_3
+// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_Interp_15_3
+// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_Interp_15_3
 
 // #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_7_6
 // #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_7_6
@@ -87,6 +92,9 @@ constexpr int GLOBAL_NDIFFS(int O) { return (O + 2) * (O + 1) / 2; }
 // constexpr int GLOBAL_NDIFFS(int O) { return 6; }
 
 // constexpr int GLOBAL_NDOFSCR(int O) { return 4; }
+// constexpr int GLOBAL_NDIFFSCR(int O) { return 3; }
+
+// constexpr int GLOBAL_NDOFSCR(int O) { return 15; }
 // constexpr int GLOBAL_NDIFFSCR(int O) { return 3; }
 
 constexpr int GLOBAL_NDOFSCR(int O) { return (O + 2) * (O + 1) / 2; }
