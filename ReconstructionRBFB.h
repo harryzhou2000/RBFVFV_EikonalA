@@ -147,13 +147,13 @@ namespace ScalarCfv
 			// relax factor
 			if ((*iterCellFieldData).boundaryCellType_ == InnerCell)
 			{
-				(*iterCellFieldData).relaxFactor = 1;
-				(*iterCellFieldData).relaxFactorCR = 1;
+				(*iterCellFieldData).relaxFactor = RBFB1_BASE_RELAX;
+				(*iterCellFieldData).relaxFactorCR = RBFB1_CR_RELAX;
 			}
 			else
 			{
-				(*iterCellFieldData).relaxFactor = 1;
-				(*iterCellFieldData).relaxFactorCR = 1;
+				(*iterCellFieldData).relaxFactor = RBFB1_BASE_RELAX;
+				(*iterCellFieldData).relaxFactorCR = RBFB1_CR_RELAX;
 			}
 
 			// base momment
@@ -181,10 +181,11 @@ namespace ScalarCfv
 					assert(false);
 			}
 
-			// CfvMath::RegularizeJacobianSym(iterCellFieldData->MeanIJ);
-			// CfvMath::RegularizeJacobian(InvMeanIJ);
-#ifdef RBFB1_USE_UNITARY_MEANIJ
 			Eigen::Matrix2d InvMeanIJ = iterCellFieldData->MeanIJ.inverse(); // = dxj/dxii
+			// CfvMath::RegularizeJacobianSym(iterCellFieldData->MeanIJ);
+			CfvMath::RegularizeJacobian(InvMeanIJ);
+			iterCellFieldData->MeanIJ = InvMeanIJ.inverse();
+#ifdef RBFB1_USE_UNITARY_MEANIJ
 			real IJ0 = InvMeanIJ(0, Eigen::all).norm();
 			real IJ1 = InvMeanIJ(1, Eigen::all).norm();
 			InvMeanIJ(0, Eigen::all) /= IJ0;
@@ -495,7 +496,7 @@ namespace ScalarCfv
 					// real l1 = std::fabs((*iterCellFieldData).lengthReference.x / ((*iterCellFieldData).lengthReference.y + parameter->EPS));
 					// real l2 = std::fabs((*iterCellFieldData).lengthReference.y / ((*iterCellFieldData).lengthReference.x + parameter->EPS));
 					//(*iterFaceFieldData).weightVF = getMax(l1, l2)*getMax(l1, l2);//deflult value
-					(*iterFaceFieldData).weightVF = 1.0; // deflult value
+					(*iterFaceFieldData).weightVF = 2.0; // deflult value
 				}
 				else if (parameter->isViscous == false)
 				{
@@ -601,7 +602,7 @@ namespace ScalarCfv
 			iterFaceFieldData->interFacialJacobi(1, 1) = unitNormalVector.x * faceL.length() * wtgt;
 #endif
 #ifdef RBFB1_USE_DELTA_INTERFACEJ
-			// real wtgt = std::pow(std::min(std::max(delta.length() / faceL.length(), 1e-0), 1e3), 1);
+			// real wtgt = std::pow(std::min(std::max(delta.length() / faceL.length(), 1e-5), 1e5), 1);
 			// real wtgt = std::sqrt(delta.length() / faceL.length());
 			real wtgt = 1.;
 			iterFaceFieldData->interFacialJacobi(0, 0) = unitNormalVector.x * delta.length();
@@ -1064,6 +1065,8 @@ namespace ScalarCfv
 			// iterCellFieldData->matrixAiiInverse=
 			// 	SVDResult.solve(Eigen::MatrixXd::Identity(iterCellFieldData->matrixAii.cols(), iterCellFieldData->matrixAii.rows()));
 			CfvMath::EigenLeastSquareInverse(Aii, iterCellFieldData->matrixAiiInverse);
+			iterCellFieldData->matrixAiiInverse(Eigen::all, 0).setZero();
+			iterCellFieldData->matrixAiiInverse(0, Eigen::all).setZero();
 
 			// assign inverseAii*Bij & inverseAii*bi, for convenient calculation
 			for (int cc = 1; cc < (*iterCellFieldData).cellCellNumber + 1; ++cc)
@@ -1073,12 +1076,15 @@ namespace ScalarCfv
 				// CfvMath::VVMatMat(inverseAii, iterCellFieldData->matrixBij[cc], iterCellFieldData->matrixAiiInverseBij[cc],
 				// 				  1, NDOFS, 1, NDOFS, 1, NDOFS);
 				iterCellFieldData->matrixAiiInverseBij[cc] = iterCellFieldData->matrixAiiInverse * iterCellFieldData->matrixBij[cc];
+				iterCellFieldData->matrixAiiInverseBij[cc](Eigen::all, 0).setZero();
+				iterCellFieldData->matrixAiiInverseBij[cc](0, Eigen::all).setZero();
 				// CfvMath::VEMatVec(inverseAii, (iterCellFieldData->vectorbij.row(cc)), iterCellFieldData->vectorAiiInversebij[cc],
 				// 				  1, NDOFS, 1, NDOFS);
 				iterCellFieldData->vectorAiiInversebij.row(cc) =
 					iterCellFieldData->vectorbij.row(cc) *
 					iterCellFieldData->matrixAiiInverse.transpose();
 			}
+			iterCellFieldData->vectorAiiInversebij(Eigen::all, 0).setZero();
 		}
 		std::cout << " ..reconstruction matrix and vector has been initialized." << std::endl;
 		return true;
@@ -1798,6 +1804,8 @@ namespace ScalarCfv
 #endif
 						iterCellFieldData->vectorAiiInversebij.row(ii) *
 						iterCellFieldData->relaxFactor * ((*iterCellFieldData_).scalarVariableTn[0] - (*iterCellFieldData).scalarVariableTn[0]);
+					// std::cout << "Ainvbij = " << iterCellFieldData->vectorAiiInversebij.row(ii) << std::endl;
+					// std::cout << "AinvBij = " << iterCellFieldData->matrixAiiInverseBij[ii] << std::endl;
 				}
 			}
 			else
@@ -1826,7 +1834,7 @@ namespace ScalarCfv
 							for (int ll = 1; ll < static_cast<int>(NDOFS); ++ll)
 							{
 								// parametric
-								fI[gg][ll] = std::pow((*iterFaceFieldData_).faceWeightVF[0], 2) * matrixDiffBaseII[ll][0] * (uBV - uI);
+								fI[gg][ll] = std::pow((*iterFaceFieldData_).faceWeightVF[0], 2)  * matrixDiffBaseII[ll][0] * (uBV - uI);
 							}
 
 							//	//--20200513
@@ -2078,7 +2086,8 @@ namespace ScalarCfv
 		for (int iCell = 0; iCell < cellFieldData->size(); iCell++)
 		{
 			auto iterCellFieldData = cellFieldData->begin() + iCell;
-			iterCellFieldData->scalarVariableTn = iterCellFieldData->scalarVariableTnJI;
+			auto usiz = iterCellFieldData->scalarVariableTn.size() - 1;
+			iterCellFieldData->scalarVariableTn(Eigen::lastN(usiz)) = iterCellFieldData->scalarVariableTnJI(Eigen::lastN(usiz));
 		}
 #endif
 		//		std::cout << " ..reconstruction has been completed." << std::endl;

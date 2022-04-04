@@ -761,13 +761,13 @@ namespace CfvMath
 		x0n_new /= x0n_new.norm();
 		Eigen::Vector2d x1n_new = xcn - xmn;
 		x1n_new /= x1n_new.norm();
-		if(x0.norm() < x1.norm())
-			x0n_new = x0n, x1n_new << -x0n_new(1), x0n_new(0);
-		else
-			x1n_new = x1n, x0n_new << x1n_new(1), -x1n_new(0);
+		// if(x0.norm() < x1.norm())
+		// 	x0n_new = x0n, x1n_new << -x0n_new(1), x0n_new(0);
+		// else
+		// 	x1n_new = x1n, x0n_new << x1n_new(1), -x1n_new(0);
 
-		// dxjdxii(0, Eigen::all) = x0n_new * x0.dot(x0n_new);
-		// dxjdxii(1, Eigen::all) = x1n_new * x1.dot(x1n_new);
+		dxjdxii(0, Eigen::all) = x0n_new * x0.dot(x0n_new);
+		dxjdxii(1, Eigen::all) = x1n_new * x1.dot(x1n_new);
 	}
 
 	// inline void RegularizeJacobianSym(Eigen::Matrix2d &dxjdxii)

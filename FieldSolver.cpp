@@ -438,7 +438,7 @@ namespace ScalarCfv
 			{
 				for (int isubrk = 1; isubrk <= parameter_->nInnerStepTimeMarching; ++isubrk)
 				{
-					for (int irec = 1; irec <= 10; irec++)
+					for (int irec = 1; irec <= REC_ITER; irec++)
 						reconstruction_->excuteReconstruction(
 							parameter_,
 							cellFieldData_,
