@@ -9,7 +9,7 @@ all: main.exe
 # CPC=icpc
 
 #### GCC or CLANG/LLVM: 
-FPFLAGS=-DUSE_OPEN_BLAS -fopenmp 
+FPFLAGS=-DUSE_OPEN_BLAS -fopenmp -std=c++14
 CPC=/usr/bin/clang++ 
 # CPC=/usr/bin/g++
 LIB=-lopenblas -llapacke
@@ -18,7 +18,7 @@ LIB=-lopenblas -llapacke
 
 OPT=-g
 OPT= -O3 -g 
-OPT= -O3 -DNDEBUG # NDEBUG macro for c assert library
+# OPT= -O3 -DNDEBUG # NDEBUG macro for c assert library
 
 OBJ:=FieldSolver.o Grid.o Math.o Parameter.o main.o
 

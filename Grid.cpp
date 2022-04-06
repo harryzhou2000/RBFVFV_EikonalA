@@ -1603,9 +1603,19 @@ namespace ScalarCfv
 	{
 		for (auto &c : *cell_)
 		{
+
 			// std::cout << c.cellType_ << std::endl;
 			if (c.cellType_ == Quadrilateral)
 			{
+				auto p12 = c.cellNode[2].second - c.cellNode[1].second;
+				auto p23 = c.cellNode[3].second - c.cellNode[2].second;
+				real p12c23 = p12.x * p23.y - p12.y * p23.x;
+				if (p12c23 > 0)
+				{
+					auto oldNode = c.cellNode;
+					for (int i = 0; i < 4; i++)
+						c.cellNode[1 + i] = oldNode[4 - i];
+				}
 				int a[4][2] = {{1, 2}, {2, 3}, {3, 4}, {4, 1}};
 				int f[4][2], n[4][2];
 				for (int ifacecell = 1; ifacecell <= c.cellFaceNumber; ifacecell++)
@@ -1630,6 +1640,47 @@ namespace ScalarCfv
 				auto oldcellFaceWeight = c.cellFaceWeight;
 				auto oldcellFaceSideoff = c.cellFaceSideOff;
 				for (int i = 0; i < 4; i++)
+				{
+					c.cellFaceIndex[i + 1] = oldcellFaceIndex[perm[i] + 1];
+					c.cellFaceWeight[i + 1] = oldcellFaceWeight[perm[i] + 1];
+					c.cellFaceSideOff[i + 1] = oldcellFaceSideoff[perm[i] + 1];
+				}
+			}
+			else if (c.cellType_ == Triangle)
+			{
+				auto p12 = c.cellNode[2].second - c.cellNode[1].second;
+				auto p23 = c.cellNode[3].second - c.cellNode[2].second;
+				real p12c23 = p12.x * p23.y - p12.y * p23.x;
+				if (p12c23 < 0)
+				{
+					auto oldNode = c.cellNode;
+					for (int i = 0; i < 3; i++)
+						c.cellNode[1 + i] = oldNode[3 - i];
+				}
+				int a[3][2] = {{1, 2}, {2, 3}, {3, 1}};
+				int f[3][2], n[3][2];
+				for (int ifacecell = 1; ifacecell <= c.cellFaceNumber; ifacecell++)
+				{
+					auto iface = c.cellFaceIndex[ifacecell];
+					f[ifacecell - 1][0] = (*face_)[iface - 1].faceNode[1].first;
+					f[ifacecell - 1][1] = (*face_)[iface - 1].faceNode[2].first;
+					n[ifacecell - 1][0] = c.cellNode[a[ifacecell - 1][0]].first;
+					n[ifacecell - 1][1] = c.cellNode[a[ifacecell - 1][1]].first;
+				}
+				int perm[3];
+				for (int i = 0; i < 3; i++)
+				{
+					int j;
+					for (j = 0; j < 3; j++)
+						if ((f[j][0] == n[i][0] && f[j][1] == n[i][1]) || (f[j][0] == n[i][1] && f[j][1] == n[i][0]))
+							break;
+					assert(j < 3);
+					perm[i] = j;
+				}
+				auto oldcellFaceIndex = c.cellFaceIndex;
+				auto oldcellFaceWeight = c.cellFaceWeight;
+				auto oldcellFaceSideoff = c.cellFaceSideOff;
+				for (int i = 0; i < 3; i++)
 				{
 					c.cellFaceIndex[i + 1] = oldcellFaceIndex[perm[i] + 1];
 					c.cellFaceWeight[i + 1] = oldcellFaceWeight[perm[i] + 1];

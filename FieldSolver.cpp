@@ -520,6 +520,7 @@ namespace ScalarCfv
 				std::cout << "Current step:"
 						  << "\t"
 						  << "\t" << iStep << std::endl;
+				std::cout << "Residual = [ " << residual << " ] " << std::endl;
 			}
 			if (iStep % parameter_->nFileOutput == 0)
 			{
@@ -1330,9 +1331,10 @@ namespace ScalarCfv
 #ifndef USE_RBFB1_N
 
 #ifdef USE_RBFB1
-			assert(iterCell->cellType_ == Quadrilateral);
+			point pCenter = CfvMath::getParamPointCenter(*iterCell);
+
 			RBFB1GetDiffBaseValue(
-				point(0.5, 0.5),
+				CfvMath::GaussParam2RBFParam(pCenter, *iterCell),
 				baryCenterI,
 				scaleI,
 				momentI,
@@ -1448,9 +1450,9 @@ namespace ScalarCfv
 				momentI,
 				matrixDiffBaseI);
 #else
-			assert(iterCell->cellType_ == Quadrilateral);
+			point pCenter = CfvMath::getParamPointCenter(*iterCell);
 			RBFB1GetDiffBaseValue(
-				point(0.5, 0.5),
+				CfvMath::GaussParam2RBFParam(pCenter, *iterCell),
 				baryCenterI,
 				scaleI,
 				momentI,
@@ -1499,9 +1501,9 @@ namespace ScalarCfv
 				momentI,
 				matrixDiffBaseI);
 #else
-			assert(iterCell->cellType_ == Quadrilateral);
+			point pCenter = CfvMath::getParamPointCenter(*iterCell);
 			RBFB1GetDiffBaseValue(
-				point(0.5, 0.5),
+				CfvMath::GaussParam2RBFParam(pCenter, *iterCell),
 				baryCenterI,
 				scaleI,
 				momentI,
@@ -1542,9 +1544,9 @@ namespace ScalarCfv
 				momentI,
 				matrixDiffBaseI);
 #else
-			assert(iterCell->cellType_ == Quadrilateral);
+			point pCenter = CfvMath::getParamPointCenter(*iterCell);
 			RBFB1GetDiffBaseValue(
-				point(0.5, 0.5),
+				CfvMath::GaussParam2RBFParam(pCenter, *iterCell),
 				baryCenterI,
 				scaleI,
 				momentI,
@@ -1595,33 +1597,55 @@ namespace ScalarCfv
 	bool fieldsolver::getResidual(
 		real &residual)
 	{
-#ifdef IF_RESTRICT_RADIUS
 		residual = 0.0;
 		real volTemp = 0.0;
 		real R = 12.0;
 		cellFieldDataVector::iterator iterCell;
+
+		real Error = 0.0;
+		real VolError = 0.0;
+
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
 		{
+#ifdef IF_RESTRICT_RADIUS
 			if ((*iterCell).baryCenter.length() < R)
 			{
 				continue;
 			}
-			residual += std::fabs((*iterCell).scalarVariableTn[0] - (*iterCell).scalarVariableTm[0]) * (*iterCell).volume;
-			volTemp += (*iterCell).volume;
-		}
-		residual /= volTemp;
-#else
-		residual = 0.0;
-		real volTemp = 0.0;
-		cellFieldDataVector::iterator iterCell;
-		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
-		{
-			residual += std::fabs((*iterCell).scalarVariableTn[0] - (*iterCell).scalarVariableTm[0]) * (*iterCell).volume;
-			volTemp += (*iterCell).volume;
-		}
-		residual /= volTemp;
 #endif
-
+#ifdef PRINT_CYLINDER1_ACCURACY
+			if ((*iterCell).baryCenter.length() > 5.0)
+				continue;
+			real incVE = 1.0;
+			Error += std::fabs((*iterCell).baryCenter.length() - 1.0 - (*iterCell).scalarVariableTn[0]);
+			VolError += incVE;
+#endif
+#ifdef PRINT_BLOCKOPEN_ACCURACY
+			real incVE = 1.0;
+			Error += std::fabs((*iterCell).baryCenter.y - (*iterCell).scalarVariableTn[0]);
+			VolError += incVE;
+#endif
+#ifdef PRINT_BLOCKBOUND_ACCURACY
+			real incVE = 1.0;
+			real ref = std::min((*iterCell).baryCenter.y, (*iterCell).baryCenter.x);
+			ref = std::min(ref, 1 - (*iterCell).baryCenter.y);
+			ref = std::min(ref, 1 - (*iterCell).baryCenter.x);
+			Error += std::fabs(ref - (*iterCell).scalarVariableTn[0]);
+			VolError += incVE;
+#endif
+			residual += std::fabs((*iterCell).scalarVariableTn[0] - (*iterCell).scalarVariableTm[0]) * (*iterCell).volume;
+			volTemp += (*iterCell).volume;
+		}
+		residual /= volTemp;
+#ifdef PRINT_CYLINDER1_ACCURACY
+		residual = Error / VolError;
+#endif
+#ifdef PRINT_BLOCKOPEN_ACCURACY
+		residual = Error / VolError;
+#endif
+#ifdef PRINT_BLOCKBOUND_ACCURACY
+		residual = Error / VolError;
+#endif
 		return true;
 	};
 

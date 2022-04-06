@@ -5,6 +5,10 @@
 #include <omp.h>
 
 #define REC_ITER 1
+#define PRINT_CYLINDER1_ACCURACY
+// #define PRINT_BLOCKOPEN_ACCURACY
+// #define PRINT_BLOCKBOUND_ACCURACY
+
 // #define USE_RBFA1
 #define USE_RBFB1
 
@@ -19,14 +23,14 @@
 // #define RBFB1_INCREMENT_CR
 // #define USE_RBFB1_N
 #define RBFB1_GlobalPoly
-// #define RBFB1_GlobalPoly_ESC // xfor vfv functional research
+#define RBFB1_GlobalPoly_ESC // xfor vfv functional research
 
 // #define RBFB1_USE_UNITARY_MEANIJ
 // #define RBFB1_USE_DELTA_Jacobi_INTERFACEJ
 // #define RBFB1_USE_DELTA_NT_INTERFACEJ
 #define RBFB1_USE_DELTA_INTERFACEJ	
 
-#define RBFB1_RBF_USE_MEANIJ
+#define RBFB1_RBF_USE_MEANIJ 
 #define RBFB1_POLY_USE_MEANIJ
 
 #define RBFB1_AR0 100000
@@ -35,30 +39,43 @@
 
 #define GRID_ROT 0
 
-// #define RBFB1GetMoment CfvMath::getMomentRBFB1_POLY
-// #define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_POLY
-// #define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_POLY
+#define RBFB1GetMoment CfvMath::getMomentRBFB1_POLY
+#define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_POLY
+#define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_POLY
 
-#define RBFB1GetMoment CfvMath::getMomentRBFB1_7_6
-#define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_7_6
-#define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_7_6
+// #define RBFB1GetMoment CfvMath::getMomentRBFB1_7_6
+// #define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_7_6
+// #define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_7_6
 
 // #define RBFB1GetMoment CfvMath::getMomentRBFB1_4_6
 // #define RBFB1GetBaseValue CfvMath::getBaseValueRBFB1_4_6
 // #define RBFB1GetDiffBaseValue CfvMath::getDiffBaseValueRBFB1_4_6
 
-// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_POLY
-// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_POLY
-// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_POLY
+#define RBFB1GetMomentCR CfvMath::getMomentRBFB1_POLY
+#define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_POLY
+#define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_POLY
 
 // #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_Interp_15_3
 // #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_Interp_15_3
 // #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_Interp_15_3
 // #define RBFB1_CR_INTERPOLATE
 
-#define RBFB1GetMomentCR CfvMath::getMomentRBFB1_7_6
-#define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_7_6
-#define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_7_6
+/***
+ * with VRbase==CRbase
+ * new functional RBFB1_USE_DELTA_INTERFACEJ wtgt = .5,
+ * without RBFB1_RBF_USE_MEANIJ
+ * MQ 0.4
+ * works
+ *
+ * with VRbase==CRbase
+ * new functional RBFB1_USE_DELTA_INTERFACEJ wtgt = .5,
+ * with*** RBFB1_RBF_USE_MEANIJ
+ * MQ 1 or 2***
+ * works
+ */
+// #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_7_6
+// #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_7_6
+// #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_7_6
 
 // #define RBFB1GetMomentCR CfvMath::getMomentRBFB1_4_6
 // #define RBFB1GetBaseValueCR CfvMath::getBaseValueRBFB1_4_6
@@ -89,23 +106,23 @@ MQ c=0.3 works
 // #define RBFB1GetDiffBaseValueCR CfvMath::getDiffBaseValueRBFB1_4_3
 
 
-#define RBFB1_CRBF  0.4
+#define RBFB1_CRBF  1
 #endif
 
-// constexpr int GLOBAL_NDOFS(int O) { return (O + 2) * (O + 1) / 2; }
-// constexpr int GLOBAL_NDIFFS(int O) { return (O + 2) * (O + 1) / 2; }
+constexpr int GLOBAL_NDOFS(int O) { return (O + 2) * (O + 1) / 2; }
+constexpr int GLOBAL_NDIFFS(int O) { return (O + 2) * (O + 1) / 2; }
 
-constexpr int GLOBAL_NDOFS(int O) { return 7; }
-constexpr int GLOBAL_NDIFFS(int O) { return 6; }
+// constexpr int GLOBAL_NDOFS(int O) { return 7; }
+// constexpr int GLOBAL_NDIFFS(int O) { return 6; }
 
-constexpr int GLOBAL_NDOFSCR(int O) { return 7; }
-constexpr int GLOBAL_NDIFFSCR(int O) { return 6; }
+// constexpr int GLOBAL_NDOFSCR(int O) { return 7; }
+// constexpr int GLOBAL_NDIFFSCR(int O) { return 6; }
 
 // constexpr int GLOBAL_NDOFSCR(int O) { return 15; }
 // constexpr int GLOBAL_NDIFFSCR(int O) { return 3; }
 
-// constexpr int GLOBAL_NDOFSCR(int O) { return (O + 2) * (O + 1) / 2; }
-// constexpr int GLOBAL_NDIFFSCR(int O) { return (O + 2) * (O + 1) / 2; }
+constexpr int GLOBAL_NDOFSCR(int O) { return (O + 2) * (O + 1) / 2; }
+constexpr int GLOBAL_NDIFFSCR(int O) { return (O + 2) * (O + 1) / 2; }
 // #define TRIAL
 // #define DEBUG_RBFB
 // #define USE_RBF

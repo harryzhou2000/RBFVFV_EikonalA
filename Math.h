@@ -546,6 +546,58 @@ namespace CfvMath
 
 	ScalarCfv::real W12(ScalarCfv::real u[], const int J);
 
+	inline void getElementMatrices(ScalarCfv::cellFieldData &cell,
+								   Eigen::VectorXd &Nj, Eigen::MatrixXd &dNjdetai, Eigen::MatrixXd &XiNj,
+								   ScalarCfv::point &p)
+	{
+		ScalarCfv::real sqrt3 = std::sqrt(3.);
+		switch (cell.cellType_)
+		{
+		case ScalarCfv::Quadrilateral:
+			//(1 - x)(1 - y) y(1 - x) x *y x *(1 - y)
+			Nj.resize(4);
+			Nj << (1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y);
+			dNjdetai.resize(2, 4);
+			dNjdetai << -(1 - p.y), -p.y, p.y, (1 - p.y),
+				-(1 - p.x), (1 - p.x), p.x, -p.x;
+			XiNj.resize(2, 4);
+			XiNj << cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x,
+				cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y;
+			break;
+		case ScalarCfv::Triangle:
+			// 1-x-y y x -> 1-x-y/sqrt3, y/sqrt3*2, x - y/sqrt3
+			Nj.resize(3);
+			Nj << 1 - p.x - p.y / sqrt3, p.y / sqrt3 * 2, p.x - p.y / sqrt3;
+			dNjdetai.resize(2, 3);
+			dNjdetai << -1, 0, 1.,
+				-1. / sqrt3, 1. / sqrt3 * 2, -1. / sqrt3;
+			XiNj.resize(2, 3);
+			XiNj << cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x,
+				cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y;
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+
+	inline ScalarCfv::point GaussParam2RBFParam(ScalarCfv::point &p, ScalarCfv::cellFieldData &cell)
+	{
+		switch (cell.cellType_)
+		{
+		case ScalarCfv::Quadrilateral:
+			return p;
+			break;
+		case ScalarCfv::Triangle:
+			return ScalarCfv::point(p.y * 0.5 + p.x, p.y * 0.5 * std::sqrt(3.));
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+
+	//warning this returns coords in param space conforming with gauss point, not with rbf param point
 	inline ScalarCfv::point GetFaceParam(ScalarCfv::cellType cellType, int ff, const ScalarCfv::point &faceP, bool inverse = false)
 	{
 		ScalarCfv::point pparaml;
@@ -574,6 +626,35 @@ namespace CfvMath
 				assert(false);
 				break;
 			}
+		else if (cellType == ScalarCfv::Triangle)
+		{
+			auto ppos = inverse ? 1 - faceP.x : faceP.x;
+			ScalarCfv::point pparam1, pparam2;
+			switch (ff)
+			{
+			case 1: // 12 left
+				// pparam1.x = 0, pparam1.y = 0;
+				// pparam2.x = 0.5, pparam2.y = 0.5 * std::sqrt(3.);
+				pparam1.x = 0, pparam1.y = 0;
+				pparam2.x = 0, pparam2.y = 1;
+				break;
+			case 2: // 23 right
+				// pparam1.x = 0.5, pparam1.y = 0.5 * std::sqrt(3.);
+				// pparam2.x = 1.0, pparam2.y = 0;
+				pparam1.x = 0, pparam1.y = 1;
+				pparam2.x = 1, pparam2.y = 0;
+				break;
+			case 3: // 31 down
+				pparam1.x = 1.0, pparam1.y = 0.0;
+				pparam2.x = 0, pparam2.y = 0;
+				break;
+			default:
+				std::cout << "ff is " << ff << std::endl;
+				assert(false);
+				break;
+			}
+			pparaml = pparam1 * (1 - ppos) + pparam2 * ppos;
+		}
 		else
 		{
 			std::cout << "cell Type Wrong\n";
@@ -584,52 +665,89 @@ namespace CfvMath
 
 	inline ScalarCfv::point getPoint(ScalarCfv::point p, ScalarCfv::cellFieldData &cell)
 	{
-		Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
-		Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
-										 {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+		Eigen::VectorXd Nj;
+		Eigen::MatrixXd dNjdetai, XiNj;
+		getElementMatrices(cell, Nj, dNjdetai, XiNj, p);
 		Eigen::Vector2d pp = XiNj * Nj;
 		return ScalarCfv::point(pp(0), pp(1));
 	}
 
 	inline Eigen::Matrix2d getIJacobi(ScalarCfv::point p, ScalarCfv::cellFieldData &cell)
 	{
-		assert(cell.cellType_ == ScalarCfv::Quadrilateral);
-		Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
-		Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
-											 {-(1 - p.x), (1 - p.x), p.x, -p.x}};
-		Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
-										 {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+		Eigen::VectorXd Nj;
+		Eigen::MatrixXd dNjdetai, XiNj;
+		getElementMatrices(cell, Nj, dNjdetai, XiNj, p);
 		Eigen::Matrix2d Jacobi = dNjdetai * XiNj.transpose();
 		return Jacobi.inverse();
 	}
 
-	inline Eigen::Matrix2d getFaceJacobi(ScalarCfv::point p, ScalarCfv::cellFieldData &cell, int iedge)
+	inline ScalarCfv::point getParamPointCenter(ScalarCfv::cellFieldData &cell)
 	{
-		assert(cell.cellType_ == ScalarCfv::Quadrilateral);
-		Eigen::Matrix2d dxijdmi; // dxij/dmi, m is parametric norm
-		switch (iedge)
+		ScalarCfv::point p;
+		switch (cell.cellType_)
 		{
-		case 1:
-			dxijdmi << -1, 0, 0, -1;
+		case ScalarCfv::Quadrilateral:
+			p.x = p.y = .5;
 			break;
-		case 2:
-			dxijdmi << 0, 1, -1, 0;
-			break;
-		case 3:
-			dxijdmi << 1, 0, 0, 1;
-			break;
-		case 4:
-			dxijdmi << 0, -1, 1, 0;
+		case ScalarCfv::Triangle:
+			p.x = 0.5, p.y = std::sqrt(3.) / 6.;
 			break;
 		default:
 			assert(false);
 			break;
 		}
-		Eigen::Vector4d Nj{(1 - p.x) * (1 - p.y), p.y * (1 - p.x), p.x * p.y, p.x * (1 - p.y)};
-		Eigen::Matrix<double, 2, 4> dNjdetai{{-(1 - p.y), -p.y, p.y, (1 - p.y)},
-											 {-(1 - p.x), (1 - p.x), p.x, -p.x}};
-		Eigen::Matrix<double, 2, 4> XiNj{{cell.cellNode[1].second.x, cell.cellNode[2].second.x, cell.cellNode[3].second.x, cell.cellNode[4].second.x},
-										 {cell.cellNode[1].second.y, cell.cellNode[2].second.y, cell.cellNode[3].second.y, cell.cellNode[4].second.y}};
+		return p;
+	}
+
+	inline Eigen::Matrix2d getFaceJacobi(ScalarCfv::point p, ScalarCfv::cellFieldData &cell, int iedge)
+	{
+		Eigen::Matrix2d dxijdmi; // dxij/dmi, m is parametric norm
+		switch (cell.cellType_)
+		{
+		case ScalarCfv::Quadrilateral:
+			switch (iedge)
+			{
+			case 1:
+				dxijdmi << -1, 0, 0, -1;
+				break;
+			case 2:
+				dxijdmi << 0, 1, -1, 0;
+				break;
+			case 3:
+				dxijdmi << 1, 0, 0, 1;
+				break;
+			case 4:
+				dxijdmi << 0, -1, 1, 0;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+			break;
+		case ScalarCfv::Triangle:
+			switch (iedge)
+			{
+			case 1:
+				dxijdmi << -std::sqrt(3.) * 0.5, 0.5, -0.5, -std::sqrt(3.) * 0.5;
+				break;
+			case 2:
+				dxijdmi << std::sqrt(3.) * 0.5, 0.5, -0.5, std::sqrt(3.) * 0.5;
+				break;
+			case 3:
+				dxijdmi << 0, -1, 1, 0;
+				break;
+			default:
+				assert(false);
+			}
+			break;
+		default:
+			assert(false);
+			break;
+		}
+
+		Eigen::VectorXd Nj;
+		Eigen::MatrixXd dNjdetai, XiNj;
+		getElementMatrices(cell, Nj, dNjdetai, XiNj, p);
 		Eigen::Matrix2d Jacobi = dNjdetai * XiNj.transpose();
 		return dxijdmi * Jacobi;
 	}
@@ -714,7 +832,7 @@ namespace CfvMath
 	void VEVecMatCopy(TA &A, TB &B, int brow, int istart, int iend)
 	{
 		for (int i = istart; i < iend; i++)
-			B(brow,i) = A[i];
+			B(brow, i) = A[i];
 	}
 
 	// B = alpha * A
@@ -774,12 +892,10 @@ namespace CfvMath
 	// {
 	// 	Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> es(0.5*(dxjdxii+dxjdxii.transpose()));
 
-
 	// }
 
 	// // TEMPLATE BUT INSTANTIATED AT math.cpp
 	void EigenLeastSquareInverse(const Eigen::MatrixXd &A, Eigen::MatrixXd &AI);
-
 
 #ifndef RBFB1_GlobalPoly_ESC
 	// Cik = sum_j -- Aij WjWj Bkj with tensored diffs
