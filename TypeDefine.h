@@ -5,9 +5,13 @@
 #include <omp.h>
 
 #define REC_ITER 1
-#define PRINT_CYLINDER1_ACCURACY
+// #define PRINT_CYLINDER1_ACCURACY
 // #define PRINT_BLOCKOPEN_ACCURACY
 // #define PRINT_BLOCKBOUND_ACCURACY
+#define PRINT_WALL_ACCURACY
+#define PRINT_WALL_ACCURACY_UB 0.001
+#define PRINT_WALL_ACCURACY_USE_RELATIVE
+// 0.01_5e-6_0.13 for poly2
 
 // #define USE_RBFA1
 #define USE_RBFB1
@@ -23,7 +27,7 @@
 // #define RBFB1_INCREMENT_CR
 // #define USE_RBFB1_N
 #define RBFB1_GlobalPoly
-#define RBFB1_GlobalPoly_ESC // xfor vfv functional research
+// #define RBFB1_GlobalPoly_ESC // xfor vfv functional research
 
 // #define RBFB1_USE_UNITARY_MEANIJ
 // #define RBFB1_USE_DELTA_Jacobi_INTERFACEJ

@@ -1281,10 +1281,10 @@ namespace ScalarCfv
 		std::cout << "	exporting sln in Tecplot format, to file : " << fileName << "..." << '\n';
 
 #ifndef USE_RBFB1_N
-		fileOut << "VARIABLES = \"x\", \"y\", \"sln\", \"smooth\", \"dx\", \"dy\"\n";
+		fileOut << "VARIABLES = \"x\", \"y\", \"sln\", \"smooth\", \"dx\", \"dy\", \"errDist\"\n";
 		fileOut << "ZONE N =" << parameter_->nodeNumber << ","
 				<< "E=" << parameter_->cellNumber << ","
-				<< "VARLOCATION=([1-2]=NODAL,[3-6]=CELLCENTERED)" << '\n';
+				<< "VARLOCATION=([1-2]=NODAL,[3-7]=CELLCENTERED)" << '\n';
 #else
 		fileOut << "VARIABLES = \"x\", \"y\", \"sln\", \"smooth\", \"dx\", \"dy\"\n";
 		fileOut << "ZONE N =" << parameter_->nodeNumber << ","
@@ -1566,6 +1566,43 @@ namespace ScalarCfv
 				fileOut << '\n';
 		}
 		fileOut << '\n';
+
+		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
+		{
+			// base moment i
+			tensor1D<real, NDOFS> momentI;
+			// base i
+			tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
+			point p = (*iterCell).baryCenter;
+			point baryCenterI = (*iterCell).baryCenter;
+			point scaleI = (*iterCell).lengthReference;
+			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+			{
+				momentI[kk] = (*iterCell).baseMoment[kk];
+			}
+#ifdef USE_RBFB1
+			point pCenter = CfvMath::getParamPointCenter(*iterCell);
+
+			RBFB1GetDiffBaseValue(
+				CfvMath::GaussParam2RBFParam(pCenter, *iterCell),
+				baryCenterI,
+				scaleI,
+				momentI,
+				matrixDiffBaseI,
+				*iterCell);
+#endif
+
+			real f = (*iterCell).scalarVariableTn[0];
+			for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+			{
+				f += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
+			}
+
+			fileOut << f - iterCell->wallDist << "\t";
+			if (((*iterCell).index % lineControl) == 0)
+				fileOut << '\n';
+		}
+		fileOut << '\n';
 		//------------------
 
 		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
@@ -1633,6 +1670,47 @@ namespace ScalarCfv
 			Error += std::fabs(ref - (*iterCell).scalarVariableTn[0]);
 			VolError += incVE;
 #endif
+#ifdef PRINT_WALL_ACCURACY
+			if (iterCell->wallDist < PRINT_WALL_ACCURACY_UB)
+			{
+				real incVE = 1.0;
+
+				// base moment i
+				tensor1D<real, NDOFS> momentI;
+				// base i
+				tensor2D<real, NDOFS, NDIFFS> matrixDiffBaseI;
+				point p = (*iterCell).baryCenter;
+				point baryCenterI = (*iterCell).baryCenter;
+				point scaleI = (*iterCell).lengthReference;
+				for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+				{
+					momentI[kk] = (*iterCell).baseMoment[kk];
+				}
+#ifdef USE_RBFB1
+				point pCenter = CfvMath::getParamPointCenter(*iterCell);
+
+				RBFB1GetDiffBaseValue(
+					CfvMath::GaussParam2RBFParam(pCenter, *iterCell),
+					baryCenterI,
+					scaleI,
+					momentI,
+					matrixDiffBaseI,
+					*iterCell);
+#endif
+				real f = (*iterCell).scalarVariableTn[0];
+				for (int kk = 1; kk < static_cast<int>(NDOFS); ++kk)
+				{
+					f += matrixDiffBaseI[kk][0] * (*iterCell).scalarVariableTn[kk];
+				}
+#ifdef PRINT_WALL_ACCURACY_USE_RELATIVE
+				Error += std::fabs(iterCell->wallDist - f) / iterCell->wallDist;
+#else
+				Error += std::fabs(iterCell->wallDist - f);
+#endif
+
+				VolError += incVE;
+			}
+#endif
 			residual += std::fabs((*iterCell).scalarVariableTn[0] - (*iterCell).scalarVariableTm[0]) * (*iterCell).volume;
 			volTemp += (*iterCell).volume;
 		}
@@ -1644,6 +1722,9 @@ namespace ScalarCfv
 		residual = Error / VolError;
 #endif
 #ifdef PRINT_BLOCKBOUND_ACCURACY
+		residual = Error / VolError;
+#endif
+#ifdef PRINT_WALL_ACCURACY
 		residual = Error / VolError;
 #endif
 		return true;

@@ -18,7 +18,7 @@ LIB=-lopenblas -llapacke
 
 OPT=-g
 OPT= -O3 -g 
-# OPT= -O3 -DNDEBUG # NDEBUG macro for c assert library
+OPT= -O3 -DNDEBUG # NDEBUG macro for c assert library
 
 OBJ:=FieldSolver.o Grid.o Math.o Parameter.o main.o
 

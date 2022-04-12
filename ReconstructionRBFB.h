@@ -142,8 +142,34 @@ namespace ScalarCfv
 	{
 		std::cout << "initializing base moment and relax factor..." << std::endl;
 		cellFieldDataVector::iterator iterCellFieldData;
+		std::vector<point> wallPoints;
+		std::vector<point> wallNorms;
+		for (auto iterFaceFieldData = faceFieldData->begin(); iterFaceFieldData != faceFieldData->end(); ++iterFaceFieldData)
+			if (iterFaceFieldData->faceCellIndex[2] == Wall)
+				for (auto &i : iterFaceFieldData->gaussPairVector_)
+				{
+					wallPoints.push_back(i.p);
+					wallNorms.push_back(i.normalVector / i.normalVector.length());
+				}
 		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
 		{
+			point pcenterGlob = CfvMath::getPoint(CfvMath::getParamPointCenter(*iterCellFieldData), *iterCellFieldData);
+			real dist = 1e308;
+			point pmin;
+			point nmin;
+			for (int ib = 0; ib < wallPoints.size(); ib++)
+			{
+				auto &pb = wallPoints[ib];
+				auto &nb = wallNorms[ib];
+				if ((pb - pcenterGlob).length() < dist)
+				{
+					dist = (pb - pcenterGlob).length();
+					pmin = pb;
+					nmin = nb;
+				}
+			}
+			iterCellFieldData->wallDist = std::fabs(getInnerProduct(pcenterGlob - pmin, nmin));
+
 			// relax factor
 			if ((*iterCellFieldData).boundaryCellType_ == InnerCell)
 			{
@@ -530,6 +556,7 @@ namespace ScalarCfv
 
 				w[0] = 1.0;
 				refLR = omegaL / (*iterFaceFieldData).area;
+				w[0] *= 10;
 #ifdef RBFB1_USE_DELTA_INTERFACEJ
 				// w[0] *= std::pow(faceL.length() / delta.length(), -1.0);
 #endif
@@ -624,12 +651,13 @@ namespace ScalarCfv
 #ifdef RBFB1_USE_DELTA_INTERFACEJ
 			// real wtgt = std::pow(std::min(std::max(delta.length() / faceL.length(), 1e-5), 1e5), 1);
 			// real wtgt = std::sqrt(delta.length() / faceL.length());
-			real wtgt = .5;
+			real wtgt = 0.0;
+			real wani = std::pow(faceL.length() / delta.length(), 0.25);
 			// for 7-6 7-6, .5 works, .25 blows
-			iterFaceFieldData->interFacialJacobi(0, 0) = unitNormalVector.x * delta.length();
-			iterFaceFieldData->interFacialJacobi(0, 1) = unitNormalVector.y * delta.length();
-			iterFaceFieldData->interFacialJacobi(1, 0) = -unitNormalVector.y * delta.length() * wtgt;
-			iterFaceFieldData->interFacialJacobi(1, 1) = unitNormalVector.x * delta.length() * wtgt;
+			iterFaceFieldData->interFacialJacobi(0, 0) = unitNormalVector.x * delta.length() * wani;
+			iterFaceFieldData->interFacialJacobi(0, 1) = unitNormalVector.y * delta.length() * wani;
+			iterFaceFieldData->interFacialJacobi(1, 0) = -unitNormalVector.y * delta.length() * wtgt * wani;
+			iterFaceFieldData->interFacialJacobi(1, 1) = unitNormalVector.x * delta.length() * wtgt * wani;
 #endif
 
 			real alpha = 1.0;

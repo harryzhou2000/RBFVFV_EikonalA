@@ -1638,12 +1638,14 @@ namespace ScalarCfv
 				}
 				auto oldcellFaceIndex = c.cellFaceIndex;
 				auto oldcellFaceWeight = c.cellFaceWeight;
-				auto oldcellFaceSideoff = c.cellFaceSideOff;
+				// auto oldcellFaceSideoff = c.cellFaceSideOff;
+				// auto oldcellCellIndex = c.cellCellIndex;
 				for (int i = 0; i < 4; i++)
 				{
 					c.cellFaceIndex[i + 1] = oldcellFaceIndex[perm[i] + 1];
 					c.cellFaceWeight[i + 1] = oldcellFaceWeight[perm[i] + 1];
-					c.cellFaceSideOff[i + 1] = oldcellFaceSideoff[perm[i] + 1];
+					// c.cellFaceSideOff[i + 1] = oldcellFaceSideoff[perm[i] + 1];
+					// c.cellCellIndex[i + 1] = oldcellCellIndex[perm[i] + 1];
 				}
 			}
 			else if (c.cellType_ == Triangle)
@@ -1651,7 +1653,7 @@ namespace ScalarCfv
 				auto p12 = c.cellNode[2].second - c.cellNode[1].second;
 				auto p23 = c.cellNode[3].second - c.cellNode[2].second;
 				real p12c23 = p12.x * p23.y - p12.y * p23.x;
-				if (p12c23 < 0)
+				if (p12c23 > 0)
 				{
 					auto oldNode = c.cellNode;
 					for (int i = 0; i < 3; i++)
@@ -1679,12 +1681,10 @@ namespace ScalarCfv
 				}
 				auto oldcellFaceIndex = c.cellFaceIndex;
 				auto oldcellFaceWeight = c.cellFaceWeight;
-				auto oldcellFaceSideoff = c.cellFaceSideOff;
 				for (int i = 0; i < 3; i++)
 				{
 					c.cellFaceIndex[i + 1] = oldcellFaceIndex[perm[i] + 1];
 					c.cellFaceWeight[i + 1] = oldcellFaceWeight[perm[i] + 1];
-					c.cellFaceSideOff[i + 1] = oldcellFaceSideoff[perm[i] + 1];
 				}
 			}
 		}

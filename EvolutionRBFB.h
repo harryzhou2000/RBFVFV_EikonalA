@@ -1081,7 +1081,7 @@ namespace ScalarCfv
 				ftemp = std::min(0.4 / ((rO + 1) * (rO + 1)), std::fabs(1 - dq.length() * dq.length()));
 				if (ftemp < 0.2 / ((rO + 1) * (rO + 1)))
 					ftemp = 0;
-				ftemp *= 0.01;
+				ftemp *= 0.1;
 
 				// ftemp = 0.0 * 0.4 / std::pow((rO + 1), 2);
 
@@ -1101,8 +1101,8 @@ namespace ScalarCfv
 				//  ftemp = 1.0 / 256.0 * 10.0 * 0.4 / std::pow((rO + 1), 2);
 
 				// fluxF[gg] = nu * un * ftemp * getInnerProduct(dq, uNV[gg]);
-				// fluxF[gg] = nu * ftemp * (qR - qL + getInnerProduct(dq, uNV[gg]) * un);
-				fluxF[gg] = nu * ftemp * (qRM - qLM);
+				fluxF[gg] = nu * ftemp * ((qR - qL) * 0.5 + getInnerProduct(dq, uNV[gg]) * un);
+				// fluxF[gg] = nu * ftemp * (qRM - qLM);
 
 				weight[gg] = (*iterFaceFieldData).parametricValue[gg].second;
 				cofJacobi[gg] = (*iterFaceFieldData).gaussPairVector_[gg].JacobiCof;

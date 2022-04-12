@@ -69,6 +69,7 @@ namespace ScalarCfv
 
 		// 20200404
 		real phiFilter;
+		
 
 		// for multistep method,
 		//[1] <-> the results from Tm
@@ -131,6 +132,7 @@ namespace ScalarCfv
 		std::vector<std::vector<real>> diffBaseValueDataBary;
 
 		Eigen::Matrix2d MeanIJ;
+		real wallDist;
 	};
 
 	typedef std::vector<cellFieldData> cellFieldDataVector;
