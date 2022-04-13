@@ -14,18 +14,18 @@ namespace ScalarCfv
 	//extern std::string fileOut_Mesh("D:/calculations/new_test/grid.plt");
 	//extern std::string fileIn_Parameter("D:/calculations/new_test/inputParameters.txt");
 
-	extern std::string fileIn_Mesh;// ("D:/calculations/new_test/grid.in");
-	extern std::string fileOut_Mesh;// ("D:/calculations/new_test/grid.plt");
-	extern std::string fileIn_Parameter;// ("D:/calculations/new_test/inputParameters.txt");
+	std::string fileIn_Mesh;// ("D:/calculations/new_test/grid.in");
+	std::string fileOut_Mesh;// ("D:/calculations/new_test/grid.plt");
+	std::string fileIn_Parameter;// ("D:/calculations/new_test/inputParameters.txt");
 	//extern std::string fileIn_OldSln;// ("D:/calculations/new_test/inputParameters.txt");
-	extern std::string fileOut_Sln;// ("D:/calculations/new_test/inputParameters.txt");
-	extern std::string fileOut_Residual;
-	extern std::string fileOut_BackUp;
-	extern std::string fileIn_BackUp;
+	std::string fileOut_Sln;// ("D:/calculations/new_test/inputParameters.txt");
+	std::string fileOut_Residual;
+	std::string fileOut_BackUp;
+	std::string fileIn_BackUp;
 	//debug
-	extern std::string fileOut_debug;// ("D:/calculations/new_test/inputParameters.txt");
-	extern std::string fileOut_debug_sln;// ("D:/calculations/new_test/inputParameters.txt");
-	extern std::string fileOut_debug_dsln;// ("D:/calculations/new_test/inputParameters.txt");
+	std::string fileOut_debug;// ("D:/calculations/new_test/inputParameters.txt");
+	std::string fileOut_debug_sln;// ("D:/calculations/new_test/inputParameters.txt");
+	std::string fileOut_debug_dsln;// ("D:/calculations/new_test/inputParameters.txt");
 
 	extern std::string fileOut_Error;
 	class parameter
@@ -123,20 +123,20 @@ namespace ScalarCfv
 		//control parameter
 		int ndim;
 		int reconstructionOrder;
-		int nStart;//¶ÁÈë
-		int nEnd;//¶ÁÈë
-		int nScreenOutput;//¶ÁÈë
-		int nFileOutput;//¶ÁÈë
-		int nBackUp;//¶ÁÈë
+		int nStart;//ï¿½ï¿½ï¿½ï¿½
+		int nEnd;//ï¿½ï¿½ï¿½ï¿½
+		int nScreenOutput;//ï¿½ï¿½ï¿½ï¿½
+		int nFileOutput;//ï¿½ï¿½ï¿½ï¿½
+		int nBackUp;//ï¿½ï¿½ï¿½ï¿½
 		//int nRKLoop;
-		int nStepTimeMarching;//¶ÁÈë S3P3 & S4P4 &S1P1
-		int nInnerStepTimeMarching;//¶ÁÈë
+		int nStepTimeMarching;//ï¿½ï¿½ï¿½ï¿½ S3P3 & S4P4 &S1P1
+		int nInnerStepTimeMarching;//ï¿½ï¿½ï¿½ï¿½
 		bool isContinue;
 		bool isPeriodicBoundary;
 		bool isViscous;
 		real EPS;
-		bool isImplicitTimeMarching;//¶ÁÈë
-		bool isLocalTimeMarching;//¶ÁÈë
+		bool isImplicitTimeMarching;//ï¿½ï¿½ï¿½ï¿½
+		bool isLocalTimeMarching;//ï¿½ï¿½ï¿½ï¿½
 		//int timeMarchingStep;
 		real cofAV;
 

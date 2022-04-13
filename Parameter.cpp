@@ -3,22 +3,22 @@
 namespace ScalarCfv
 {
 	const std::string BASE_PATH = "./Cases/test";
-	extern std::string fineOut_BndCheck(BASE_PATH + "/bndCheck.txt");
-	extern std::string fileIn_Mesh(BASE_PATH + "/grid.in");
+	std::string fineOut_BndCheck(BASE_PATH + "/bndCheck.txt");
+	std::string fileIn_Mesh(BASE_PATH + "/grid.in");
 	//		extern std::string fileIn_Mesh("D:/calculations/new_test/grid_o2.in");
-	extern std::string fileOut_Mesh(BASE_PATH + "/grid.plt");
+	std::string fileOut_Mesh(BASE_PATH + "/grid.plt");
 	//extern std::string fileIn_Parameter("D:/calculations/new_test/inputParameters.txt");
-	extern std::string fileIn_Parameter(BASE_PATH + "/inputParameters_notes.txt");
-	extern std::string fileOut_debug_sln(BASE_PATH + "/sln.plt");
+	std::string fileIn_Parameter(BASE_PATH + "/inputParameters_notes.txt");
+	std::string fileOut_debug_sln(BASE_PATH + "/sln.plt");
 
-	extern std::string fileIn_BackUp(BASE_PATH + "/sln.sav");
-	extern std::string fileOut_BackUp(BASE_PATH + "/sln.sav");
-	extern std::string fileOut_Sln(BASE_PATH + "/sln");
-	extern std::string fileOut_Residual(BASE_PATH + "/residual.txt");
+	std::string fileIn_BackUp(BASE_PATH + "/sln.sav");
+	std::string fileOut_BackUp(BASE_PATH + "/sln.sav");
+	std::string fileOut_Sln(BASE_PATH + "/sln");
+	std::string fileOut_Residual(BASE_PATH + "/residual.txt");
 	//debug
 	//extern std::string fileOut_debug("D:/calculations/new_test/debug.txt");
-	extern std::string fileOut_debug(BASE_PATH + "/debug.plt");
-	extern std::string fileOut_debug_dsln(BASE_PATH + "/dsln.plt");
+	std::string fileOut_debug(BASE_PATH + "/debug.plt");
+	std::string fileOut_debug_dsln(BASE_PATH + "/dsln.plt");
 
 	bool parameter::readParameterFile(const std::string &filename)
 	{

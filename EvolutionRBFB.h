@@ -552,9 +552,10 @@ namespace ScalarCfv
 	{
 
 		//		std::cout << "computing source term..." << std::endl;
-		cellFieldDataVector::iterator iterCellFieldData;
-		for (iterCellFieldData = cellFieldData->begin(); iterCellFieldData != cellFieldData->end(); ++iterCellFieldData)
+#pragma omp parallel for schedule(guided)
+		for (int icellFieldData = 0; icellFieldData < cellFieldData->size(); ++icellFieldData)
 		{
+			cellFieldDataVector::iterator iterCellFieldData = cellFieldData->begin() + icellFieldData;
 			real *fI = new real[static_cast<int>((*iterCellFieldData).PG)];
 			real *weight = new real[static_cast<int>((*iterCellFieldData).PG)];
 			real *cofJacobi = new real[static_cast<int>((*iterCellFieldData).PG)];
@@ -943,17 +944,17 @@ namespace ScalarCfv
 		faceFieldDataVector *faceFieldData,
 		GaussIntegralFaceO1Grid<fO> *gaussIntegralFace)
 	{
-
-		cellFieldDataVector::iterator iterCell_;
-		faceFieldDataVector::iterator iterFaceFieldData;
-
-		// real nu = 0.008; un = 1
-		real nu = 1.0; // 0.1;//0.02
-		real un;
-		real d;
-		real SI;
-		for (iterFaceFieldData = faceFieldData->begin(); iterFaceFieldData != faceFieldData->end(); ++iterFaceFieldData)
+#pragma omp parallel for schedule(guided)
+		for (int ifaceFieldData = 0; ifaceFieldData < faceFieldData->size(); ++ifaceFieldData)
 		{
+			cellFieldDataVector::iterator iterCell_;
+			faceFieldDataVector::iterator iterFaceFieldData = faceFieldData->begin() + ifaceFieldData;
+			real nu = 1.0; // 0.1;//0.02
+			real un;
+			// real nu = 0.008; un = 1
+			real d;
+			real SI;
+
 			int cl = (*iterFaceFieldData).faceCellIndex[1];
 			int cr = (*iterFaceFieldData).faceCellIndex[2];
 			// int ff;

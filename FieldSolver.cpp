@@ -1637,13 +1637,15 @@ namespace ScalarCfv
 		residual = 0.0;
 		real volTemp = 0.0;
 		real R = 12.0;
-		cellFieldDataVector::iterator iterCell;
-
 		real Error = 0.0;
 		real VolError = 0.0;
 
-		for (iterCell = cellFieldData_->begin(); iterCell != cellFieldData_->end(); ++iterCell)
+#pragma omp parallel for schedule(static) \
+	reduction(+                           \
+			  : residual, volTemp, Error, VolError)
+		for (int icellFieldData = 0; icellFieldData < cellFieldData_->size(); ++icellFieldData)
 		{
+			auto iterCell = cellFieldData_->begin() + icellFieldData;
 #ifdef IF_RESTRICT_RADIUS
 			if ((*iterCell).baryCenter.length() < R)
 			{

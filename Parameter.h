@@ -26,6 +26,7 @@ namespace ScalarCfv
 	extern std::string fileOut_debug;	   // ("D:/calculations/new_test/inputParameters.txt");
 	extern std::string fileOut_debug_sln;  // ("D:/calculations/new_test/inputParameters.txt");
 	extern std::string fileOut_debug_dsln; // ("D:/calculations/new_test/inputParameters.txt");
+	
 	class parameter
 	{
 	public:

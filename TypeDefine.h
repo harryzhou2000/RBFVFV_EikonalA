@@ -26,7 +26,7 @@
 // #define RBFB1_CR_DIFFDIM 0.1
 // #define RBFB1_INCREMENT_CR
 // #define USE_RBFB1_N
-#define RBFB1_GlobalPoly
+// #define RBFB1_GlobalPoly
 // #define RBFB1_GlobalPoly_ESC // xfor vfv functional research
 
 // #define RBFB1_USE_UNITARY_MEANIJ
